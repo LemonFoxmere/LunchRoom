@@ -7,7 +7,7 @@
         <div id="content">
             
             <div id="logo">
-                <MediaQuery query="(min-width: 930px)" let:matches>
+                <MediaQuery query="(min-width: 1000px)" let:matches>
                     {#if matches}
                         <img src="/logo_text.svg" alt="" class="no-drag">
                     {:else}
@@ -67,19 +67,19 @@
 
                     a{
                         text-decoration: none;
+                        margin-right: 48pt;
+
+                        &:first-child{
+                            margin: 0px;
+                        }
 
                         button{
-                            margin-right: 48pt;
                             display: flex; align-items: center;
     
                             svg{
                                 margin-left: 8pt;
                                 height: 14pt;
                             }
-                        }
-
-                        &:first-child{
-                            margin: 0px;
                         }
                     }
                 }
@@ -90,7 +90,7 @@
                     overflow: visible;
                 }
 
-                @media screen and (max-width: 930px) {
+                @media screen and (max-width: 1000px) {
                     width: calc(100vw - 100px);
                 }
             }

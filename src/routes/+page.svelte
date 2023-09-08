@@ -22,13 +22,29 @@
             margin-bottom: 40px;
         }
 
-        button{
-            width: 180px; height: 50px;
+        section{
+            display: flex; flex-direction: row;
 
-            &.text{
-                text-decoration: underline;
+            button{
+                width: 180px; height: 50px;
+    
+                &.text{
+                    text-decoration: underline;
+                }
+            }
+
+            @media screen and (max-width: 621px) {
+                flex-direction: column;
+
+                button{
+                    width: calc(100vw - 100px);
+                    margin-bottom: 12px;
+                    
+                    &:last-child{
+                        margin: 0;
+                    }
+                }
             }
         }
     }
-
 </style>

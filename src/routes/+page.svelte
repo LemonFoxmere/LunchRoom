@@ -86,7 +86,8 @@
         }
 
         p{
-            width: calc(100% - 50px);
+            width: min(600px, calc(100% - 50px));
+            margin-bottom: 200px
         }
 
         @media screen and (max-width: $mobile-width) {

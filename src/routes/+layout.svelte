@@ -1,27 +1,35 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import MenuButton from "./../lib/comp/ui/MenuButton.svelte";
 
     // mobile menu control
     let mobileMenuOpened = false;
     const toggleMobileMenu = () => {
         mobileMenuOpened = !mobileMenuOpened;
-
-        if(mobileMenuOpened){
-            // scroll to top of page
-            window.scrollTo(0, 0);
-        }
     }
     const closeMobileMenu = () => {
         mobileMenuOpened = false;
     }
+
+    // scroll animation
+    let scrollDist = 0;
+    const trackScroll = () => {
+        scrollDist = window.scrollY;
+        requestAnimationFrame(trackScroll);
+    }
+    onMount(trackScroll);
+
+    $: animResolution = 1000;
+    $: navbarAnimDelay = -1 * (Math.min(100, scrollDist) / 100) * animResolution;
+    $: navbarLogoDelay = -1 * (Math.min(300, scrollDist) / 300) * animResolution;
 </script>
 
 <main>
-    <div id="navbar" on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}>
-        <div id="content">
-            <a href="/">
-                <div id="logo">
-                    <img src="/logo.svg" alt="" class="no-drag exclude-desktop">
+    <div id="navbar" class="{mobileMenuOpened ? "active" : ""}" on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}>
+        <div id="content" style="animation-duration: {animResolution}ms; animation-delay: {navbarAnimDelay}ms">
+            <a href="/" on:click={closeMobileMenu}>
+                <div id="logo" style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms">
+                    <img src="/logo.svg" height="32pt" alt="" class="no-drag exclude-desktop">
                     <img src="/logo_text.svg" alt="" class="no-drag only-desktop">
                 </div>
             </a>
@@ -48,31 +56,29 @@
         </div>
     </div>
 
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
         id="mobile-menu"
         class="{mobileMenuOpened ? "" : "disabled"} only-phone"
         on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}
+        on:click={closeMobileMenu}
     >
-        <div id="menu-bg">
-            <section class="menu-buttons">
-                <a href="/login">
-                    <button class="text">Login</button>
-                </a>
-                <hr>
-            </section>
+        <div id="menu-bg" on:click={e => e.stopPropagation()}>
+            <a class="menu-items" href="/login">
+                <button class="text">Login</button>
+            </a>
 
-            <section class="menu-buttons">
-                <a target="_blank">
-                    <button class="text">Community</button>
-                </a>
-                <hr>
-            </section>
+            <hr class="menu-items">
 
-            <section class="menu-buttons">
-                <a href="https://github.com/LemonFoxmere/LunchRoom" target="_blank">
-                    <button class="text">GitHub</button>
-                </a>
-            </section>
+            <a class="menu-items" target="_blank">
+                <button class="text">Community</button>
+            </a>
+
+            <hr class="menu-items">
+
+            <a class="menu-items" href="https://github.com/LemonFoxmere/LunchRoom" target="_blank">
+                <button class="text">GitHub</button>
+            </a>
         </div>
     </div>
 
@@ -82,22 +88,54 @@
 <style lang="scss">
     @import "$static/stylesheets/guideline";
 
-    $stagger: 70ms;    // Delay between animations
+    $stagger: 40ms;    // Delay between animations
 
     main{
         width: 100%; height: fit-content;
         display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
         min-height: 100vh;
 
-        overflow: scroll;
-
         #navbar{
+            @extend .glass-heavy;
+
             width: 100%; min-height: $navbar-height; height: $navbar-height;
             display: flex; justify-content: center; align-items: flex-end;
+            position: sticky; top: 0;
 
             #content{
                 width: calc(100vw - 300px); height: fit-content;
                 display: flex; justify-content: space-between; align-items: center;
+
+                animation: shrink forwards;
+                animation-play-state: paused;
+
+                @keyframes shrink {
+                    from {
+                        transform: translateY(0pt);
+                    }
+                    to {
+                        transform: translateY(-18pt);
+                    }
+                }
+
+                #logo{
+                    animation: logo-shrink forwards;
+                    animation-play-state: paused;
+                    animation-timing-function: $out-expo;
+
+                    @keyframes logo-shrink {
+                        from {
+                            transform: scale(100%);
+                        }
+                        to {
+                            transform: scale(80%);
+                        }
+                    }
+
+                    @media screen and (max-width: $mobile-width){
+                        animation: none;
+                    }
+                }
 
                 .cta{
                     display: flex; flex-direction: row-reverse;
@@ -126,20 +164,30 @@
                     display: flex; align-items: center;
                     overflow: visible;
                 }
-
+                
                 @media screen and (max-width: $tablet-width) {
-                    width: calc(100vw - 100px);
+                    width: calc(100vw - 70px);
                 }
+
+                @media screen and (max-width: $mobile-width) {
+                    animation: none;
+                }
+            }
+
+            @media screen and (max-width: $mobile-width) {
+                align-items: center;
+                min-height: $mobile-navbar-height; height: $mobile-navbar-height;
+                background-color: $white;
             }
         }
 
         #mobile-menu{
+            @extend .glass-light;
+
             width: 100%; height: calc(100% - $navbar-height);
-            position: absolute; top: $navbar-height;
-            background-color: hsla(96, 12%, 92%, 50%);
-            
-            backdrop-filter: blur(30px) saturate(200%);
-            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            position: fixed; top: $navbar-height;
+            z-index: 100;
+
             overflow: hidden;
             
             pointer-events: all;
@@ -150,7 +198,7 @@
             #menu-bg{
                 width: 100%; height: fit-content;
                 box-sizing: border-box;
-                padding: 24pt 50px 8pt 50px;
+                padding: 0pt 20pt 8pt 20pt;
 
                 display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
                 
@@ -163,43 +211,14 @@
                 transition: 400ms $out-cubic;
                 transition-property: transform;
 
-                .menu-buttons{
+                .menu-items{
                     width: 100%;
 
-                    @for $i from 1 through 3 { // Change the number based on the number of buttons
+                    @for $i from 1 through 5 { // Change the number based on the number of buttons
                         &:nth-child(#{$i}) {
                             animation: fly-in 500ms $out-cubic #{($i - 1) * $stagger} forwards;
                             animation-fill-mode: both;
                         }
-                    }
-
-                    a{
-                        display: flex;
-                        
-                        width: 100%;
-                        padding: 16pt 50vw;
-                        text-decoration: none;
-
-                        transform: translateX(-50vw);
-    
-                        &:active{
-                            button{
-                                color: $tertiary;
-                            }
-                        }
-
-                        button{
-                            font-size: 18pt;
-                        }
-                    }
-    
-                    hr{
-                        margin: 0px;
-                        height: 2px; width: calc(100% + 40pt);
-                        transform: translate(-20pt, 0pt);
-    
-                        border: none;
-                        background-color: $pentinary;
                     }
 
                     @keyframes fly-in {
@@ -212,6 +231,31 @@
                             transform: translateY(0);
                         }
                     }
+                }
+
+                a{
+                    display: flex;
+                
+                    padding: 16pt 8pt; box-sizing: border-box;
+                    text-decoration: none;
+
+                    &:active{
+                        button{
+                            color: $tertiary;
+                        }
+                    }
+
+                    button{
+                        font-size: 16pt;
+                    }
+                }
+
+                hr{
+                    margin: 0px;
+                    height: 2px; width: calc(100% + 40pt);
+
+                    border: none;
+                    background-color: $pentinary;
                 }
             }
             
@@ -227,11 +271,10 @@
                     transition: 400ms $in-quint;
 
 
-                    .menu-buttons{
-
-                        @for $i from 1 through 3 { // Change the number based on the number of buttons
+                    .menu-items{
+                        @for $i from 1 through 5 { // Change the number based on the number of buttons
                             &:nth-child(#{$i}) {
-                                animation: fly-out 500ms $out-cubic #{($i - 1) * $stagger} forwards;
+                                animation: fly-out 250ms $in-cubic #{($i - 1) * $stagger} forwards;
                             }
                         }
                     }
@@ -247,6 +290,10 @@
                         }
                     }
                 }
+            }
+
+            @media screen and (max-width: $mobile-width) {
+                top: $mobile-navbar-height;
             }
         }
     }

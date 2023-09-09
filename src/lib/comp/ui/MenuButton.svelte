@@ -16,13 +16,13 @@
     @import "$static/stylesheets/guideline";
 
     #menu-btn{
-        width: 24pt; height: 24pt;
+        width: 20pt; height: 20pt;
         display: flex; justify-content: flex-end; align-items: center;
 
         position:relative;
 
         .bar{
-            width: 24pt; height: 3px;
+            width: 20pt; height: 2.5px;
             border-radius: 10px;
             position:absolute;
             background-color: $primary;

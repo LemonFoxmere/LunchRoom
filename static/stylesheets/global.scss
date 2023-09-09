@@ -6,11 +6,12 @@ html{
 
 body, html{
     margin:0; padding:0; // remove margin stuff
-    background-color: $white;
-    width: 100vw; height: 100vh;
+    box-sizing: border-box;
 
-    display: flex; justify-content: center; align-items: center;
-    overflow:hidden;
+    background-color: $white;
+    width: 100vw; height: fit-content;
+
+    overflow-x: hidden; overflow-y: auto;
 }
 
 .no-drag{

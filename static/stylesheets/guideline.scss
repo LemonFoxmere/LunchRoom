@@ -34,6 +34,13 @@ $in-out-quint:  cubic-bezier(0.86, 0, 0.07, 1);
 $in-out-expo:   cubic-bezier(1, 0, 0, 1);
 $in-out-circ:   cubic-bezier(0.785, 0.135, 0.15, 0.86);
 
+// SIZING
+$safari-mobile-urlbar-height: 80px;
+$navbar-height: 86px;
+
+$mobile-width: 621px;
+$tablet-width: 1000px;
+
 // element styles
 
 .card-frame{
@@ -49,14 +56,27 @@ button{
     font-family: "Figtree", system-ui, Helvetica, sans-serif;
 
     border: 2px solid $black; border-radius: 8pt;
-    font-size: 16pt;
+    font-size: 14pt;
     color: $primary; background: none;
     letter-spacing: -0.44px;
 
     padding: 6pt 16pt; margin: 0;
+    box-sizing: border-box;
     cursor: pointer;
 
-    &:hover{
+    -webkit-tap-highlight-color: transparent;
+
+    -webkit-user-drag: none;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+
+    @media(hover: hover){ &:hover{
+        border-color: $tertiary;
+        color: $tertiary;
+    }}
+    &:active {
         border-color: $tertiary;
         color: $tertiary;
     }
@@ -65,15 +85,28 @@ button{
         border: none; background: none;
         padding: 0;
         
-        font-size: 16pt; font-weight: 300;
+        font-size: 14pt; font-weight: 300;
         color: $primary;
 
         &.small{
             font-size: 12pt;
         }
 
-        &:hover{
+        @media(hover: hover){&:hover{
+            color: $tertiary;
+        }};
+        &:active{
             color: $tertiary;
         }
     }
+}
+
+a{
+    -webkit-tap-highlight-color: transparent;
+
+    -webkit-user-drag: none;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }

@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { screenSize } from "$lib/@const/ui";
 	import MenuButton from "./../lib/comp/ui/MenuButton.svelte";
-    import MediaQuery from "svelte-media-query";
 
     // mobile menu control
     let mobileMenuOpened = false;
@@ -21,74 +19,70 @@
 <main>
     <div id="navbar" on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}>
         <div id="content">
-            <div id="logo">
-                <MediaQuery query="(min-width: {screenSize.tablet}px)" let:matches>
-                    {#if matches}
-                        <img src="/logo_text.svg" alt="" class="no-drag">
-                    {:else}
-                        <img src="/logo.svg" alt="" class="no-drag">
-                    {/if}
-                </MediaQuery>
-            </div>
+            <a href="/">
+                <div id="logo">
+                    <img src="/logo.svg" alt="" class="no-drag exclude-desktop">
+                    <img src="/logo_text.svg" alt="" class="no-drag only-desktop">
+                </div>
+            </a>
 
-            <div id="cta">
-                <MediaQuery query="(min-width: {screenSize.phone}px)" let:matches>
-                    {#if matches}
-                        <a href="/login" target="_blank">
-                            <button class="text">Login</button>
-                        </a>
-
-                        <a target="_blank">
-                            <button class="text">Community</button>
-                        </a>
-
-                        <a href="https://github.com/LemonFoxmere/LunchRoom" target="_blank">
-                            <button class="text">GitHub</button>
-                        </a>
-                    {:else}
-                        <!-- menu icon -->
-                        <MenuButton opened={mobileMenuOpened} on:click={toggleMobileMenu}/>
-                    {/if}
-                </MediaQuery>
-            </div>
-        </div>
-    </div>
-
-    <MediaQuery query="(min-width: {screenSize.phone}px)" let:matches>
-        <div
-            id="mobile-menu"
-            class="{mobileMenuOpened && !matches ? "" : "disabled"}"
-            on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}
-        >
-            <div id="menu-bg">
-                <section class="menu-buttons">
-                    <a href="/login" target="_blank">
-                        <button class="text">Login</button>
-                    </a>
-                    <hr>
+            <div>
+                <section class="only-phone cta">
+                    <MenuButton opened={mobileMenuOpened} on:click={toggleMobileMenu}/>
                 </section>
 
-                <section class="menu-buttons">
+                <section class="exclude-phone cta">
+                    <a href="/login">
+                        <button class="text">Login</button>
+                    </a>
+    
                     <a target="_blank">
                         <button class="text">Community</button>
                     </a>
-                    <hr>
-                </section>
-
-                <section class="menu-buttons">
+    
                     <a href="https://github.com/LemonFoxmere/LunchRoom" target="_blank">
                         <button class="text">GitHub</button>
                     </a>
                 </section>
             </div>
         </div>
-    </MediaQuery>
+    </div>
+
+    <div
+        id="mobile-menu"
+        class="{mobileMenuOpened ? "" : "disabled"} only-phone"
+        on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}
+    >
+        <div id="menu-bg">
+            <section class="menu-buttons">
+                <a href="/login">
+                    <button class="text">Login</button>
+                </a>
+                <hr>
+            </section>
+
+            <section class="menu-buttons">
+                <a target="_blank">
+                    <button class="text">Community</button>
+                </a>
+                <hr>
+            </section>
+
+            <section class="menu-buttons">
+                <a href="https://github.com/LemonFoxmere/LunchRoom" target="_blank">
+                    <button class="text">GitHub</button>
+                </a>
+            </section>
+        </div>
+    </div>
 
     <slot></slot>
 </main>
 
 <style lang="scss">
     @import "$static/stylesheets/guideline";
+
+    $stagger: 70ms;    // Delay between animations
 
     main{
         width: 100%; height: fit-content;
@@ -105,9 +99,9 @@
                 width: calc(100vw - 300px); height: fit-content;
                 display: flex; justify-content: space-between; align-items: center;
 
-                #cta{
+                .cta{
                     display: flex; flex-direction: row-reverse;
-
+                    
                     a{
                         text-decoration: none;
                         margin-right: 36pt;
@@ -156,7 +150,7 @@
             #menu-bg{
                 width: 100%; height: fit-content;
                 box-sizing: border-box;
-                padding: 26pt 50px 20pt 50px;
+                padding: 24pt 50px 8pt 50px;
 
                 display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
                 
@@ -166,16 +160,16 @@
 
                 transform: translateY(0px);
                 transform-origin: top;
-                transition: transform 400ms $out-cubic;
+                transition: 400ms $out-cubic;
+                transition-property: transform;
 
                 .menu-buttons{
                     width: 100%;
 
-                    $stagger: 70ms;    // Delay between animations
                     @for $i from 1 through 3 { // Change the number based on the number of buttons
                         &:nth-child(#{$i}) {
                             animation: fly-in 500ms $out-cubic #{($i - 1) * $stagger} forwards;
-                            animation-fill-mode: backwards;
+                            animation-fill-mode: both;
                         }
                     }
 
@@ -183,7 +177,7 @@
                         display: flex;
                         
                         width: 100%;
-                        padding: 15pt 50vw;
+                        padding: 16pt 50vw;
                         text-decoration: none;
 
                         transform: translateX(-50vw);
@@ -195,7 +189,7 @@
                         }
 
                         button{
-                            font-size: 22pt;
+                            font-size: 18pt;
                         }
                     }
     
@@ -224,12 +218,33 @@
             &.disabled{
                 opacity: 0;
                 pointer-events: none;
+                
+                transition: 400ms $in-quart;
+                transition-property: backdrop-filter, -webkit-backdrop-filter, opacity;
 
                 #menu-bg{
-                    transform: translateY(-10px);
+                    transform: translateY(-15px);
+                    transition: 400ms $in-quint;
+
 
                     .menu-buttons{
-                        animation: none;
+
+                        @for $i from 1 through 3 { // Change the number based on the number of buttons
+                            &:nth-child(#{$i}) {
+                                animation: fly-out 500ms $out-cubic #{($i - 1) * $stagger} forwards;
+                            }
+                        }
+                    }
+
+                    @keyframes fly-out {
+                        0% {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                        100% {
+                            opacity: 0;
+                            transform: translateY(-15px);
+                        }
                     }
                 }
             }

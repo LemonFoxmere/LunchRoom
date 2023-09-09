@@ -30,7 +30,6 @@
 	"type": "module",
 	"dependencies": {
 		"sass": "^1.66.1",
-		"scss": "^0.2.4",
-		"svelte-media-query": "^1.1.2"
+		"scss": "^0.2.4"
 	}
 }

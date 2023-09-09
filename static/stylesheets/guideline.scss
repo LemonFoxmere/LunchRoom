@@ -35,11 +35,34 @@ $in-out-expo:   cubic-bezier(1, 0, 0, 1);
 $in-out-circ:   cubic-bezier(0.785, 0.135, 0.15, 0.86);
 
 // SIZING
-$safari-mobile-urlbar-height: 80px;
+$urlbar-height: 80px;
 $navbar-height: 86px;
 
 $mobile-width: 621px;
 $tablet-width: 1000px;
+
+// RESPONSIVE DESIGN
+.only-phone{
+    @media screen and (min-width: $mobile-width){
+        display: none !important;
+    }
+}
+.exclude-phone{
+    @media screen and (max-width: $mobile-width){
+        display: none !important;
+    }
+}
+.exclude-desktop{
+    @media screen and (min-width: $tablet-width){
+        display: none !important;
+    }
+}
+.only-desktop{
+    @media screen and (max-width: $tablet-width){
+        display: none !important;
+    }
+}
+
 
 // element styles
 

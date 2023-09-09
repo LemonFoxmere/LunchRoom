@@ -74,7 +74,7 @@
             }
 
             @media screen and (max-width: $mobile-width) {
-                height: calc(100vh - $safari-mobile-urlbar-height - $navbar-height);
+                height: calc(100vh - $urlbar-height - $navbar-height);
                 flex-direction: column;
 
                 img{
@@ -89,9 +89,8 @@
             width: calc(100% - 50px);
         }
 
-        // fuck you safari
         @media screen and (max-width: $mobile-width) {
-            padding-bottom: $safari-mobile-urlbar-height;
+            padding-bottom: 16pt;
         }
     }
 </style>

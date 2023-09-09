@@ -132,7 +132,7 @@
                         }
                     }
 
-                    @media screen and (max-width: $mobile-width){
+                    @media screen and (max-width: $tablet-width){
                         animation: none;
                     }
                 }

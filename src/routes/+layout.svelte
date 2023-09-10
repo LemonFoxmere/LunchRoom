@@ -1,14 +1,26 @@
+<script lang="ts" context="module">
+    import { get, writable } from "svelte/store";
+
+    export const mobileMenuOpened = writable<boolean>(false);
+
+    export const signInText = writable<"Sign In" | "Sign Up">("Sign In");
+</script>
+
 <script lang="ts">
-	import { onMount } from "svelte";
+    import { onMount } from "svelte";
 	import MenuButton from "./../lib/comp/ui/MenuButton.svelte";
 
+    const signInURI: Record<string, string> = {
+        "Sign In": "/signin",
+        "Sign Up": "/signup",
+    }
+
     // mobile menu control
-    let mobileMenuOpened = false;
     const toggleMobileMenu = () => {
-        mobileMenuOpened = !mobileMenuOpened;
+        $mobileMenuOpened = !$mobileMenuOpened;
     }
     const closeMobileMenu = () => {
-        mobileMenuOpened = false;
+        $mobileMenuOpened = false;
     }
 
     // scroll animation
@@ -25,7 +37,7 @@
 </script>
 
 <main>
-    <div id="navbar" class="{mobileMenuOpened ? "active" : ""}" on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}>
+    <div id="navbar" class="{$mobileMenuOpened ? "active" : ""}" on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}>
         <div id="content" style="animation-duration: {animResolution}ms; animation-delay: {navbarAnimDelay}ms">
             <a href="/" on:click={closeMobileMenu}>
                 <div id="logo" style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms">
@@ -36,12 +48,12 @@
 
             <div>
                 <section class="only-phone cta">
-                    <MenuButton opened={mobileMenuOpened} on:click={toggleMobileMenu}/>
+                    <MenuButton opened={$mobileMenuOpened} on:click={toggleMobileMenu}/>
                 </section>
 
                 <section class="exclude-phone cta">
-                    <a href="/login">
-                        <button class="text">Login</button>
+                    <a href="{signInURI[$signInText]}">
+                        <button class="text">{$signInText}</button>
                     </a>
     
                     <a target="_blank">
@@ -59,30 +71,30 @@
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
         id="mobile-menu"
-        class="{mobileMenuOpened ? "" : "disabled"} only-phone"
+        class="{$mobileMenuOpened ? "" : "disabled"} only-phone"
         on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}
         on:click={closeMobileMenu}
     >
         <div id="menu-bg" on:click={e => e.stopPropagation()}>
-            <a class="menu-items" href="/login">
-                <button class="text">Login</button>
+            <a class="menu-items" href="{signInURI[$signInText]}" on:click={closeMobileMenu}>
+                <button class="text">{$signInText}</button>
             </a>
 
             <hr class="menu-items">
 
-            <a class="menu-items" target="_blank">
+            <a class="menu-items" target="_blank" on:click={closeMobileMenu}>
                 <button class="text">Community</button>
             </a>
 
             <hr class="menu-items">
 
-            <a class="menu-items" href="https://github.com/LemonFoxmere/LunchRoom" target="_blank">
+            <a class="menu-items" href="https://github.com/LemonFoxmere/LunchRoom" target="_blank" on:click={closeMobileMenu}>
                 <button class="text">GitHub</button>
             </a>
+            </div>
         </div>
-    </div>
 
-    <slot></slot>
+        <slot></slot>
 </main>
 
 <style lang="scss">

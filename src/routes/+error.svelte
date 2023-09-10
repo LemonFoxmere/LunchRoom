@@ -1,5 +1,11 @@
 <script lang="ts">
     import { page } from '$app/stores';
+	import { onMount } from "svelte";
+	import { signInText } from "./+layout.svelte";
+
+    onMount(() => {
+        $signInText = "Sign In";
+    })
 </script>
 
 <main>

@@ -1,11 +1,6 @@
 <script lang="ts">
     import { page } from '$app/stores';
 	import { onMount } from "svelte";
-	import { signInText } from "./+layout.svelte";
-
-    onMount(() => {
-        $signInText = "Sign In";
-    })
 </script>
 
 <main>
@@ -29,9 +24,13 @@
         display: flex; align-items: center; justify-content: center; flex-direction: column;
 
         h1{
-            margin-bottom: 36pt;
-            width: calc(100% - 100px); max-width: 600pt;
+            margin-bottom: 36px;
+            width: calc(100% - 100px); max-width: 1000px;
             text-align: center;
+        }
+
+        button{
+            padding: 10px 24px;
         }
 
         @media screen and (max-width: $mobile-width) {

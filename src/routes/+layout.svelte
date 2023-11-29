@@ -1,14 +1,15 @@
 <script lang="ts" context="module">
-    import { get, writable } from "svelte/store";
+    import { writable } from "svelte/store";
 
     export const mobileMenuOpened = writable<boolean>(false);
-
-    export const signInText = writable<"Sign In" | "Sign Up">("Sign In");
 </script>
 
 <script lang="ts">
     import { onMount } from "svelte";
-	import MenuButton from "./../lib/comp/ui/MenuButton.svelte";
+	import MenuButton from "../lib/comp/ui/navbar/MenuButton.svelte";
+	import type { PageData } from "./$types";
+	
+    export let data: PageData;
 
     const signInURI: Record<string, string> = {
         "Sign In": "/signin",
@@ -41,8 +42,8 @@
         <div id="content" style="animation-duration: {animResolution}ms; animation-delay: {navbarAnimDelay}ms">
             <a href="/" on:click={closeMobileMenu}>
                 <div id="logo" style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms">
-                    <img src="/logo.svg" height="32pt" alt="" class="no-drag exclude-desktop">
-                    <img src="/logo_text.svg" alt="" class="no-drag only-desktop">
+                    <img src="/logo.svg" height="26px" alt="" class="no-drag exclude-desktop">
+                    <img src="/logo_text.svg" height="28px" alt="" class="no-drag only-desktop">
                 </div>
             </a>
 
@@ -51,10 +52,12 @@
                     <MenuButton opened={$mobileMenuOpened} on:click={toggleMobileMenu}/>
                 </section>
 
-                <section class="exclude-phone cta">
-                    <a href="{signInURI[$signInText]}">
-                        <button class="text">{$signInText}</button>
-                    </a>
+                <section class="exclude-phone cta" style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms">
+                    {#if !data.accessToken}
+                        <a href="{signInURI[data.signInText]}">
+                            <button class="text">{data.signInText}</button>
+                        </a>
+                    {/if}
     
                     <a target="_blank">
                         <button class="text">Community</button>
@@ -76,9 +79,11 @@
         on:click={closeMobileMenu}
     >
         <div id="menu-bg" on:click={e => e.stopPropagation()}>
-            <a class="menu-items" href="{signInURI[$signInText]}" on:click={closeMobileMenu}>
-                <button class="text">{$signInText}</button>
-            </a>
+            {#if !data.accessToken}
+                <a class="menu-items" href="{signInURI[data.signInText]}" on:click={closeMobileMenu}>
+                    <button class="text">{data.signInText}</button>
+                </a>
+            {/if}
 
             <hr class="menu-items">
 
@@ -103,9 +108,8 @@
     $stagger: 40ms;    // Delay between animations
 
     main{
-        width: 100%; height: fit-content;
+        width: 100%;
         display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
-        min-height: 100vh;
 
         #navbar{
             @extend .glass-heavy;
@@ -123,10 +127,10 @@
 
                 @keyframes shrink {
                     from {
-                        transform: translateY(0pt);
+                        transform: translateY(0px);
                     }
                     to {
-                        transform: translateY(-18pt);
+                        transform: translateY(-11px);
                     }
                 }
 
@@ -152,9 +156,22 @@
                 .cta{
                     display: flex; flex-direction: row-reverse;
                     
+                    animation: cta-shrink forwards;
+                    animation-play-state: paused;
+                    animation-timing-function: $out-expo;
+
+                    @keyframes cta-shrink {
+                        from {
+                            transform: scale(100%);
+                        }
+                        to {
+                            transform: scale(90%);
+                        }
+                    }
+                    
                     a{
                         text-decoration: none;
-                        margin-right: 36pt;
+                        margin-right: 48px;
 
                         &:first-child{
                             margin: 0px;
@@ -164,8 +181,8 @@
                             display: flex; align-items: center;
     
                             svg{
-                                margin-left: 8pt;
-                                height: 14pt;
+                                margin-left: 8px;
+                                height: 14px;
                             }
                         }
                     }
@@ -178,7 +195,7 @@
                 }
                 
                 @media screen and (max-width: $tablet-width) {
-                    width: calc(100vw - 70px);
+                    width: calc(100vw - 50px);
                 }
 
                 @media screen and (max-width: $mobile-width) {
@@ -189,7 +206,11 @@
             @media screen and (max-width: $mobile-width) {
                 align-items: center;
                 min-height: $mobile-navbar-height; height: $mobile-navbar-height;
-                background-color: $white;
+                transition: background-color 300ms $out-cubic;
+
+                &.active{
+                    background-color: $white;
+                }
             }
         }
 
@@ -210,13 +231,13 @@
             #menu-bg{
                 width: 100%; height: fit-content;
                 box-sizing: border-box;
-                padding: 0pt 20pt 8pt 20pt;
+                padding: 0px 20px 8px 20px;
 
                 display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
                 
                 background-color: $white;
                 box-shadow: 0px 20px 70px 0px hsla(0, 0%, 0%, 20%);
-                border-radius: 0pt 0pt 22pt 22pt;
+                border-radius: 0px 0px 22px 22px;
 
                 transform: translateY(0px);
                 transform-origin: top;
@@ -248,7 +269,7 @@
                 a{
                     display: flex;
                 
-                    padding: 16pt 8pt; box-sizing: border-box;
+                    padding: 22px 8px; box-sizing: border-box;
                     text-decoration: none;
 
                     &:active{
@@ -258,13 +279,13 @@
                     }
 
                     button{
-                        font-size: 16pt;
+                        font-size: 18px;
                     }
                 }
 
                 hr{
                     margin: 0px;
-                    height: 2px; width: calc(100% + 40pt);
+                    height: 2px; width: calc(100% + 40px);
 
                     border: none;
                     background-color: $pentinary;

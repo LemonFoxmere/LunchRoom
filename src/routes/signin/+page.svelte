@@ -1,95 +1,314 @@
 <script lang="ts">
-	import { signInText } from "$route/+layout.svelte";
+	import LoadingDots from "./../../lib/comp/ui/general/LoadingDots.svelte";
+	import { API_HOST } from "$lib/@const/dynamic.env";
 	import { onMount } from "svelte";
+	import Cookies from "js-cookie";
 
-    onMount(() => {
-        $signInText = "Sign Up";
-    })
+    let inputField: HTMLElement;
+    let emailInput: HTMLInputElement;
+    let passwordInput: HTMLInputElement;
+    let keepSigninInput: HTMLInputElement;
+    
+    let authStatus: "norm" | "pending" | "fail" | "success" = "norm";
+
+    const animateInputFailure = () => {
+        inputField.classList.remove("no-anim");
+        inputField.onanimationend = () => {
+            inputField.classList.add("no-anim");
+            inputField.onanimationend = null;
+        }
+    }
+
+    const signin = async () => {
+        // do not perform the request if the auth status is pending
+        if(authStatus === "pending") return;
+        authStatus = "pending";
+
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        // check if email and password are empty
+        if(!email || !password || !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email)){
+            animateInputFailure();
+            authStatus = "norm";
+            return;
+        }
+        
+        const req = await fetch(`${API_HOST}/auth/signin/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        })
+
+        // in the case of login failure, set a cooldown of 3 seconds and set status to failed
+        if(!req.ok){
+            setTimeout(() => {
+                authStatus = "fail";
+                animateInputFailure();
+            }, 1000);
+            return;
+        }
+
+        const body = await req.json();
+
+        const accessToken = body.access_token;
+
+        // store access token in cookies
+        if(keepSigninInput.checked){
+            Cookies.set("access_token", accessToken, { expires: 7 });
+        } else {
+            Cookies.set("access_token", accessToken);
+        }
+
+        authStatus = "success";
+
+        // TODO: redirect to profile page
+        window.location.href = "/";
+    }
 </script>
 
 <main>
-    <h1>Welcome Back!</h1>
+    <h1>Sign in to <span>LunchRoom</span></h1>
 
     <form>
-        <input id="emailInput" type="email" placeholder="tinysable@lunchroom.ink"/>
+        <section bind:this={inputField} id="input-container" class="no-anim">
+            <input
+                bind:this={emailInput}
+                id="email-input"
+                class={`${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
+                type="username"
+                placeholder="tinysable@lunchroom.ink"
+            />
+            <input
+                bind:this={passwordInput}
+                id="password-input"
+                class={`${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
+                type="password"
+                placeholder="••••••••••"
+            />
+        </section>
 
-        <button id="submit-btn" type="submit" class="text">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <button id="submit" type="submit" class={`solid ${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`} on:click={signin}>
+            {#if authStatus === "pending" || authStatus === "success"}
+                <LoadingDots />
+            {:else}
+                Sign in
+            {/if}
         </button>
+        
+        <section id="keep-signin-container" on:click={e => { keepSigninInput.click() }} role="checkbox" tabindex="4">
+            <div id="checkbox-container">
+                <input bind:this={keepSigninInput} id="checkbox" type="checkbox" checked/>
+                
+                <svg x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;">
+                    <style type="text/css"> .st0{stroke:currentColor; fill: currentColor; stroke-miterlimit:10;} </style>
+                    <path class="st0" d="M9.9,18c-0.3,0-0.5-0.1-0.7-0.3l-4.9-5.2c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l4.1,4.4l8.4-9.2
+                        c0.3-0.4,1-0.5,1.4-0.2c0.4,0.3,0.5,1,0.2,1.4c0,0-0.1,0.1-0.1,0.1l-9.1,10C10.4,17.9,10.1,18,9.9,18L9.9,18z"/>
+                </svg>
+            </div>
+
+            <p id="label" class="no-drag">Keep me signed in</p>
+        </section>
+        
+        {#if authStatus === "fail"}
+            <p id="password-reset">Incorrect email or password. Try again or reset password.</p>
+        {/if}
     </form>
+
+
+    <a id="signup" href="/signup"> I don't have an account </a>
 </main>
 
 <style lang="scss">
     @import "$static/stylesheets/guideline";
 
     main {
-        width: 100%; height: calc(100vh - $navbar-height);
-        padding: 0pt 20px; box-sizing: border-box;
+        width: 100%; height: calc(100vh - 2 * $navbar-height);
+        padding: 0px 20px; box-sizing: border-box;
         display: flex; justify-content: center; align-items: center; flex-direction: column;
 
-        transform: translateY(-30pt);
-
         h1{
-            font-size: 36pt;
+            font-size: 36px;
         }
 
         form{
             position: relative;
 
             width: 100%; max-width: 600px;
-            margin-top: 20pt;
+            margin-top: 28px;
 
             display: flex; justify-content: center; align-items: center; flex-direction: column;
 
-            input{
-                border: 2px solid $black;
-                background: none;
-                border-radius: 8pt;
-
-                width: 100%; height: 36pt;
-                padding: 0pt 36pt 0pt 12pt; box-sizing: border-box;
-
-                font-size: 12pt;
+            #input-container{
+                animation: 400ms 1 forwards shake;
+                width: 100%;
                 
-                &::placeholder{
-                    color: $quaternary;
+                &.no-anim{ // the normal state of the input fields
+                    animation: none;
+                    
+                    input{
+                        border-color: $black;
+                        transition: border-color 500ms $in-cubic;
+                        transition-delay: 300ms;
+                    }
                 }
-            }
-            
-            #submit-btn{
-                position: absolute;
-                right: 8pt;
-                width: 24pt; height: 24pt;
+                
+                input{
+                    width: 100%; height: 46px;
+                    padding: 0px 14px; box-sizing: border-box;
+                    transition: none;
 
-                svg{
-                    width: 100%; height: 100%;
-                    color: $black;
+                    border: 2px solid $red;
+                    border-radius: 10px;
+                    background: none;
+
+                    font-size: 16px;
+        
+                    &::placeholder{
+                        color: $quaternary;
+                    }
+    
+                    &#email-input{
+                        border-radius: 10px 10px 0px 0px;
+                    }
+                    &#password-input{
+                        border-radius: 0px 0px 10px 10px;
+                        transform: translateY(-2px);
+                    }
                 }
             }
+
+            #keep-signin-container{
+                position: relative;
+                display: flex; align-items: center;
+                margin-top: 48px;
+                cursor: pointer;
+
+                #checkbox-container{
+                    display: flex; align-items: center; justify-content: center;
+                    width: 18px; height: 18px;
+                    
+                    #checkbox{
+                        appearance: none;
+                        width: 100%; height: 100%;
+                        margin: 0px; padding: 0px;
+                        
+                        background-color: $white;
+                        border: 1.5px solid $black;
+                        border-radius: 4px;
+    
+                        cursor: pointer;
+                        pointer-events: none;
+    
+                        &:checked{
+                            background-color: $black;
+                        }
+                    }
+    
+                    svg {
+                        position: absolute;
+                        pointer-events: none;
+                        transform: translate(0px, 0.5px);
+                        width: 15px; height: 15px;
+                        color: $white;
+                    }
+                }
+                
+                
+                #label{
+                    margin-left: 12px;
+                    font-size: 14px;
+                }
+            }
+
+            #submit{
+                min-width: 100px;
+                padding: 10px 24px;
+                margin-top: 24px;
+            }
+
+            #password-reset{
+                position: absolute;
+                bottom: -60px;
+                
+                font-size: 14px;
+                font-weight: 400;
+                color: $red;
+            }
+        }
+
+        #signup{
+            position: absolute; bottom: 24px;
+
+            font-size: 16px;
+            font-weight: 400;
+            color: $quaternary;
         }
 
         @media screen and (max-width: $mobile-width) {
-            height: calc(100vh - $urlbar-height - $navbar-height);
-            
+            height: calc(100vh - $urlbar-height - 2 * $navbar-height);
+
             h1{
-                font-size: 28pt;
+                text-align: center;
+                font-size: 32px;
             }
 
             form{
-                $icon-size: 32pt;
+                margin-top: 32px;
+                $icon-size: 32px;
 
                 input{
-                    height: 42pt;
-                    padding: 0pt 14pt;
-                    font-size: 13pt;
+                    height: 46px;
+                    padding: 0px 16px;
+                    font-size: 16px;
+                }
+                
+                #submit{
+                    height: 46px;
+                    width: 100%; 
                 }
 
-                #submit-btn{
-                    width: 28pt; height: 28pt;
+                #keep-signin-container{
+                    #checkbox-container{
+                        width: 22px; height: 22px;
+                    }
+
+                    #label{
+                        font-size: 14px;
+                    }
                 }
             }
         }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0px);
+            }
+            20% {
+                transform: translateX(10px);
+            }
+            40% {
+                transform: translateX(-10px);
+            }
+            60% {
+                transform: translateX(5px);
+            }
+            80% {
+                transform: translateX(-5px);
+            }
+            100% {
+                transform: translateX(0px);
+            }
+        }
+    }
+
+    .disabled{
+        pointer-events: none !important;
+        cursor: default;
     }
 </style>

@@ -10,7 +10,7 @@ $pentinary: hsl(0, 0%, 79%);
 $solid-white: hsl(0, 0%, 100%);
 
 $green: hsl(112, 59%, 42%);
-$red: hsl(356, 66%, 51%);
+$red: hsl(356, 80%, 51%);
 $yellow: hsl(40, 82%, 55%);
 $blue: hsl(214, 72%, 52%);
 
@@ -27,6 +27,7 @@ $out-quart:     cubic-bezier(0.165, 0.84, 0.44, 1.0075);
 $out-quint:     cubic-bezier(0.23, 1, 0.32, 1.002);
 $out-expo:      cubic-bezier(0.19, 1, 0.22, 1.003);
 $out-circ:      cubic-bezier(0.075, 0.82, 0.165, 1.0015);
+$out-generic:   cubic-bezier(0.3,-0.01,0.4,1.004);
 $in-out-quad:   cubic-bezier(0.455, 0.03, 0.515, 0.955);
 $in-out-cubic:  cubic-bezier(0.645, 0.045, 0.355, 1);
 $in-out-quart:  cubic-bezier(0.77, 0, 0.175, 1);
@@ -35,9 +36,9 @@ $in-out-expo:   cubic-bezier(1, 0, 0, 1);
 $in-out-circ:   cubic-bezier(0.785, 0.135, 0.15, 0.86);
 
 // SIZING
-$urlbar-height: 80px;
-$mobile-navbar-height: 86px;
-$navbar-height: 86px;
+$urlbar-height: 100px;
+$mobile-navbar-height: 70px;
+$navbar-height: 60px;
 
 $mobile-width: 621px;
 $tablet-width: 1000px;
@@ -91,12 +92,13 @@ $tablet-width: 1000px;
 button{
     font-family: "Figtree", system-ui, Helvetica, sans-serif;
 
-    border: 2px solid $black; border-radius: 8pt;
-    font-size: 14pt;
+    border: 2px solid $black; border-radius: 10px;
+    font-size: 16px;
+    font-weight: 400;
     color: $primary; background: none;
     letter-spacing: -0.44px;
 
-    padding: 6pt 16pt; margin: 0;
+    padding: 6px 16px; margin: 0;
     box-sizing: border-box;
     cursor: pointer;
 
@@ -121,11 +123,11 @@ button{
         border: none; background: none;
         padding: 0;
         
-        font-size: 14pt; font-weight: 300;
+        font-weight: 300;
         color: $primary;
 
         &.small{
-            font-size: 12pt;
+            font-size: 12px;
         }
 
         @media(hover: hover){&:hover{
@@ -135,12 +137,69 @@ button{
             color: $tertiary;
         }
     }
+
+    &.solid{
+        background-color: $black;
+        
+        font-weight: 400;
+        letter-spacing: 0.12px;
+        color: $white;
+
+        @media(hover: hover){&:hover{
+            background-color: $primary;
+            border-color: $primary;
+        }};
+        &:active {
+            background-color: $primary;
+            border-color: $primary;
+        }
+
+        @media screen and (max-width: $mobile-width) {
+            font-weight: 500;
+        }
+    }
+}
+
+input{
+    width: 200px; height: 36px;
+    padding: 0px 10px; box-sizing: border-box;
+    transition: none;
+
+    border: 2px solid $black;
+    border-radius: 8px;
+    background: none;
+
+    font-family: "Figtree", system-ui, Helvetica, sans-serif;
+    font-size: 14px;
+
+    &::placeholder{
+        color: $quaternary;
+        transition: opacity 300ms ease-in;
+    }
+
+    &.large{
+        width: 400px; height: 46px;
+        padding: 0px 14px;
+        
+        border-radius: 10px;
+
+        font-size: 16px;
+    }
+
+    &.hide-placeholder{
+        &:active, &:focus{
+            &::placeholder{
+                opacity: 0;
+                transition: opacity 200ms ease-out;
+            }
+        }
+    }
 }
 
 a{
     @extend .no-drag !optional;
-
     -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
 }
 
 hr{

@@ -1,19 +1,26 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { signInText } from "./+layout.svelte";
+	import type { PageData } from "./$types";
 
-    onMount(() => {
-        $signInText = "Sign In";
-    })
+    export let data: PageData;
 </script>
 
 <main>
     <div id="frontpage">
-        <img src="/images/tiny.jpg" alt="">
-    
-        <section>
-            <button>Sign Up</button>
-            <button class="text">What?</button>
+        <section id="title">
+            <h1>YCH</h1>
+            <h3><em>Noun:</em> Your Commission Here</h3>
+        </section>
+        
+        <section id="cta">
+            {#if !data.accessToken}
+                <a href="/signup">
+                    <button>Sign Up</button>
+                </a>
+                <button class="text">What?</button>
+            {:else}
+                <button>View Profile</button>
+            {/if}
         </section>
     </div>
 </main>
@@ -27,32 +34,50 @@
         box-sizing: border-box;
 
         #frontpage{
-            width: 100%; height: calc(100vh - $navbar-height);
+            width: 100%; height: calc(100vh - 2*$navbar-height);
             display: flex; justify-content: center; align-items: center; flex-direction: row;
 
-            img{
-                width: 400px;
-                border-radius: 12pt;
-                box-shadow: 0px 15px 30px 0px hsla(0, 0%, 0%, 15%);
-                margin-right: 100px;
+            #title{
+                display: flex; flex-direction: column;
+
+                h1{
+                    font-size: 64px;
+                    font-weight: 800;
+                    transform: translate(-10px, 0px);
+                }
+                h3{
+                    margin-top: 12px;
+                    font-weight: 400;
+                    color: $primary;
+                }
             }
 
-            section{
+            #cta{
                 display: flex; flex-direction: row;
+                margin: 0px 0px 0px 82px;
     
                 button{
-                    width: 180px; height: 50px;
+                    width: 128px; height: 46px;
         
                     &.text{
                         text-decoration: underline;
                     }
+
+                    &:first-child{
+                        margin-right: 12px;
+                    }
                 }
     
+                @media screen and (max-width: $tablet-width) {
+                    margin: 36px 0px 0px 0px;
+                }
+
                 @media screen and (max-width: $mobile-width) {
                     flex-direction: column; align-items: center;
+                    margin: 42px 0px 0px 0px;
     
                     button{
-                        width: calc(100vw - 100px);
+                        width: calc(100vw - 60px);
                         margin-bottom: 12px;
                         
                         &:last-child{
@@ -69,22 +94,16 @@
             @media screen and (max-width: $tablet-width) {
                 flex-direction: column;
 
-                img{
-                    width: min(calc($mobile-width - 100px), calc(100vh - 300px));
-                    
-                    margin: 20px 0px 50px 0px;
+                #title{
+                    h3{
+                        font-size: 26px;
+                    }
                 }
             }
 
             @media screen and (max-width: $mobile-width) {
                 height: calc(100vh - $urlbar-height - $navbar-height);
                 flex-direction: column;
-
-                img{
-                    width: calc(100vw - 100px);
-                    border-radius: 16pt;
-                    margin: 20px 0px 50px 0px;
-                }
             }
         }
 
@@ -94,7 +113,7 @@
         }
 
         @media screen and (max-width: $mobile-width) {
-            padding-bottom: 16pt;
+            padding-bottom: 16px;
         }
     }
 </style>

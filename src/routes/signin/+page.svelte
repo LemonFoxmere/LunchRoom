@@ -1,7 +1,6 @@
 <script lang="ts">
 	import LoadingDots from "./../../lib/comp/ui/general/LoadingDots.svelte";
 	import { API_HOST } from "$lib/@const/dynamic.env";
-	import { onMount } from "svelte";
 	import Cookies from "js-cookie";
 
     let inputField: HTMLElement;

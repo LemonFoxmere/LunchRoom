@@ -1,6 +1,17 @@
 <script lang="ts" context="module">
+	import PasswordFC from "./../../lib/comp/signup/flowContent/PasswordFC.svelte";
+	import VerifFC from "./../../lib/comp/signup/flowContent/VerifFC.svelte";
+	import EmailFC from "./../../lib/comp/signup/flowContent/EmailFC.svelte";
+	import HandleFC from "./../../lib/comp/signup/flowContent/HandleFC.svelte";
+	import NameFC from "./../../lib/comp/signup/flowContent/NameFC.svelte";
+	import IntroFC from "./../../lib/comp/signup/flowContent/IntroFC.svelte";
 	import VerificationInput from "./../../lib/comp/ui/inputs/VerificationInput.svelte";
 	import { API_HOST } from "$lib/@const/dynamic.env";
+
+    export interface uniqueSignupProcessStatus {
+        state: null | "checking" | "success" | "failed",
+        message: string,
+    }
 
     const handleValid = async (handle: string): Promise<[boolean, string]> => { // returns an error message or null for success
         // check handle validity first
@@ -108,7 +119,7 @@
 	import Cookies from "js-cookie";
 
     let navContainer: HTMLElement;
-    let navStep = 4;
+    let navStep = 4; // DEBUG:
     
     let nameValue: string = "Lemon"; // DEBUG:
     let nameField: HTMLInputElement;
@@ -117,11 +128,14 @@
     let handleField: HTMLInputElement;
     
     let emailValue: string = "reallemonorange@gmail.com"; // DEBUG:
-    let validEmail: string = "";
+    let lastEmail: string = "";
     let emailField: HTMLInputElement;
 
     let verifCode: string; // DEBUG:
     let verifField: HTMLInputElement;
+    
+    let passwordValue: string;
+    let passwordField: HTMLInputElement;
 
     let leftClickable: boolean;
     let rightClickable: boolean;
@@ -133,6 +147,7 @@
         2: 104, // handle
         3: 104, // email
         4: 124, // verification
+        5: 300, // password
     }
     // UI variables
     $: navHeight = navButtonHeight[navStep] ?? navButtonHeight[Object.keys(navButtonHeight).length - 1];
@@ -150,19 +165,33 @@
             if(emailField) emailField.focus();
         },
         4: () => {
+            // if the valid email is now different from the original one, send a verification email
+            if(lastEmail !== emailValue){
+                lastEmail = emailValue; // update last email
+                verifCodeStatus.state = null; // reset verification status to null
+                verifCode = ""; // reset verification code
+
+                sendVerificationEmail(lastEmail, nameValue);
+                cooldownResend(); // start a cooldown for the verification code
+            }
+            // focus the field
             if(verifField) verifField.focus();
-            sendVerificationEmail(validEmail, nameValue);
-            cooldownResend(); // start a cooldown for the verification code
         },
+        5: () => {
+            if(passwordField) passwordField.focus();
+        }
     }
 
     // nav position : (left disabled condition, right disabled condition)
     let navButtonDisabledCondition: Record<number, [boolean, boolean]>;
     $: navButtonDisabledCondition = { 
         0: [false, true],  // disabled (not clickable), normal (clickable)
-        1: [true, !!nameValue],
-        2: [true, handleStatus.state === "success"],
-        3: [true, emailStatus.state === "success"]
+        1: [true, !!nameValue], // name
+        2: [true, handleStatus.state === "success"], // handle
+        3: [true, emailStatus.state === "success"], // email
+        // 4: [verifCodeStatus.state !== "success", verifCodeStatus.state === "success"], // verification
+        4: [false, true], // verification
+        5: [false, true] // verification
     }
     // UI variables
     $: leftClickable = !navButtonDisabledCondition[navStep] ? true : navButtonDisabledCondition[navStep][0]
@@ -184,13 +213,9 @@
         if(!!navAction) navAction();
     }
 
-    interface uniqueIdApplicationStatus {
-        state: null | "checking" | "success" | "failed",
-        message: string,
-    }
-    let handleStatus: uniqueIdApplicationStatus = {  state: null, message: "" };
-    let emailStatus: uniqueIdApplicationStatus = {  state: null, message: "" };
-    let verifCodeStatus: uniqueIdApplicationStatus = {  state: null, message: "" };
+    let handleStatus: uniqueSignupProcessStatus = {  state: null, message: "" };
+    let emailStatus: uniqueSignupProcessStatus = {  state: null, message: "" };
+    let verifCodeStatus: uniqueSignupProcessStatus = {  state: null, message: "" };
 
     let checkTimeout: ReturnType<typeof setTimeout>;
     const checkHandleAvailablility = () => {
@@ -218,11 +243,28 @@
             // set email status to success and store the valid email
             if(valid) {
                 emailStatus.state = "success";
-                validEmail = email;
             }
             else emailStatus.state = "failed";
 
             emailStatus.message = message;
+        }, 1000);
+    }
+
+    const checkVerificationCode = () => {
+        verifCodeStatus.state = "checking";
+        clearTimeout(checkTimeout); // clear the previous timeout
+        
+        checkTimeout = setTimeout(async () => { // check if handle is available after 1000ms of delay
+            const [valid, message] = await codeValid(verifField.value, emailField.value);
+            
+            if(valid) {
+                verifCodeStatus.state = "success"
+            } else{
+                verifCode = ""; // reset verification code
+                verifCodeStatus.state = "failed";
+            }
+
+            verifCodeStatus.message = message;
         }, 1000);
     }
 
@@ -237,116 +279,68 @@
             if(resendCooldownTime === 0) clearInterval(resendCooldownInterval);
         }, 1000);
     }
-    const resendEmail = () => {
-        sendVerificationEmail(validEmail, nameValue);
+    const resendVerificationCode = () => {
+        sendVerificationEmail(emailField.value, nameValue);
         cooldownResend();
     }
-
-    const checkVerificationCode = () => {
-        verifCodeStatus.state = "checking";
-        clearTimeout(checkTimeout); // clear the previous timeout
-        
-        checkTimeout = setTimeout(async () => { // check if handle is available after 1000ms of delay
-            const [valid, message] = await codeValid(verifField.value, validEmail);
-            
-            if(valid) verifCodeStatus.state = "success";
-            else verifCodeStatus.state = "failed";
-
-            verifCodeStatus.message = message;
-        }, 1000);
-    }
-    
 </script>
 
 <main>
     <section id="flow-content-container">
         <section id="intro" class="flow-content {navStep === 0 ? "visible" : ""} {navStep > 0 ? "left" : "right"}">
-            <h1>Welcome to LunchRoom!</h1>
-            <p>Click the right arrow to start creating your account.</p>
+            <IntroFC/>
         </section>
     
         <section id="name" class="flow-content {navStep === 1 ? "visible" : ""} {navStep > 1 ? "left" : "right"}">
-            <h1>First, what's your name?</h1>
-            <input bind:this={nameField} bind:value={nameValue} type="text" class="input-field large hide-placeholder" placeholder="Tiny Sable"/>
+            <NameFC
+                bind:input={nameField}
+                bind:value={nameValue}
+            />
         </section>
     
         <!-- Form fields -->
         <section id="handle" class="flow-content {navStep === 2 ? "visible" : ""} {navStep > 2 ? "left" : "right"}">
-            <h1>Hey {nameValue?.split(" ")[0] ?? ""}! Let's get you a handle.</h1>
-            
-            <div>
-                <input bind:this={handleField} bind:value={handleValue} on:input={checkHandleAvailablility} type="text" class="input-field large hide-placeholder" placeholder="Tiny Sable"/>
-
-                <p id="input-decorator" class="no-drag">@</p>
-            </div>
-
-            <div id="message-container">
-                {#if handleStatus.state !== null}
-                    {#if handleStatus.state === "checking"}
-                        <LoadingSpinner/>
-                    {:else}
-                        <h6 class={handleStatus.state}>{handleStatus.message}</h6>
-                    {/if}
-                {/if}
-            </div>
+            <HandleFC
+                nameValue={nameValue}
+                status={handleStatus}
+                bind:input={handleField}
+                bind:value={handleValue}
+                on:input={checkHandleAvailablility}
+            />
         </section>
     
         <section id="email" class="flow-content {navStep === 3 ? "visible" : ""} {navStep > 3 ? "left" : "right"}">
-            <h1>Awesome. What's your email?</h1>
-            
-            <input bind:this={emailField} bind:value={emailValue} on:input={checkEmailAvailablility} type="email" class="input-field large hide-placeholder" placeholder="tinysable@lunchroom.ink"/>
-
-            <div id="message-container">
-                {#if emailStatus.state !== null}
-                    {#if emailStatus.state === "checking"}
-                        <LoadingSpinner/>
-                    {:else}
-                        <h6 class={emailStatus.state}>{emailStatus.message}</h6>
-                    {/if}
-                {/if}
-            </div>
+            <EmailFC
+                status={emailStatus}
+                bind:input={emailField}
+                bind:value={emailValue}
+                on:input={checkEmailAvailablility}
+            />
         </section>
 
         <section id="verfication" class="flow-content {navStep === 4 ? "visible" : ""} {navStep > 4 ? "left" : "right"}">
-            <h1>Verification code, please.</h1>
-            <p>Check your inbox for a verification code to confirm it's really you.</p>
-            
-            <VerificationInput bind:input={verifField} bind:value={verifCode} on:submit={checkVerificationCode} />
+            <VerifFC
+                nameValue={nameValue}
+                status={verifCodeStatus}
+                resendCooldownTime={resendCooldownTime}
+                bind:input={verifField}
+                bind:value={verifCode}
+                on:submit={checkVerificationCode}
+                on:resend-code={resendVerificationCode}
+            />
+        </section>
 
-            <div id="message-container">
-                {#if verifCodeStatus.state === null}
-                    {#if resendCooldownTime > 0}
-                        <h6 id="resend-cooldown">Resend code in {resendCooldownTime}s</h6>
-                    {:else if true}
-                        <button on:click={resendEmail} id="resend-code" class="text">
-                            <h6>
-                                Resend code
-                            </h6>
-                        </button>
-                    {/if}
-                {:else}
-                    {#if verifCodeStatus.state === "failed"}
-                        <h6 class="failed">{verifCodeStatus.message} &nbsp; </h6>
-                        {#if resendCooldownTime > 0}
-                            <h6 id="resend-cooldown" class="failed">Resend code in {resendCooldownTime}s.</h6>
-                        {:else if true}
-                            <button on:click={resendEmail} id="resend-code" class="text failed">
-                                <h6 class="failed">
-                                    Resend code?
-                                </h6>
-                            </button>
-                        {/if}
-                    {:else if verifCodeStatus.state === "success"}
-                        <h6 class="success">{verifCodeStatus.message}</h6>
-                    {:else}
-                        <LoadingSpinner />
-                    {/if}
-                {/if}
-            </div>
+        <section id="password" class="flow-content {navStep === 5 ? "visible" : ""} {navStep > 5 ? "left" : "right"}">
+            <PasswordFC bind:input={passwordField} bind:value={passwordValue} />
         </section>
     </section>
 
-    <section bind:this={navContainer} id="nav-button-container" style="transform: translateY({navHeight}px);">
+    <!-- Normal nav buttons -->
+    <section
+        bind:this={navContainer}
+        id="nav-button-container"
+        style="transform: translateY({navHeight}px); opacity: {navStep === 5 ? "0" : "1"}; pointer-events: {navStep === 5 ? "none" : "all"};"
+    >
         <button disabled={!leftClickable} id="left" class="text" type="reset" on:click={navLeft}>
             <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
@@ -403,99 +397,6 @@
                     pointer-events: all;
                     transform: translateX(0px);
                 }
-    
-                &#intro{
-                    h1{
-                        margin-bottom: 10px;
-                    }
-                }
-                &#name, &#handle, &#email{
-                    h1{
-                        margin-bottom: 28px;
-                        white-space: nowrap;
-                    }
-                }
-                &#handle, &#email, &#verfication{
-                    div{
-                        width: 100%; height: fit-content;
-                        position: relative;
-
-                        display: flex; justify-content: center; align-items: center;
-                    }
-                    #input-decorator{
-                        position: absolute; left: 13.5px;
-                        font-size: 22px;
-                        font-weight: 400;
-
-                        transform: translateY(-1.65px);
-                    }
-
-                    #message-container{
-                        position: absolute; bottom: -130px;
-                        display: flex; justify-content: center; align-items: center;
-
-                        h6{
-                            font-size: 16px;
-                            position: relative;
-                            
-                        }
-
-                        .failed{
-                            color: $red;
-                        }
-                        .success{
-                            color: $green;
-                        }
-                    }
-                }
-                &#verfication{
-                    h1{
-                        margin-bottom: 10px;
-                        white-space: nowrap;
-                    }
-                    p{
-                        margin-bottom: 32px;
-                        font-size: 16px;
-                    }
-                    #resend-cooldown{
-                        color: $quaternary;
-                        font-size: 16px;
-                    }
-                    #resend-code{
-                        font-size: 16px;
-                        text-decoration: underline;
-                        cursor: pointer;
-
-                        h6{
-                            color: $primary;
-
-                            #failed{
-                                color: $red;
-                            }
-                            #success{
-                                color: $green;
-                            }
-                        }
-                        
-                        &:hover{
-                            opacity: 0.5;
-                        }
-                    }
-                }
-            }
-        }
-
-        .input-field{
-            width: 100%;
-            text-align: center;
-            transition: opacity 700ms ease-in-out, transform 700ms $out-generic;
-
-            &::-webkit-contacts-auto-fill-button {
-                visibility: hidden;
-                display: none !important;
-                pointer-events: none;
-                width: 0px !important;
-                margin: 0px !important;
             }
         }
         
@@ -504,7 +405,7 @@
 
             opacity: 1;
             
-            transition: opacity 700ms ease-in-out, transform 700ms $out-generic;
+            transition: opacity 350ms $out-generic, transform 700ms $out-generic;
             
             button{
                 width: 24px; height: 24px;

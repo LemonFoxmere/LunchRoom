@@ -27,6 +27,8 @@
 
             field.oninput = () => {
                 field.value = field.value.toUpperCase().replace(/[^A-Z0-9]/g, "").charAt(0); // prevent erroneous input
+
+                if(field.value.length !== 0 && i + 1 !== fieldList.length) fieldList[i + 1].focus(); // advance to next field. We control that here so it work with autofills
             }
 
             field.onkeydown = (e: KeyboardEvent) => {
@@ -37,15 +39,15 @@
 
                 if( /^[a-zA-Z0-9]$/.test(e.key) || e.key === "ArrowRight" || (e.key === "Tab" && !e.shiftKey) ){
                     if(i + 1 !== fieldList.length){
-                        field.blur();
+                        // field.blur();
                         setTimeout(() => { // wait for default event to pass first
                             if(/^[a-zA-Z0-9]$/.test(e.key)) field.value = `${e.key}`.toUpperCase();
-                            fieldList[i + 1].focus();
+                            if(e.key === "ArrowRight" || (e.key === "Tab" && !e.shiftKey)) fieldList[i + 1].focus();
                         }, 0);
                     }
                 } else if ( e.key === "ArrowLeft" || e.key === "Backspace" || (e.key === "Tab" && e.shiftKey) ) {
                     if(i !== 0){
-                        field.blur();
+                        // field.blur();
                         setTimeout(() => { // wait for default event to pass first
                             if(e.key === "Backspace") field.value = "";
                             fieldList[i - 1].focus();
@@ -80,8 +82,10 @@
                 if(pastedText.length === 0) return;
 
                 // update the bidner input and fill in all fieldlist and unfocus all fields
-                field.value = pastedText;
-                disp("submit"); // emit the submit event
+                value = pastedText;
+                
+                if(pastedText.length === 6) disp("submit"); // emit the submit event
+                
                 for(let i = 0; i < fieldList.length; i++) {
                     fieldList[i].value = pastedText.charAt(i);
                     fieldList[i].blur();
@@ -97,15 +101,19 @@
             v1Field.focus();
         }
     })
+
+    $: if(value === "" && !!fieldList){ // used for clearing the values
+        for(let i = 0; i < fieldList.length; i++) fieldList[i].value = "";
+    }
 </script>
 
 <main>
-    <input bind:this={v1Field} type="text" class="monospace" placeholder=" ">
-    <input bind:this={v2Field} type="text" class="monospace" placeholder=" ">
-    <input bind:this={v3Field} type="text" class="monospace" placeholder=" ">
-    <input bind:this={v4Field} type="text" class="monospace" placeholder=" ">
-    <input bind:this={v5Field} type="text" class="monospace" placeholder=" ">
-    <input bind:this={v6Field} type="text" class="monospace" placeholder=" ">
+    <input bind:this={v1Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+    <input bind:this={v2Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+    <input bind:this={v3Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+    <input bind:this={v4Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+    <input bind:this={v5Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+    <input bind:this={v6Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
 
     <input id="psuedo" bind:this={input} bind:value={value} type="text">
 </main>
@@ -128,14 +136,14 @@
             font-weight: 600;
             color: $white;
 
-            transition: background-color 500ms $out-cubic;
+            transition: color 700ms $out-cubic;
 
             &:last-child{
                 margin-right: 0;
             }
 
             &:not(:placeholder-shown) {
-                background-color: $black;
+                color: $black;
             }
 
             &#psuedo{

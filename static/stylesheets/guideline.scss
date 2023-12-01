@@ -161,7 +161,7 @@ button{
 }
 
 input{
-    width: 200px; height: 36px;
+    height: 36px;
     padding: 0px 10px; box-sizing: border-box;
     transition: none;
 
@@ -178,7 +178,7 @@ input{
     }
 
     &.large{
-        width: 400px; height: 46px;
+        height: 46px;
         padding: 0px 14px;
         
         border-radius: 10px;

@@ -23,7 +23,7 @@
 
 <div id="message-container">
     {#if status.state !== null}
-        {#if status.state === "checking"}
+        {#if status.state === "processing"}
             <LoadingSpinner/>
         {:else}
             <h6 class={status.state}>{status.message}</h6>

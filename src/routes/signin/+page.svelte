@@ -1,313 +1,363 @@
 <script lang="ts">
-	import LoadingDots from "./../../lib/comp/ui/general/LoadingDots.svelte";
 	import { API_HOST } from "$lib/@const/dynamic.env";
 	import Cookies from "js-cookie";
+	import LoadingDots from "./../../lib/comp/ui/general/LoadingDots.svelte";
 
-    let inputField: HTMLElement;
-    let emailInput: HTMLInputElement;
-    let passwordInput: HTMLInputElement;
-    let keepSigninInput: HTMLInputElement;
-    
-    let authStatus: "norm" | "pending" | "fail" | "success" = "norm";
+	let inputField: HTMLElement;
+	let emailInput: HTMLInputElement;
+	let passwordInput: HTMLInputElement;
+	let keepSigninInput: HTMLInputElement;
 
-    const animateInputFailure = () => {
-        inputField.classList.remove("no-anim");
-        inputField.onanimationend = () => {
-            inputField.classList.add("no-anim");
-            inputField.onanimationend = null;
-        }
-    }
+	let authStatus: "norm" | "pending" | "fail" | "success" = "norm";
 
-    const signin = async () => {
-        // do not perform the request if the auth status is pending
-        if(authStatus === "pending") return;
-        authStatus = "pending";
+	const animateInputFailure = () => {
+		inputField.classList.remove("no-anim");
+		inputField.onanimationend = () => {
+			inputField.classList.add("no-anim");
+			inputField.onanimationend = null;
+		};
+	};
 
-        const email = emailInput.value;
-        const password = passwordInput.value;
+	const signin = async () => {
+		// do not perform the request if the auth status is pending
+		if (authStatus === "pending") return;
+		authStatus = "pending";
 
-        // check if email and password are empty
-        if(!email || !password || !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email)){
-            animateInputFailure();
-            authStatus = "norm";
-            return;
-        }
-        
-        const req = await fetch(`${API_HOST}/auth/signin/`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
-        })
+		const email = emailInput.value;
+		const password = passwordInput.value;
 
-        // in the case of login failure, set a cooldown of 3 seconds and set status to failed
-        if(!req.ok){
-            setTimeout(() => {
-                authStatus = "fail";
-                animateInputFailure();
-            }, 1000);
-            return;
-        }
+		// check if email and password are empty
+		if (!email || !password || !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email)) {
+			animateInputFailure();
+			authStatus = "norm";
+			return;
+		}
 
-        const body = await req.json();
+		const resp = await fetch(`${API_HOST}/auth/signin/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				email: email,
+				password: password
+			})
+		});
 
-        const accessToken = body.access_token;
+		// in the case of login failure, set a cooldown of 3 seconds and set status to failed
+		if (!resp.ok) {
+			setTimeout(() => {
+				authStatus = "fail";
+				animateInputFailure();
+			}, 1000);
+			return;
+		}
 
-        // store access token in cookies
-        if(keepSigninInput.checked){
-            Cookies.set("access_token", accessToken, { expires: 7 });
-        } else {
-            Cookies.set("access_token", accessToken);
-        }
+		const body = await resp.json();
 
-        authStatus = "success";
+		const accessToken = body.access_token;
 
-        // TODO: redirect to profile page
-        window.location.href = "/";
-    }
+		// store access token in cookies
+		if (keepSigninInput.checked) {
+			Cookies.set("access_token", accessToken, { expires: 7 });
+		} else {
+			Cookies.set("access_token", accessToken);
+		}
+
+		authStatus = "success";
+
+		// TODO: redirect to profile page
+		window.location.href = "/";
+	};
 </script>
 
 <main>
-    <h1>Sign in to <span>LunchRoom</span></h1>
+	<h1>Sign in to <span>LunchRoom</span></h1>
 
-    <form>
-        <section bind:this={inputField} id="input-container" class="no-anim">
-            <input
-                bind:this={emailInput}
-                id="email-input"
-                class={`${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
-                type="username"
-                placeholder="tinysable@lunchroom.ink"
-            />
-            <input
-                bind:this={passwordInput}
-                id="password-input"
-                class={`${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
-                type="password"
-                placeholder="••••••••••"
-            />
-        </section>
+	<form>
+		<section bind:this={inputField} id="input-container" class="no-anim">
+			<input
+				bind:this={emailInput}
+				id="email-input"
+				class={`${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
+				type="username"
+				placeholder="tinysable@lunchroom.ink"
+			/>
+			<input
+				bind:this={passwordInput}
+				id="password-input"
+				class={`${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
+				type="password"
+				placeholder="••••••••••"
+			/>
+		</section>
 
-        <button id="submit" type="submit" class={`solid ${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`} on:click={signin}>
-            {#if authStatus === "pending" || authStatus === "success"}
-                <LoadingDots />
-            {:else}
-                Sign in
-            {/if}
-        </button>
-        
-        <section id="keep-signin-container" on:click={e => { keepSigninInput.click() }} role="checkbox" tabindex="4">
-            <div id="checkbox-container">
-                <input bind:this={keepSigninInput} id="checkbox" type="checkbox" checked/>
-                
-                <svg x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;">
-                    <style type="text/css"> .st0{stroke:currentColor; fill: currentColor; stroke-miterlimit:10;} </style>
-                    <path class="st0" d="M9.9,18c-0.3,0-0.5-0.1-0.7-0.3l-4.9-5.2c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l4.1,4.4l8.4-9.2
-                        c0.3-0.4,1-0.5,1.4-0.2c0.4,0.3,0.5,1,0.2,1.4c0,0-0.1,0.1-0.1,0.1l-9.1,10C10.4,17.9,10.1,18,9.9,18L9.9,18z"/>
-                </svg>
-            </div>
+		<button
+			id="submit"
+			type="submit"
+			class={`solid ${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
+			on:click={signin}
+		>
+			{#if authStatus === "pending" || authStatus === "success"}
+				<LoadingDots />
+			{:else}
+				Sign in
+			{/if}
+		</button>
 
-            <p id="label" class="no-drag">Keep me signed in</p>
-        </section>
-        
-        {#if authStatus === "fail"}
-            <p id="password-reset">Incorrect email or password. Try again or reset password.</p>
-        {/if}
-    </form>
+		<section
+			id="keep-signin-container"
+			on:click={(e) => {
+				keepSigninInput.click();
+			}}
+			role="checkbox"
+			tabindex="4"
+		>
+			<div id="checkbox-container">
+				<input bind:this={keepSigninInput} id="checkbox" type="checkbox" checked />
 
+				<svg x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;">
+					<style type="text/css">
+						.st0 {
+							stroke: currentColor;
+							fill: currentColor;
+							stroke-miterlimit: 10;
+						}
+					</style>
+					<path
+						class="st0"
+						d="M9.9,18c-0.3,0-0.5-0.1-0.7-0.3l-4.9-5.2c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l4.1,4.4l8.4-9.2
+                        c0.3-0.4,1-0.5,1.4-0.2c0.4,0.3,0.5,1,0.2,1.4c0,0-0.1,0.1-0.1,0.1l-9.1,10C10.4,17.9,10.1,18,9.9,18L9.9,18z"
+					/>
+				</svg>
+			</div>
 
-    <a id="signup" href="/signup"> I don't have an account </a>
+			<p id="label" class="no-drag">Keep me signed in</p>
+		</section>
+
+		{#if authStatus === "fail"}
+			<p id="password-reset">
+				Incorrect email or password. Try again or <a href="/reset-password">reset password</a>.
+			</p>
+		{/if}
+	</form>
+
+	<a id="signup" href="/signup">I don't have an account</a>
 </main>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    main {
-        width: 100%; height: calc(100vh - 2 * $navbar-height);
-        padding: 0px 20px; box-sizing: border-box;
-        display: flex; justify-content: center; align-items: center; flex-direction: column;
+	main {
+		width: 100%;
+		height: calc(100vh - 2 * $navbar-height);
+		padding: 0px 20px;
+		box-sizing: border-box;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
 
-        h1{
-            font-size: 36px;
-        }
+		h1 {
+			font-size: 36px;
+		}
 
-        form{
-            position: relative;
+		form {
+			position: relative;
 
-            width: 100%; max-width: 600px;
-            margin-top: 28px;
+			width: 100%;
+			max-width: 600px;
+			margin-top: 28px;
 
-            display: flex; justify-content: center; align-items: center; flex-direction: column;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
 
-            #input-container{
-                animation: 400ms 1 forwards shake;
-                width: 100%;
-                
-                &.no-anim{ // the normal state of the input fields
-                    animation: none;
-                    
-                    input{
-                        border-color: $black;
-                        transition: border-color 500ms $in-cubic;
-                        transition-delay: 300ms;
-                    }
-                }
-                
-                input{
-                    width: 100%; height: 46px;
-                    padding: 0px 14px; box-sizing: border-box;
-                    transition: none;
+			#input-container {
+				animation: 400ms 1 forwards shake;
+				width: 100%;
 
-                    border: 2px solid $red;
-                    border-radius: 10px;
-                    background: none;
+				&.no-anim {
+					// the normal state of the input fields
+					animation: none;
 
-                    font-size: 16px;
-        
-                    &::placeholder{
-                        color: $quaternary;
-                    }
-    
-                    &#email-input{
-                        border-radius: 10px 10px 0px 0px;
-                    }
-                    &#password-input{
-                        border-radius: 0px 0px 10px 10px;
-                        transform: translateY(-2px);
-                    }
-                }
-            }
+					input {
+						border-color: $black;
+						transition: border-color 500ms $in-cubic;
+						transition-delay: 300ms;
+					}
+				}
 
-            #keep-signin-container{
-                position: relative;
-                display: flex; align-items: center;
-                margin-top: 48px;
-                cursor: pointer;
+				input {
+					width: 100%;
+					height: 46px;
+					padding: 0px 14px;
+					box-sizing: border-box;
+					transition: none;
 
-                #checkbox-container{
-                    display: flex; align-items: center; justify-content: center;
-                    width: 18px; height: 18px;
-                    
-                    #checkbox{
-                        appearance: none;
-                        width: 100%; height: 100%;
-                        margin: 0px; padding: 0px;
-                        
-                        background-color: $white;
-                        border: 1.5px solid $black;
-                        border-radius: 4px;
-    
-                        cursor: pointer;
-                        pointer-events: none;
-    
-                        &:checked{
-                            background-color: $black;
-                        }
-                    }
-    
-                    svg {
-                        position: absolute;
-                        pointer-events: none;
-                        transform: translate(0px, 0.5px);
-                        width: 15px; height: 15px;
-                        color: $white;
-                    }
-                }
-                
-                
-                #label{
-                    margin-left: 12px;
-                    font-size: 14px;
-                }
-            }
+					border: 2px solid $red;
+					border-radius: 10px;
+					background: none;
 
-            #submit{
-                min-width: 100px;
-                padding: 10px 24px;
-                margin-top: 24px;
-            }
+					font-size: 16px;
 
-            #password-reset{
-                position: absolute;
-                bottom: -60px;
-                
-                font-size: 14px;
-                font-weight: 400;
-                color: $red;
-            }
-        }
+					&::placeholder {
+						color: $quaternary;
+					}
 
-        #signup{
-            position: absolute; bottom: 24px;
+					&#email-input {
+						border-radius: 10px 10px 0px 0px;
+					}
+					&#password-input {
+						border-radius: 0px 0px 10px 10px;
+						transform: translateY(-2px);
+					}
+				}
+			}
 
-            font-size: 16px;
-            font-weight: 400;
-            color: $quaternary;
-        }
+			#keep-signin-container {
+				position: relative;
+				display: flex;
+				align-items: center;
+				margin-top: 48px;
+				cursor: pointer;
 
-        @media screen and (max-width: $mobile-width) {
-            height: calc(100vh - $urlbar-height - 2 * $navbar-height);
+				#checkbox-container {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 20px;
+					height: 20px;
 
-            h1{
-                text-align: center;
-                font-size: 32px;
-            }
+					#checkbox {
+						appearance: none;
+						width: 100%;
+						height: 100%;
+						margin: 0px;
+						padding: 0px;
 
-            form{
-                margin-top: 32px;
-                $icon-size: 32px;
+						background-color: $white;
+						border: 1.5px solid $black;
+						border-radius: 4px;
 
-                input{
-                    height: 46px;
-                    padding: 0px 16px;
-                    font-size: 16px;
-                }
-                
-                #submit{
-                    height: 46px;
-                    width: 100%; 
-                }
+						cursor: pointer;
+						pointer-events: none;
 
-                #keep-signin-container{
-                    #checkbox-container{
-                        width: 22px; height: 22px;
-                    }
+						&:checked {
+							background-color: $black;
+						}
+					}
 
-                    #label{
-                        font-size: 14px;
-                    }
-                }
-            }
-        }
+					svg {
+						position: absolute;
+						pointer-events: none;
+						transform: translate(0px, 0.5px);
+						width: 15px;
+						height: 15px;
+						color: $white;
+					}
+				}
 
-        @keyframes shake {
-            0% {
-                transform: translateX(0px);
-            }
-            20% {
-                transform: translateX(10px);
-            }
-            40% {
-                transform: translateX(-10px);
-            }
-            60% {
-                transform: translateX(5px);
-            }
-            80% {
-                transform: translateX(-5px);
-            }
-            100% {
-                transform: translateX(0px);
-            }
-        }
-    }
+				#label {
+					margin-left: 14px;
+					font-size: 16px;
+					transform: translateY(-0.6px);
+				}
+			}
 
-    .disabled{
-        pointer-events: none !important;
-        cursor: default;
-    }
+			#submit {
+				min-width: 100px;
+				padding: 10px 24px;
+				margin-top: 24px;
+			}
+
+			#password-reset {
+				position: absolute;
+				bottom: -70px;
+
+				font-size: 16px;
+				font-weight: 400;
+				color: $red;
+
+				a {
+					color: $red;
+					font-size: 16px;
+					font-weight: 400;
+					text-decoration: underline;
+				}
+			}
+		}
+
+		#signup {
+			position: absolute;
+			bottom: 24px;
+
+			font-size: 16px;
+			font-weight: 400;
+			color: $quaternary;
+		}
+
+		@media screen and (max-width: $mobile-width) {
+			height: calc(100vh - $urlbar-height - 2 * $navbar-height);
+
+			h1 {
+				text-align: center;
+				font-size: 32px;
+			}
+
+			form {
+				margin-top: 32px;
+				$icon-size: 32px;
+
+				input {
+					height: 46px;
+					padding: 0px 16px;
+					font-size: 16px;
+				}
+
+				#submit {
+					height: 46px;
+					width: 100%;
+				}
+
+				#keep-signin-container {
+					#checkbox-container {
+						width: 22px;
+						height: 22px;
+					}
+
+					#label {
+						font-size: 14px;
+					}
+				}
+			}
+		}
+
+		@keyframes shake {
+			0% {
+				transform: translateX(0px);
+			}
+			20% {
+				transform: translateX(10px);
+			}
+			40% {
+				transform: translateX(-10px);
+			}
+			60% {
+				transform: translateX(5px);
+			}
+			80% {
+				transform: translateX(-5px);
+			}
+			100% {
+				transform: translateX(0px);
+			}
+		}
+	}
+
+	.disabled {
+		pointer-events: none !important;
+		cursor: default;
+	}
 </style>

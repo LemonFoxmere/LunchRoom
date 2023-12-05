@@ -16,6 +16,9 @@
 		3: /[!@#$%^&*()'"=`_+{}\[\]\/:;<>,.?~\\|-]/.test(value)
 	};
 
+	let failedLatched: boolean = false;
+	$: failedLatched = failedLatched || status.state === "failed";
+
 	$: passwordValid =
 		passwordRequirements[0] &&
 		passwordRequirements[1] &&
@@ -36,7 +39,12 @@
 </script>
 
 <main>
-	<h1>Choose a strong password.</h1>
+	<h1>Choose a new password.</h1>
+	{#if failedLatched}
+		<p id="failure-error">{status.message}</p>
+	{:else}
+		<p>And remember it this time :3</p>
+	{/if}
 
 	<div id="input-container">
 		<input
@@ -100,23 +108,19 @@
 		</button>
 	</div>
 
-	{#if status.state === "failed"}
-		<p id="failure-error">{status.message || "Something went wrong, please try again later."}</p>
-	{:else}
-		<button
-			disabled={!passwordValid && status.state !== "processing"}
-			class="solid large {!passwordValid ? 'locked' : ''}"
-			id="submit"
-			type="submit"
-			on:click={onSubmit}
-		>
-			{#if status.state === null}
-				Start using LunchRoom
-			{:else}
-				<LoadingDots />
-			{/if}
-		</button>
-	{/if}
+	<button
+		disabled={!passwordValid || status.state === "processing"}
+		class="solid large {!passwordValid ? 'locked' : ''}"
+		id="submit"
+		type="submit"
+		on:click={onSubmit}
+	>
+		{#if status.state === null || status.state === "failed"}
+			Reset Password
+		{:else}
+			<LoadingDots />
+		{/if}
+	</button>
 
 	<div id="message-container">
 		<div class="pwd-req">
@@ -151,8 +155,17 @@
 		flex-direction: column;
 
 		h1 {
-			margin-bottom: 28px;
+			margin-bottom: 8px;
 			white-space: nowrap;
+		}
+		p {
+			font-size: 16px;
+			margin-bottom: 28px;
+		}
+		#failure-error {
+			color: $red;
+			font-size: 16px;
+			margin-bottom: 28px;
 		}
 
 		div {
@@ -209,12 +222,6 @@
 			&.locked {
 				opacity: 0.3;
 			}
-		}
-		#failure-error {
-			margin-top: 30px;
-			color: $red;
-			font-size: 16px;
-			font-weight: 400;
 		}
 
 		#message-container {

@@ -14,7 +14,7 @@
 	};
 </script>
 
-<h1>Awesome. What's your email?</h1>
+<h1>Let's reset your password. What's your email?</h1>
 
 <input
 	bind:this={input}

@@ -2,6 +2,7 @@
     import { writable } from "svelte/store";
 
     export const mobileMenuOpened = writable<boolean>(false);
+    export const topBarLayout = writable<"normal" | "alternate" | "minimal">("normal");
 </script>
 
 <script lang="ts">
@@ -10,11 +11,6 @@
 	import type { PageData } from "./$types";
 	
     export let data: PageData;
-
-    const signInURI: Record<string, string> = {
-        "Sign In": "/signin",
-        "Sign Up": "/signup",
-    }
 
     // mobile menu control
     const toggleMobileMenu = () => {
@@ -33,29 +29,34 @@
     onMount(trackScroll);
 
     $: animResolution = 1000;
-    $: navbarAnimDelay = -1 * (Math.min(100, scrollDist) / 100) * animResolution;
-    $: navbarLogoDelay = -1 * (Math.min(300, scrollDist) / 300) * animResolution;
+    $: navbarAnimDelay = Math.min(0, -1 * (Math.min(100, scrollDist) / 100) * animResolution);
+    $: navbarLogoDelay = Math.min(0, -1 * (Math.min(300, scrollDist) / 300) * animResolution);
+
+    // change the navbar layout based on page url. Ex: sign up and sign in will have minimal layout
+    $: if(data.url.includes("/signin") || data.url.includes("/signup")){
+        $topBarLayout = "minimal";
+    } else {
+        $topBarLayout = "normal";
+    }
 </script>
 
 <main>
     <div id="navbar" class="{$mobileMenuOpened ? "active" : ""}" on:touchmove={e => {e.preventDefault(); e.stopPropagation()}}>
-        <div id="content" style="animation-duration: {animResolution}ms; animation-delay: {navbarAnimDelay}ms">
-            <a href="/" on:click={closeMobileMenu}>
-                <div id="logo" style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms">
-                    <img src="/logo.svg" height="26px" alt="" class="no-drag exclude-desktop">
-                    <img src="/logo_text.svg" height="28px" alt="" class="no-drag only-desktop">
-                </div>
+        <div id="content" class={$topBarLayout} style="animation-duration: {animResolution}ms; animation-delay: {navbarAnimDelay}ms">
+            <a id="logo" href="/" on:click={closeMobileMenu}>
+                <img src="/logo.svg" style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms" height="26px" alt="" class="no-drag exclude-desktop">
+                <img src="/logo_text.svg" style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms" height="28px" alt="" class="no-drag only-desktop">
             </a>
 
-            <div>
+            <div id="cta-container">
                 <section class="only-phone cta">
                     <MenuButton opened={$mobileMenuOpened} on:click={toggleMobileMenu}/>
                 </section>
 
                 <section class="exclude-phone cta" style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms">
                     {#if !data.accessToken}
-                        <a href="{signInURI[data.signInText]}">
-                            <button class="text">{data.signInText}</button>
+                        <a href="/signin">
+                            <button class="text">Sign In</button>
                         </a>
                     {/if}
     
@@ -80,8 +81,8 @@
     >
         <div id="menu-bg" on:click={e => e.stopPropagation()}>
             {#if !data.accessToken}
-                <a class="menu-items" href="{signInURI[data.signInText]}" on:click={closeMobileMenu}>
-                    <button class="text">{data.signInText}</button>
+                <a class="menu-items" href="/signin" on:click={closeMobileMenu}>
+                    <button class="text">Sign in</button>
                 </a>
             {/if}
 
@@ -119,8 +120,9 @@
             position: sticky; top: 0;
 
             #content{
-                width: calc(100vw - 300px); height: fit-content;
-                display: flex; justify-content: space-between; align-items: center;
+                width: calc(100vw - 300px); height: 36px;
+                display: flex; justify-content: center; align-items: center;
+                position: relative;
 
                 animation: shrink forwards;
                 animation-play-state: paused;
@@ -135,63 +137,71 @@
                 }
 
                 #logo{
-                    animation: logo-shrink forwards;
-                    animation-play-state: paused;
-                    animation-timing-function: $out-expo;
+                    position: absolute; left: 0px;
+                    height: 36px;
+                    display: flex; justify-content: center; align-items: center;
 
-                    @keyframes logo-shrink {
-                        from {
-                            transform: scale(100%);
+                    img{
+                        animation: logo-shrink forwards;
+                        animation-play-state: paused;
+                        animation-timing-function: $out-expo;
+    
+                        @keyframes logo-shrink {
+                            from {
+                                transform: scale(100%);
+                            }
+                            to {
+                                transform: scale(80%);
+                            }
                         }
-                        to {
-                            transform: scale(80%);
+    
+                        @media screen and (max-width: $tablet-width){
+                            animation: none;
                         }
-                    }
-
-                    @media screen and (max-width: $tablet-width){
-                        animation: none;
                     }
                 }
 
-                .cta{
-                    display: flex; flex-direction: row-reverse;
+                #cta-container{
+                    position: absolute; right: 0px;
                     
-                    animation: cta-shrink forwards;
-                    animation-play-state: paused;
-                    animation-timing-function: $out-expo;
+                    height: 36px; width: fit-content;
+                    display: flex; justify-content: center; align-items: center;
+                    overflow: visible;
 
-                    @keyframes cta-shrink {
-                        from {
-                            transform: scale(100%);
+                    .cta{
+                        display: flex; flex-direction: row-reverse;
+                        
+                        animation: cta-shrink forwards;
+                        animation-play-state: paused;
+                        animation-timing-function: $out-expo;
+        
+                        @keyframes cta-shrink {
+                            from {
+                                transform: scale(100%);
+                            }
+                            to {
+                                transform: scale(90%);
+                            }
                         }
-                        to {
-                            transform: scale(90%);
-                        }
-                    }
-                    
-                    a{
-                        text-decoration: none;
-                        margin-right: 48px;
-
-                        &:first-child{
-                            margin: 0px;
-                        }
-
-                        button{
-                            display: flex; align-items: center;
+                        
+                        a{
+                            text-decoration: none;
+                            margin-right: 48px;
     
-                            svg{
-                                margin-left: 8px;
-                                height: 14px;
+                            &:first-child{
+                                margin: 0px;
+                            }
+    
+                            button{
+                                display: flex; align-items: center;
+        
+                                svg{
+                                    margin-left: 8px;
+                                    height: 14px;
+                                }
                             }
                         }
                     }
-                }
-
-                div{
-                    height: 36px;
-                    display: flex; align-items: center;
-                    overflow: visible;
                 }
                 
                 @media screen and (max-width: $tablet-width) {
@@ -201,7 +211,19 @@
                 @media screen and (max-width: $mobile-width) {
                     animation: none;
                 }
+
+                &.minimal{
+                    #logo{
+                        left: 50%;
+                        transform: translateX(-50%);
+                    }
+                    #cta-container{
+                        pointer-events: none;
+                        opacity: 0;
+                    }
+                }
             }
+
 
             @media screen and (max-width: $mobile-width) {
                 align-items: center;

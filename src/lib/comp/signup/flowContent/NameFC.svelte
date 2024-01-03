@@ -4,13 +4,7 @@
 </script>
 
 <h1>First, what's your name?</h1>
-<input
-	bind:this={input}
-	bind:value
-	type="text"
-	class="large hide-placeholder"
-	placeholder="Tiny Sable"
-/>
+<input bind:this={input} bind:value type="text" class="large hide-placeholder" />
 
 <style lang="scss">
 	@import "$static/stylesheets/guideline";

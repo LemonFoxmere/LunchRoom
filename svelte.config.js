@@ -8,7 +8,7 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	onwarn: (warning, handler) => {
-        if (warning.code === 'css-unused-selector') {
+        if (warning.code === "css-unused-selector" || warning.code.startsWith('a11y-')) {
             return;
         }
         handler(warning);

@@ -137,6 +137,10 @@ button{
         &:active{
             color: $tertiary;
         }
+
+        &.underlined{
+            text-decoration: underline;
+        }
     }
 
     &.solid{
@@ -205,6 +209,15 @@ a{
     @extend .no-drag !optional;
     -webkit-tap-highlight-color: transparent;
     cursor: pointer;
+
+    &.plain{
+        text-decoration: none;
+        color: $primary;
+
+        &:hover{
+            color: $tertiary;
+        }
+    }
 }
 
 hr{

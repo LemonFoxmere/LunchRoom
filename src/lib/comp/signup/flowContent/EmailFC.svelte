@@ -22,7 +22,7 @@
 	on:input={oninput}
 	type="email"
 	class="large hide-placeholder"
-	placeholder="tinysable@lunchroom.ink"
+	placeholder="example@lunchroom.ink"
 />
 
 <div id="message-container">

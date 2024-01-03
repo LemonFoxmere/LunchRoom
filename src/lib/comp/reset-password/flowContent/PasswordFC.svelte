@@ -55,7 +55,7 @@
 			placeholder="•••••••••"
 		/>
 
-		<button id="toggle-visible" type="submit" class="text no-drag" on:click={togglePwdVisibility}>
+		<button id="toggle-visible" class="text no-drag" on:click={togglePwdVisibility}>
 			{#if !passwordVisible}
 				<!-- eye norm -->
 				<svg

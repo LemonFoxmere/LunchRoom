@@ -7,6 +7,8 @@
 	export let input: HTMLInputElement;
 	export let value: string;
 	export let status: uniqueSignupProcessStatus;
+	let contentHeight: number;
+
 	const disp = createEventDispatcher();
 
 	let passwordRequirements: Record<number, boolean>;
@@ -27,19 +29,13 @@
 		passwordRequirements[3];
 
 	let passwordVisible = false;
-	const togglePwdVisibility = () => {
-		if (input) {
-			input.type = input.type === "password" ? "text" : "password";
-			passwordVisible = input.type === "text";
-		}
-	};
 
 	const onSubmit = () => {
 		disp("submit");
 	};
 </script>
 
-<main>
+<main bind:clientHeight={contentHeight}>
 	<h1>Choose a new password.</h1>
 	{#if failedLatched}
 		<p id="failure-error">{status.message}</p>
@@ -48,15 +44,27 @@
 	{/if}
 
 	<div id="input-container">
-		<input
-			bind:this={input}
-			bind:value
-			type="password"
-			class="input-field large hide-placeholder"
-			placeholder="•••••••••"
-		/>
+		{#if passwordVisible}
+			<input
+				bind:this={input}
+				bind:value
+				placeholder="•••••••••"
+				type="text"
+				class="input-field large hide-placeholder"
+			/>
+		{:else}
+			<input
+				bind:this={input}
+				bind:value
+				placeholder="•••••••••"
+				type="password"
+				class="input-field large hide-placeholder"
+			/>
+		{/if}
 
-		<PasswordVisibleToggle bind:passwordVisible />
+		<div id="toggle-visible">
+			<PasswordVisibleToggle bind:passwordVisible />
+		</div>
 	</div>
 
 	<button
@@ -73,149 +81,157 @@
 		{/if}
 	</button>
 
-	<div id="message-container">
+	<div id="message-container" style="transform: translateY({contentHeight / 2 + 100}px)">
 		<div class="pwd-req">
 			<div class="pwd-check-status {passwordRequirements[0] ? 'ok' : ''}" />
-			<h6>Make it between 6 and 30 characters long</h6>
+			<h6 class="exclude-phone">Make it between 6 and 30 characters long</h6>
+			<h6 class="only-phone">Between 6 and 30 characters long</h6>
 		</div>
 		<div class="pwd-req">
 			<div class="pwd-check-status {passwordRequirements[1] ? 'ok' : ''}" />
-			<h6>Include at least 1 number</h6>
+			<h6 class="exclude-phone">Include at least 1 number</h6>
+			<h6 class="only-phone">Have at least 1 number</h6>
 		</div>
 		<div class="pwd-req">
 			<div class="pwd-check-status {passwordRequirements[2] ? 'ok' : ''}" />
-			<h6>Include at least 1 capitcalized letter</h6>
+			<h6 class="exclude-phone">Include at least 1 capitcalized letter</h6>
+			<h6 class="only-phone">Have at least 1 capitcalized letter</h6>
 		</div>
 		<div class="pwd-req">
 			<div class="pwd-check-status {passwordRequirements[3] ? 'ok' : ''}" />
-			<h6>Include at least 1 special character (!@#$%^&*\)</h6>
+			<h6 class="exclude-phone">Include at least 1 special character (!@#$%^&*\)</h6>
+			<h6 class="include-phone">Have at least 1 special character</h6>
 		</div>
 	</div>
 </main>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    main {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
+	main {
+		width: 100%;
+		position: relative;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
 
-        h1 {
-            margin-bottom: 8px;
-            white-space: nowrap;
-        }
+		h1 {
+			margin-bottom: 8px;
+			text-align: center;
+		}
 
-        p {
-            font-size: 16px;
-            margin-bottom: 28px;
-        }
+		p {
+			font-size: 16px;
+			margin-bottom: 28px;
+		}
 
-        #failure-error {
-            color: $red;
-            font-size: 16px;
-            margin-bottom: 28px;
-        }
+		#failure-error {
+			color: $red;
+			font-size: 16px;
+			margin-bottom: 28px;
+		}
 
-        div {
-            width: 100%;
-            height: fit-content;
-            position: relative;
+		div {
+			width: 100%;
+			height: fit-content;
+			position: relative;
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
 
-        #input-container {
-            input {
-                width: 100%;
-                text-align: center;
+		#input-container {
+			max-width: 600px;
 
-                padding-right: 44px !important;
-                padding-left: 44px !important;
-                box-sizing: border-box;
+			input {
+				width: 100%;
+				text-align: center;
 
-                &::-webkit-contacts-auto-fill-button {
-                    visibility: hidden;
-                    display: none !important;
-                    pointer-events: none;
-                    width: 0 !important;
-                    margin: 0 !important;
-                }
-            }
+				padding-right: 44px !important;
+				padding-left: 44px !important;
+				box-sizing: border-box;
 
-            #toggle-visible {
-                position: absolute;
-                right: 14px;
-                transform: translateY(1.5px);
+				&::-webkit-contacts-auto-fill-button {
+					visibility: hidden;
+					display: none !important;
+					pointer-events: none;
+					width: 0 !important;
+					margin: 0 !important;
+				}
+			}
 
-                svg {
-                    width: 24px;
-                    height: 24px;
-                }
-            }
-        }
+			#toggle-visible {
+				position: absolute;
+				width: fit-content;
+				height: fit-content;
 
-        #submit {
-            margin-top: 30px;
-            width: fit-content;
-            min-width: 80px;
+				right: 0px;
+			}
+		}
 
-            transition: opacity 200ms ease-in-out;
+		#submit {
+			margin-top: 30px;
+			width: fit-content;
+			min-width: 80px;
 
-            &:disabled {
-                pointer-events: none;
-                cursor: default;
-            }
+			transition: opacity 200ms ease-in-out;
 
-            &.locked {
-                opacity: 0.3;
-            }
-        }
+			&:disabled {
+				pointer-events: none;
+				cursor: default;
+			}
 
-        #message-container {
-            position: absolute;
-            bottom: -170px;
-            width: fit-content;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+			&.locked {
+				opacity: 0.3;
+			}
+		}
 
-            .pwd-req {
-                display: flex;
-                justify-content: flex-start;
-                margin-bottom: 8px;
+		#message-container {
+			position: absolute;
 
-                &:last-child {
-                    margin: 0;
-                }
+			width: fit-content;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
 
-                .pwd-check-status {
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 100%;
-                    background-color: $pentinary;
-                    margin-right: 14px;
+			.pwd-req {
+				display: flex;
+				justify-content: flex-start;
+				margin-bottom: 8px;
 
-                    transition: background-color 200ms ease-in-out;
+				&:last-child {
+					margin: 0;
+				}
 
-                    &.ok {
-                        background-color: $black;
-                    }
-                }
-            }
+				.pwd-check-status {
+					width: 8px;
+					height: 8px;
+					border-radius: 100%;
+					background-color: $pentinary;
+					margin-right: 14px;
 
-            h6 {
-                font-size: 16px;
-                position: relative;
-                color: $tertiary;
-            }
-        }
-    }
+					transition: background-color 200ms ease-in-out;
+
+					&.ok {
+						background-color: $black;
+					}
+				}
+			}
+
+			h6 {
+				font-size: 16px;
+				position: relative;
+				color: $tertiary;
+			}
+		}
+
+		@media screen and (max-width: $mobile-width) {
+			h1 {
+				font-size: 32px;
+			}
+		}
+	}
 </style>

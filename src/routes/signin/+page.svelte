@@ -132,11 +132,11 @@
 
 					<svg x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;">
 						<style type="text/css">
-                            .st0 {
-                                stroke: currentColor;
-                                fill: currentColor;
-                                stroke-miterlimit: 10;
-                            }
+							.st0 {
+								stroke: currentColor;
+								fill: currentColor;
+								stroke-miterlimit: 10;
+							}
 						</style>
 						<path
 							class="st0"
@@ -161,240 +161,239 @@
 </SignInLock>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    main {
-        width: 100%;
-        height: calc(100vh - 2 * $navbar-height);
-        padding: 0 20px;
-        box-sizing: border-box;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
+	main {
+		width: 100%;
+		height: calc(100vh - 2 * $navbar-height);
+		padding: 0 20px;
+		box-sizing: border-box;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
 
-        h1 {
-            font-size: 36px;
-        }
+		h1 {
+			font-size: 36px;
+		}
 
-        form {
-            position: relative;
+		form {
+			position: relative;
 
-            width: 100%;
-            max-width: 600px;
-            margin-top: 28px;
+			width: 100%;
+			max-width: 600px;
+			margin-top: 28px;
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
 
-            #input-container {
-                animation: 400ms 1 forwards shake;
-                width: 100%;
+			#input-container {
+				animation: 400ms 1 forwards shake;
+				width: 100%;
 
-                &.no-anim {
-                    // the normal state of the input fields
-                    animation: none;
+				&.no-anim {
+					// the normal state of the input fields
+					animation: none;
 
-                    input {
-                        border-color: $black;
-                        transition: border-color 500ms $in-cubic;
-                        transition-delay: 300ms;
-                    }
-                }
+					input {
+						border-color: $black;
+						transition: border-color 500ms $in-cubic;
+						transition-delay: 300ms;
+					}
+				}
 
-                #password-container {
-                    position: relative;
-                    display: flex;
-                    justify-content: center;
-                    align-content: center;
+				#password-container {
+					position: relative;
+					display: flex;
+					justify-content: center;
+					align-content: center;
 
-                    input {
-                        padding-right: 50px;
-                        box-sizing: border-box;
-                    }
+					input {
+						padding-right: 50px;
+						box-sizing: border-box;
+					}
 
-                    #toggle-visible {
-                        position: absolute;
-                        width: fit-content;
-                        height: fit-content;
+					#toggle-visible {
+						position: absolute;
+						width: fit-content;
+						height: fit-content;
 
-                        right: 14px;
-                        transform: translateY(9px);
-                    }
-                }
+						right: 0px;
+					}
+				}
 
-                input {
-                    width: 100%;
-                    height: 46px;
-                    padding: 0 14px;
-                    box-sizing: border-box;
-                    transition: none;
+				input {
+					width: 100%;
+					height: 46px;
+					padding: 0 14px;
+					box-sizing: border-box;
+					transition: none;
 
-                    border: 2px solid $red;
-                    border-radius: 10px;
-                    background: none;
+					border: 2px solid $red;
+					border-radius: 10px;
+					background: none;
 
-                    font-size: 16px;
+					font-size: 16px;
 
-                    &::placeholder {
-                        color: $quaternary;
-                    }
+					&::placeholder {
+						color: $quaternary;
+					}
 
-                    &#email-input {
-                        border-radius: 10px 10px 0 0;
-                    }
+					&#email-input {
+						border-radius: 10px 10px 0 0;
+					}
 
-                    &#password-input {
-                        border-radius: 0 0 10px 10px;
-                        transform: translateY(-2px);
-                    }
-                }
-            }
+					&#password-input {
+						border-radius: 0 0 10px 10px;
+						transform: translateY(-2px);
+					}
+				}
+			}
 
-            #keep-signin-container {
-                position: relative;
-                display: flex;
-                align-items: center;
-                margin-top: 48px;
-                cursor: pointer;
+			#keep-signin-container {
+				position: relative;
+				display: flex;
+				align-items: center;
+				margin-top: 48px;
+				cursor: pointer;
 
-                #checkbox-container {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 20px;
-                    height: 20px;
+				#checkbox-container {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 20px;
+					height: 20px;
 
-                    #checkbox {
-                        appearance: none;
-                        width: 100%;
-                        height: 100%;
-                        margin: 0;
-                        padding: 0;
+					#checkbox {
+						appearance: none;
+						width: 100%;
+						height: 100%;
+						margin: 0;
+						padding: 0;
 
-                        background-color: $white;
-                        border: 1.5px solid $black;
-                        border-radius: 4px;
+						background-color: $white;
+						border: 1.5px solid $black;
+						border-radius: 4px;
 
-                        cursor: pointer;
-                        pointer-events: none;
+						cursor: pointer;
+						pointer-events: none;
 
-                        &:checked {
-                            background-color: $black;
-                        }
-                    }
+						&:checked {
+							background-color: $black;
+						}
+					}
 
-                    svg {
-                        position: absolute;
-                        pointer-events: none;
-                        transform: translate(0px, 0.5px);
-                        width: 15px;
-                        height: 15px;
-                        color: $white;
-                    }
-                }
+					svg {
+						position: absolute;
+						pointer-events: none;
+						transform: translate(0px, 0.5px);
+						width: 15px;
+						height: 15px;
+						color: $white;
+					}
+				}
 
-                #label {
-                    margin-left: 14px;
-                    font-size: 16px;
-                    transform: translateY(-0.6px);
-                }
-            }
+				#label {
+					margin-left: 14px;
+					font-size: 16px;
+					transform: translateY(-0.6px);
+				}
+			}
 
-            #submit {
-                min-width: 100px;
-                padding: 10px 24px;
-                margin-top: 24px;
-            }
+			#submit {
+				min-width: 100px;
+				padding: 10px 24px;
+				margin-top: 24px;
+			}
 
-            #password-reset {
-                position: absolute;
-                bottom: -70px;
+			#password-reset {
+				position: absolute;
+				bottom: -70px;
 
-                font-size: 16px;
-                font-weight: 400;
-                color: $red;
+				font-size: 16px;
+				font-weight: 400;
+				color: $red;
 
-                a {
-                    color: $red;
-                    font-size: 16px;
-                    font-weight: 400;
-                    text-decoration: underline;
-                }
-            }
-        }
+				a {
+					color: $red;
+					font-size: 16px;
+					font-weight: 400;
+					text-decoration: underline;
+				}
+			}
+		}
 
-        #signup {
-            position: absolute;
-            bottom: 14px;
+		#signup {
+			position: absolute;
+			bottom: 14px;
 
-            font-size: 16px;
-            font-weight: 400;
-            color: $quaternary;
-        }
+			font-size: 16px;
+			font-weight: 400;
+			color: $quaternary;
+		}
 
-        @media screen and (max-width: $mobile-width) {
-            height: calc(100vh - $urlbar-height - $navbar-height);
+		@media screen and (max-width: $mobile-width) {
+			height: calc(100vh - $urlbar-height - $navbar-height);
 
-            h1 {
-                text-align: center;
-                font-size: 32px;
-            }
+			h1 {
+				text-align: center;
+				font-size: 32px;
+			}
 
-            form {
-                margin-top: 32px;
-                $icon-size: 32px;
+			form {
+				margin-top: 32px;
+				$icon-size: 32px;
 
-                input {
-                    height: 46px;
-                    padding: 0 16px;
-                    font-size: 16px;
-                }
+				input {
+					height: 46px;
+					padding: 0 16px;
+					font-size: 16px;
+				}
 
-                #submit {
-                    height: 46px;
-                    width: 100%;
-                }
+				#submit {
+					height: 46px;
+					width: 100%;
+				}
 
-                #keep-signin-container {
-                    #checkbox-container {
-                        width: 22px;
-                        height: 22px;
-                    }
+				#keep-signin-container {
+					#checkbox-container {
+						width: 22px;
+						height: 22px;
+					}
 
-                    #label {
-                        font-size: 14px;
-                    }
-                }
-            }
-        }
+					#label {
+						font-size: 14px;
+					}
+				}
+			}
+		}
 
-        @keyframes shake {
-            0% {
-                transform: translateX(0px);
-            }
-            20% {
-                transform: translateX(10px);
-            }
-            40% {
-                transform: translateX(-10px);
-            }
-            60% {
-                transform: translateX(5px);
-            }
-            80% {
-                transform: translateX(-5px);
-            }
-            100% {
-                transform: translateX(0px);
-            }
-        }
-    }
+		@keyframes shake {
+			0% {
+				transform: translateX(0px);
+			}
+			20% {
+				transform: translateX(10px);
+			}
+			40% {
+				transform: translateX(-10px);
+			}
+			60% {
+				transform: translateX(5px);
+			}
+			80% {
+				transform: translateX(-5px);
+			}
+			100% {
+				transform: translateX(0px);
+			}
+		}
+	}
 
-    .disabled {
-        pointer-events: none !important;
-        cursor: default;
-    }
+	.disabled {
+		pointer-events: none !important;
+		cursor: default;
+	}
 </style>

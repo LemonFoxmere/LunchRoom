@@ -9,6 +9,8 @@
 	export let status: uniqueSignupProcessStatus;
 	let contentHeight: number;
 
+	export let enabled = false;
+
 	const disp = createEventDispatcher();
 
 	let passwordRequirements: Record<number, boolean>;
@@ -31,17 +33,29 @@
 	};
 </script>
 
-<main bind:clientHeight={contentHeight}>
+<main bind:clientHeight={contentHeight} style="pointer-events: {enabled ? 'all' : 'none'};">
 	<h1>Choose a strong password.</h1>
 
 	<div id="input-container">
-		<input
-			bind:this={input}
-			bind:value
-			type="password"
-			class="input-field large hide-placeholder"
-			placeholder="•••••••••"
-		/>
+		{#if passwordVisible}
+			<input
+				disabled={!enabled}
+				bind:this={input}
+				bind:value
+				placeholder="•••••••••"
+				type="text"
+				class="input-field large hide-placeholder"
+			/>
+		{:else}
+			<input
+				disabled={!enabled}
+				bind:this={input}
+				bind:value
+				placeholder="•••••••••"
+				type="password"
+				class="input-field large hide-placeholder"
+			/>
+		{/if}
 
 		<div id="toggle-visible">
 			<PasswordVisibleToggle bind:passwordVisible />
@@ -52,7 +66,7 @@
 		<p id="failure-error">{status.message || "Something went wrong, please try again later."}</p>
 	{:else}
 		<button
-			disabled={!passwordValid && status.state !== "processing"}
+			disabled={(!passwordValid && status.state !== "processing") || !enabled}
 			class="solid large {!passwordValid ? 'locked' : ''}"
 			id="submit"
 			type="submit"
@@ -66,7 +80,7 @@
 		</button>
 	{/if}
 
-	<div id="message-container" style="transform: translateY({contentHeight/2 + 100}px)">
+	<div id="message-container" style="transform: translateY({contentHeight / 2 + 100}px)">
 		<div class="pwd-req">
 			<div class="pwd-check-status {passwordRequirements[0] ? 'ok' : ''}" />
 			<h6 class="exclude-phone">Make it between 6 and 30 characters long</h6>
@@ -91,126 +105,125 @@
 </main>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    main {
-        width: 100%;
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
+	main {
+		width: 100%;
+		position: relative;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
 
-        h1 {
-            margin-bottom: 28px;
+		h1 {
+			margin-bottom: 28px;
 			text-align: center;
-        }
+		}
 
-        div {
-            width: 100%;
-            height: fit-content;
-            position: relative;
+		div {
+			width: 100%;
+			height: fit-content;
+			position: relative;
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
 
-        #input-container {
-            input {
-                width: 100%;
-                text-align: center;
+		#input-container {
+			input {
+				width: 100%;
+				text-align: center;
 
-                padding-right: 44px !important;
-                padding-left: 44px !important;
-                box-sizing: border-box;
+				padding-right: 44px !important;
+				padding-left: 44px !important;
+				box-sizing: border-box;
 
-                &::-webkit-contacts-auto-fill-button {
-                    visibility: hidden;
-                    display: none !important;
-                    pointer-events: none;
-                    width: 0 !important;
-                    margin: 0 !important;
-                }
-            }
+				&::-webkit-contacts-auto-fill-button {
+					visibility: hidden;
+					display: none !important;
+					pointer-events: none;
+					width: 0 !important;
+					margin: 0 !important;
+				}
+			}
 
-            #toggle-visible {
-                position: absolute;
-                width: fit-content;
-                height: fit-content;
+			#toggle-visible {
+				position: absolute;
+				width: fit-content;
+				height: fit-content;
 
-                right: 14px;
-                transform: translateY(2px);
-            }
-        }
+				right: 0px;
+			}
+		}
 
-        #submit {
-            margin-top: 30px;
-            width: fit-content;
-            min-width: 80px;
+		#submit {
+			margin-top: 30px;
+			width: fit-content;
+			min-width: 80px;
 
-            transition: opacity 200ms ease-in-out;
+			transition: opacity 200ms ease-in-out;
 
-            &:disabled {
-                pointer-events: none;
-                cursor: default;
-            }
+			&:disabled {
+				pointer-events: none;
+				cursor: default;
+			}
 
-            &.locked {
-                opacity: 0.3;
-            }
-        }
+			&.locked {
+				opacity: 0.3;
+			}
+		}
 
-        #failure-error {
-            margin-top: 30px;
-            color: $red;
-            font-size: 16px;
-            font-weight: 400;
-        }
+		#failure-error {
+			margin-top: 30px;
+			color: $red;
+			font-size: 16px;
+			font-weight: 400;
+		}
 
-        #message-container {
-            position: absolute;
-            width: fit-content;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+		#message-container {
+			position: absolute;
+			width: fit-content;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
 
-            .pwd-req {
-                display: flex;
-                justify-content: flex-start;
-                margin-bottom: 8px;
+			.pwd-req {
+				display: flex;
+				justify-content: flex-start;
+				margin-bottom: 8px;
 
-                &:last-child {
-                    margin: 0;
-                }
+				&:last-child {
+					margin: 0;
+				}
 
-                .pwd-check-status {
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 100%;
-                    background-color: $pentinary;
-                    margin-right: 14px;
+				.pwd-check-status {
+					width: 8px;
+					height: 8px;
+					border-radius: 100%;
+					background-color: $pentinary;
+					margin-right: 14px;
 
-                    transition: background-color 200ms ease-in-out;
+					transition: background-color 200ms ease-in-out;
 
-                    &.ok {
-                        background-color: $black;
-                    }
-                }
-            }
+					&.ok {
+						background-color: $black;
+					}
+				}
+			}
 
-            h6 {
-                font-size: 16px;
-                position: relative;
-                color: $tertiary;
-            }
-        }
+			h6 {
+				font-size: 16px;
+				position: relative;
+				color: $tertiary;
+			}
+		}
 
-        @media screen and (max-width: $mobile-width) {
-            h1 {
-                font-size: 32px;
-            }
-        }
-    }
+		@media screen and (max-width: $mobile-width) {
+			h1 {
+				font-size: 32px;
+			}
+		}
+	}
 </style>

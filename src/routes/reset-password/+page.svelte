@@ -12,13 +12,15 @@
 	import RedirectFC from "./../../lib/comp/reset-password/flowContent/RedirectFC.svelte";
 	import VerifFC from "./../../lib/comp/signup/flowContent/VerifFC.svelte";
 
-	let navStep = 0;
+	let navStep = 3;
 
 	let emailContentHeight = 120;
+
 	let verifContentHeight = 120;
 	// nav position : height
-	const navButtonHeight: Record<number, number> = {
-		0: emailContentHeight / 2, // email
+	let navButtonHeight: Record<number, number>;
+	$: navButtonHeight = {
+		0: emailContentHeight / 2 + 12 + 35, // email
 		1: verifContentHeight / 2 + 12 + 35 // verification
 	};
 	// UI variables
@@ -71,7 +73,6 @@
 		if (navAction) navAction();
 	};
 
-	const emailStatus: uniqueSignupProcessStatus = { state: null, message: "" };
 	let emailField: HTMLInputElement;
 	let emailValue: string;
 	let lastEmail: string;
@@ -178,7 +179,7 @@
 			class="flow-content {navStep === 0 ? 'visible' : ''} {navStep > 0 ? 'left' : 'right'}"
 		>
 			<EmailFC
-				status={emailStatus}
+				enabled={navStep === 0}
 				bind:input={emailField}
 				bind:value={emailValue}
 				bind:contentHeight={emailContentHeight}
@@ -191,6 +192,7 @@
 		>
 			<VerifFC
 				status={verifCodeStatus}
+				enabled={navStep === 1}
 				{resendCooldownTime}
 				bind:input={verifField}
 				bind:value={verifCode}
@@ -256,12 +258,13 @@
 				align-items: center;
 				flex-direction: column;
 				width: calc(100% - 40px);
-				max-width: 600px;
 
 				opacity: 0;
 				pointer-events: none;
 
-				transition: opacity 300ms ease-in-out, transform 700ms $out-generic;
+				transition:
+					opacity 300ms ease-in-out,
+					transform 700ms $out-generic;
 				transform: translateX(0px);
 
 				&.left {
@@ -279,11 +282,12 @@
 		}
 
 		#nav-button-container {
-			position: absolute;
-
+			position: fixed;
 			opacity: 1;
 
-			transition: opacity 350ms $out-generic, transform 700ms $out-generic;
+			transition:
+				opacity 350ms $out-generic,
+				transform 700ms $out-generic;
 		}
 
 		@media screen and (max-width: $mobile-width) {

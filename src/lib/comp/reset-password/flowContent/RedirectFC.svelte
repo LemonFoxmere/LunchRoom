@@ -9,24 +9,39 @@
 </a>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    h1 {
-        margin-bottom: 10px;
-        white-space: nowrap;
-    }
+	h1 {
+		margin-bottom: 10px;
+		text-align: center;
+	}
 
-    p {
-        font-size: 16px;
-    }
+	p {
+		font-size: 16px;
+	}
 
-    a {
-        width: fit-content;
-        height: fit-content;
-        padding: 0;
-        margin: 0;
+	a {
+		width: fit-content;
+		height: fit-content;
+		padding: 0;
+		margin: 0;
 
-        position: absolute;
-        bottom: -80px;
-    }
+		position: absolute;
+		bottom: -80px;
+	}
+
+	@media screen and (max-width: $mobile-width) {
+		h1 {
+			font-size: 32px;
+		}
+
+		a {
+			width: 100%;
+			height: 46px;
+			button {
+				width: inherit;
+				height: inherit;
+			}
+		}
+	}
 </style>

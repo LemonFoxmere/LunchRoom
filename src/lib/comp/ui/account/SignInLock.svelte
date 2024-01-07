@@ -14,7 +14,7 @@
 	<slot />
 {:else}
 	<main>
-		<h1>You're already signed in.</h1>
+		<h1>You're already <span>signed in.</span></h1>
 
 		<section>
 			<a href="/" class="plain">
@@ -27,46 +27,57 @@
 {/if}
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    main {
-        width: 100%;
-        height: calc(100vh - 2 * $navbar-height);
-        padding: 0 20px;
-        box-sizing: border-box;
+	main {
+		width: 100%;
+		height: calc(100vh - 2 * $navbar-height);
+		padding: 0 20px;
+		box-sizing: border-box;
 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
 
-        section {
-            margin-top: 28px;
+		h1 {
+			text-align: center;
+			margin-bottom: 32px;
 
-            a {
-                margin-right: 42px;
-            }
-        }
+			span {
+				white-space: nowrap;
+			}
+		}
 
-        @media screen and (max-width: $mobile-width) {
-            height: calc(100vh - $urlbar-height - 2 * $navbar-height);
+		section {
+			a {
+				margin-right: 42px;
+			}
+		}
 
-            section {
-                width: 100%;
-                flex-direction: column;
-                margin-top: 60px;
+		@media screen and (max-width: $mobile-width) {
+			height: calc(100vh - $urlbar-height - $navbar-height);
 
-                button {
-                    width: 100%;
-                    height: 46px;
-                }
+			h1 {
+				font-size: 32px;
+				margin-bottom: 36px;
+			}
 
-                a {
-                    display: flex;
-                    width: 100%;
-                    margin-bottom: 12px;
-                }
-            }
-        }
-    }
+			section {
+				width: 100%;
+				flex-direction: column;
+
+				button {
+					width: 100%;
+					height: 46px;
+				}
+
+				a {
+					display: flex;
+					width: 100%;
+					margin-bottom: 12px;
+				}
+			}
+		}
+	}
 </style>

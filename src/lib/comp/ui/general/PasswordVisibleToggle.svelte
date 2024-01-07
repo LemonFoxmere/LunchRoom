@@ -56,11 +56,23 @@
 </a>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    svg {
-        color: $black;
-        width: 23px;
-        height: 24px;
-    }
+	a {
+		// border: 1px solid red;
+		width: 50px;
+		height: 42px;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	svg {
+		color: $black;
+		width: 23px;
+		height: 24px;
+
+		transform: translateX(-2px);
+	}
 </style>

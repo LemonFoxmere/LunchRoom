@@ -8,12 +8,7 @@
 
 <main>
 	<button disabled={!leftClickable} id="left" class="text" type="reset" on:click={leftCallback}>
-		<svg
-			width="24px"
-			height="24px"
-			viewBox="0 0 24 24"
-			xmlns="http://www.w3.org/2000/svg"
-		>
+		<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 			<g
 				id="Icons"
 				stroke="none"
@@ -35,12 +30,7 @@
 	</button>
 
 	<button disabled={!rightClickable} id="right" class="text" type="submit" on:click={rightCallback}>
-		<svg
-			width="24px"
-			height="24px"
-			viewBox="0 0 24 24"
-			xmlns="http://www.w3.org/2000/svg"
-		>
+		<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 			<g
 				id="Icons"
 				stroke="none"
@@ -62,25 +52,35 @@
 </main>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    button {
-        width: 24px;
-        height: 24px;
-        border-radius: 24px;
+	button {
+		width: 24px;
+		height: auto;
+		aspect-ratio: 1/1;
+		border-radius: 24px;
 
-        opacity: 1;
+		opacity: 1;
 
-        transition: opacity 250ms ease-in-out;
+		transition: opacity 250ms ease-in-out;
 
-        &#left {
-            margin-right: 36px;
-        }
+		&#left {
+			margin-right: 36px;
+		}
 
-        &:disabled {
-            opacity: 0.5;
-            color: $tertiary;
-            pointer-events: none;
-        }
-    }
+		&:disabled {
+			opacity: 0.5;
+			color: $tertiary;
+			pointer-events: none;
+		}
+
+		svg {
+			width: inherit;
+			height: inherit;
+		}
+
+		@media screen and (max-width: $mobile-width) {
+			width: 28px;
+		}
+	}
 </style>

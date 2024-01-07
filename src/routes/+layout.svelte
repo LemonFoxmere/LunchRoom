@@ -149,283 +149,293 @@
 </main>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    $stagger: 40ms; // Delay between animations
+	$stagger: 40ms; // Delay between animations
 
-    main {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
+	main {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: center;
 
-        #navbar {
-            @extend .glass-heavy;
+		#navbar {
+			@extend .glass-heavy;
 
-            width: 100%;
-            min-height: $navbar-height;
-            height: $navbar-height;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            position: sticky;
-            top: 0;
+			width: 100%;
+			min-height: $navbar-height;
+			height: $navbar-height;
+			display: flex;
+			justify-content: center;
+			align-items: flex-end;
+			position: sticky;
+			top: 0;
 
-            #content {
-                width: calc(100vw - 300px);
-                height: 36px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                position: relative;
+			z-index: 10;
 
-                animation: shrink forwards;
-                animation-play-state: paused;
+			#content {
+				width: calc(100vw - 300px);
+				height: 36px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				position: relative;
 
-                @keyframes shrink {
-                    from {
-                        transform: translateY(0px);
-                    }
-                    to {
-                        transform: translateY(-11px);
-                    }
-                }
+				animation: shrink forwards;
+				animation-play-state: paused;
 
-                #logo {
-                    position: absolute;
-                    left: 0;
-                    height: 36px;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
+				@keyframes shrink {
+					from {
+						transform: translateY(0px);
+					}
+					to {
+						transform: translateY(-11px);
+					}
+				}
 
-                    img {
-                        animation: logo-shrink forwards;
-                        animation-play-state: paused;
-                        animation-timing-function: $out-expo;
+				#logo {
+					position: absolute;
+					left: 0;
+					height: 36px;
+					display: flex;
+					justify-content: center;
+					align-items: center;
 
-                        @keyframes logo-shrink {
-                            from {
-                                transform: scale(100%);
-                            }
-                            to {
-                                transform: scale(80%);
-                            }
-                        }
+					cursor: pointer;
 
-                        @media screen and (max-width: $tablet-width) {
-                            animation: none;
-                        }
-                    }
-                }
+					img {
+						animation: logo-shrink forwards;
+						animation-play-state: paused;
+						animation-timing-function: $out-expo;
 
-                #cta-container {
-                    position: absolute;
-                    right: 0;
+						@keyframes logo-shrink {
+							from {
+								transform: scale(100%);
+							}
+							to {
+								transform: scale(80%);
+							}
+						}
 
-                    height: 36px;
-                    width: fit-content;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    overflow: visible;
+						@media screen and (max-width: $tablet-width) {
+							animation: none;
+						}
+					}
+				}
 
-                    .cta {
-                        display: flex;
-                        flex-direction: row-reverse;
+				#cta-container {
+					position: absolute;
+					right: 0;
 
-                        animation: cta-shrink forwards;
-                        animation-play-state: paused;
-                        animation-timing-function: $out-expo;
+					height: 36px;
+					width: fit-content;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					overflow: visible;
 
-                        @keyframes cta-shrink {
-                            from {
-                                transform: scale(100%);
-                            }
-                            to {
-                                transform: scale(90%);
-                            }
-                        }
+					.cta {
+						display: flex;
+						flex-direction: row-reverse;
 
-                        a {
-                            text-decoration: none;
-                            margin-right: 48px;
+						animation: cta-shrink forwards;
+						animation-play-state: paused;
+						animation-timing-function: $out-expo;
 
-                            &:first-child {
-                                margin: 0;
-                            }
+						@keyframes cta-shrink {
+							from {
+								transform: scale(100%);
+							}
+							to {
+								transform: scale(90%);
+							}
+						}
 
-                            button {
-                                display: flex;
-                                align-items: center;
+						a {
+							text-decoration: none;
+							margin-right: 48px;
 
-                                svg {
-                                    margin-left: 8px;
-                                    height: 14px;
-                                }
-                            }
-                        }
-                    }
-                }
+							&:first-child {
+								margin: 0;
+							}
 
-                @media screen and (max-width: $tablet-width) {
-                    width: calc(100vw - 50px);
-                }
+							button {
+								display: flex;
+								align-items: center;
 
-                @media screen and (max-width: $mobile-width) {
-                    animation: none;
-                }
+								svg {
+									margin-left: 8px;
+									height: 14px;
+								}
+							}
+						}
+					}
+				}
 
-                &.minimal {
-                    #logo {
-                        left: 50%;
-                        transform: translateX(-50%);
-                    }
+				@media screen and (max-width: $tablet-width) {
+					width: calc(100vw - 50px);
+				}
 
-                    #cta-container {
-                        pointer-events: none;
-                        opacity: 0;
-                    }
-                }
-            }
+				@media screen and (max-width: $mobile-width) {
+					animation: none;
+				}
 
-            @media screen and (max-width: $mobile-width) {
-                align-items: center;
-                min-height: $mobile-navbar-height;
-                height: $mobile-navbar-height;
-                transition: background-color 300ms $out-cubic;
+				&.minimal {
+					#logo {
+						left: 50%;
+						transform: translateX(-50%);
+					}
 
-                &.active {
-                    background-color: $white;
-                }
-            }
-        }
+					#cta-container {
+						pointer-events: none;
+						opacity: 0;
+					}
+				}
+			}
 
-        #mobile-menu {
-            @extend .glass-light;
+			@media screen and (max-width: $mobile-width) {
+				align-items: center;
+				min-height: $mobile-navbar-height;
+				height: $mobile-navbar-height;
+				transition: background-color 300ms $out-cubic;
 
-            width: 100%;
-            max-width: 100vw;
-            height: calc(100% - $navbar-height);
-            position: fixed;
-            top: $navbar-height;
-            z-index: 100;
+				&.active {
+					background-color: $white;
+				}
+			}
+		}
 
-            overflow: hidden;
+		#mobile-menu {
+			@extend .glass-light;
 
-            pointer-events: all;
+			width: 100%;
+			max-width: 100vw;
+			height: calc(100% - $navbar-height);
+			position: fixed;
+			top: $navbar-height;
+			z-index: 100;
 
-            transition: 500ms $out-cubic;
-            transition-property: backdrop-filter, -webkit-backdrop-filter, opacity;
+			overflow: hidden;
 
-            #menu-bg {
-                width: 100%;
-                height: fit-content;
-                box-sizing: border-box;
-                padding: 0 20px 8px 20px;
+			pointer-events: all;
 
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                justify-content: flex-start;
+			transition: 500ms $out-cubic;
+			transition-property:
+				backdrop-filter,
+				-webkit-backdrop-filter,
+				opacity;
 
-                background-color: $white;
-                box-shadow: 0 20px 70px 0 hsla(0, 0%, 0%, 20%);
-                border-radius: 0 0 22px 22px;
+			#menu-bg {
+				width: 100%;
+				height: fit-content;
+				box-sizing: border-box;
+				padding: 0 20px 8px 20px;
 
-                transform: translateY(0px);
-                transform-origin: top;
-                transition: 400ms $out-cubic;
-                transition-property: transform;
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				justify-content: flex-start;
 
-                .menu-items {
-                    width: 100%;
+				background-color: $white;
+				box-shadow: 0 20px 70px 0 hsla(0, 0%, 0%, 20%);
+				border-radius: 0 0 22px 22px;
 
-                    @for $i from 1 through 5 {
-                        // Change the number based on the number of buttons
-                        &:nth-child(#{$i}) {
-                            animation: fly-in 500ms $out-cubic #{($i - 1) * $stagger} forwards;
-                            animation-fill-mode: both;
-                        }
-                    }
+				transform: translateY(0px);
+				transform-origin: top;
+				transition: 400ms $out-cubic;
+				transition-property: transform;
 
-                    @keyframes fly-in {
-                        0% {
-                            opacity: 0;
-                            transform: translateY(-15px);
-                        }
-                        100% {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-                    }
-                }
+				.menu-items {
+					width: 100%;
 
-                a {
-                    display: flex;
+					@for $i from 1 through 5 {
+						// Change the number based on the number of buttons
+						&:nth-child(#{$i}) {
+							animation: fly-in 500ms $out-cubic #{($i - 1) * $stagger} forwards;
+							animation-fill-mode: both;
+						}
+					}
 
-                    padding: 22px 8px;
-                    box-sizing: border-box;
-                    text-decoration: none;
+					@keyframes fly-in {
+						0% {
+							opacity: 0;
+							transform: translateY(-15px);
+						}
+						100% {
+							opacity: 1;
+							transform: translateY(0);
+						}
+					}
+				}
 
-                    &:active {
-                        button {
-                            color: $tertiary;
-                        }
-                    }
+				a {
+					display: flex;
 
-                    button {
-                        font-size: 18px;
-                    }
-                }
+					padding: 22px 8px;
+					box-sizing: border-box;
+					text-decoration: none;
 
-                hr {
-                    margin: 0;
-                    height: 2px;
-                    width: calc(100% + 40px);
+					&:active {
+						button {
+							color: $tertiary;
+						}
+					}
 
-                    border: none;
-                    background-color: $pentinary;
-                }
-            }
+					button {
+						font-size: 18px;
+					}
+				}
 
-            &.disabled {
-                opacity: 0;
-                pointer-events: none;
+				hr {
+					margin: 0;
+					height: 2px;
+					width: calc(100% + 40px);
 
-                transition: 400ms $in-quart;
-                transition-property: backdrop-filter, -webkit-backdrop-filter, opacity;
+					border: none;
+					background-color: $pentinary;
+				}
+			}
 
-                #menu-bg {
-                    transform: translateY(-15px);
-                    transition: 400ms $in-quint;
+			&.disabled {
+				opacity: 0;
+				pointer-events: none;
 
-                    .menu-items {
-                        @for $i from 1 through 5 {
-                            // Change the number based on the number of buttons
-                            &:nth-child(#{$i}) {
-                                animation: fly-out 250ms $in-cubic #{($i - 1) * $stagger} forwards;
-                            }
-                        }
-                    }
+				transition: 400ms $in-quart;
+				transition-property:
+					backdrop-filter,
+					-webkit-backdrop-filter,
+					opacity;
 
-                    @keyframes fly-out {
-                        0% {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-                        100% {
-                            opacity: 0;
-                            transform: translateY(-15px);
-                        }
-                    }
-                }
-            }
+				#menu-bg {
+					transform: translateY(-15px);
+					transition: 400ms $in-quint;
 
-            @media screen and (max-width: $mobile-width) {
-                top: $mobile-navbar-height;
-            }
-        }
-    }
+					.menu-items {
+						@for $i from 1 through 5 {
+							// Change the number based on the number of buttons
+							&:nth-child(#{$i}) {
+								animation: fly-out 250ms $in-cubic #{($i - 1) * $stagger} forwards;
+							}
+						}
+					}
+
+					@keyframes fly-out {
+						0% {
+							opacity: 1;
+							transform: translateY(0);
+						}
+						100% {
+							opacity: 0;
+							transform: translateY(-15px);
+						}
+					}
+				}
+			}
+
+			@media screen and (max-width: $mobile-width) {
+				top: $mobile-navbar-height;
+			}
+		}
+	}
 </style>

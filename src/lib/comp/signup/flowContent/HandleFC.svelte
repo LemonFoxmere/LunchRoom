@@ -11,17 +11,19 @@
 
 	export let input: HTMLInputElement;
 	export let value: string;
+	export let enabled = false;
 
 	const oninput = () => {
 		disp("input");
 	};
 </script>
 
-<main bind:clientHeight={contentHeight}>
+<main bind:clientHeight={contentHeight} style="pointer-events: {enabled ? 'all' : 'none'};">
 	<h1>Hey {nameValue?.split(" ")[0] ?? ""}! Let's get you a handle.</h1>
 
 	<div>
 		<input
+			disabled={!enabled}
 			bind:this={input}
 			bind:value
 			on:input={oninput}
@@ -72,7 +74,9 @@
 		input {
 			width: 100%;
 			text-align: center;
-			transition: opacity 700ms ease-in-out, transform 700ms $out-generic;
+			transition:
+				opacity 700ms ease-in-out,
+				transform 700ms $out-generic;
 
 			&::-webkit-contacts-auto-fill-button {
 				visibility: hidden;

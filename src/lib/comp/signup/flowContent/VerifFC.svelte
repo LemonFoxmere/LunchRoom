@@ -13,6 +13,8 @@
 	export let value: string;
 	export let contentHeight: number;
 
+	export let enabled = false;
+
 	const onsubmit = () => {
 		// send dispatch event for parent component to take care of
 		disp("submit");
@@ -23,14 +25,14 @@
 	};
 </script>
 
-<main bind:clientHeight={contentHeight}>
+<main bind:clientHeight={contentHeight} style="pointer-events: {enabled ? 'all' : 'none'};">
 	<h1>Verification <span>code, please.</span></h1>
 	<p>Check your inbox for a verification code to confirm it's really you.</p>
 
 	<VerificationInput
 		bind:input
 		bind:value
-		disabled={status.state === "success" || status.state === "processing"}
+		disabled={status.state === "success" || status.state === "processing" || !enabled}
 		on:submit={onsubmit}
 	/>
 
@@ -61,97 +63,97 @@
 </main>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    main {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+	main {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
 
-        h1 {
-            margin-bottom: 10px;
+		h1 {
+			margin-bottom: 10px;
 
-            span {
-                white-space: nowrap;
-            }
-        }
+			span {
+				white-space: nowrap;
+			}
+		}
 
-        p {
-            margin-bottom: 32px;
-            font-size: 16px;
-        }
+		p {
+			margin-bottom: 32px;
+			font-size: 16px;
+		}
 
-        h6 {
-            font-size: 16px;
-        }
+		h6 {
+			font-size: 16px;
+		}
 
-        div {
-            width: 100%;
-            height: fit-content;
-            position: relative;
+		div {
+			width: 100%;
+			height: fit-content;
+			position: relative;
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
 
-        #message-container {
-            position: absolute;
-            bottom: -130px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+		#message-container {
+			position: absolute;
+			bottom: -130px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
 
-            h6 {
-                position: relative;
-            }
+			h6 {
+				position: relative;
+			}
 
-            .failed {
-                color: $red;
-            }
+			.failed {
+				color: $red;
+			}
 
-            .success {
-                color: $green;
-            }
-        }
+			.success {
+				color: $green;
+			}
+		}
 
-        #resend-cooldown {
-            color: $quaternary;
-        }
+		#resend-cooldown {
+			color: $quaternary;
+		}
 
-        #resend-code {
-            font-size: 16px;
-            text-decoration: underline;
-            cursor: pointer;
+		#resend-code {
+			font-size: 16px;
+			text-decoration: underline;
+			cursor: pointer;
 
-            h6 {
-                color: $primary;
+			h6 {
+				color: $primary;
 
-                #failed {
-                    color: $red;
-                }
+				#failed {
+					color: $red;
+				}
 
-                #success {
-                    color: $green;
-                }
-            }
+				#success {
+					color: $green;
+				}
+			}
 
-            &:hover {
-                opacity: 0.5;
-            }
-        }
+			&:hover {
+				opacity: 0.5;
+			}
+		}
 
-        @media screen and (max-width: $mobile-width) {
-            h1 {
-                font-size: 32px;
-                text-align: center;
-            }
-            p {
-                font-size: 14px;
-                text-align: center;
-            }
-        }
-    }
+		@media screen and (max-width: $mobile-width) {
+			h1 {
+				font-size: 32px;
+				text-align: center;
+			}
+			p {
+				font-size: 14px;
+				text-align: center;
+			}
+		}
+	}
 </style>

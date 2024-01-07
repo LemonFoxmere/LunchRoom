@@ -144,7 +144,7 @@
 	let rightClickable: boolean;
 
 	// the individual content height for tuning the button heights
-	let introContentHeight = 120;
+	let introContentHeight = 65;
 	let nameContentHeight = 120;
 	let handleContentHeight = 120;
 	let emailContentHeight = 120;
@@ -363,6 +363,7 @@
 			class="flow-content {navStep === 1 ? 'visible' : ''} {navStep > 1 ? 'left' : 'right'}"
 		>
 			<NameFC
+				enabled={navStep === 1}
 				bind:input={nameField}
 				bind:value={nameValue}
 				bind:contentHeight={nameContentHeight}
@@ -377,6 +378,7 @@
 			<HandleFC
 				{nameValue}
 				status={handleStatus}
+				enabled={navStep === 2}
 				bind:input={handleField}
 				bind:contentHeight={handleContentHeight}
 				bind:value={handleValue}
@@ -390,6 +392,7 @@
 		>
 			<EmailFC
 				status={emailStatus}
+				enabled={navStep === 3}
 				bind:input={emailField}
 				bind:value={emailValue}
 				bind:contentHeight={emailContentHeight}
@@ -403,6 +406,7 @@
 		>
 			<VerifFC
 				status={verifCodeStatus}
+				enabled={navStep === 4}
 				{resendCooldownTime}
 				bind:input={verifField}
 				bind:value={verifCode}
@@ -418,6 +422,7 @@
 		>
 			<PasswordFC
 				status={signupStatus}
+				enabled={navStep === 5}
 				bind:input={passwordField}
 				bind:value={passwordValue}
 				on:submit={requestNewUser}
@@ -480,7 +485,9 @@
 				opacity: 0;
 				pointer-events: none;
 
-				transition: opacity 300ms ease-in-out, transform 700ms $out-generic;
+				transition:
+					opacity 300ms ease-in-out,
+					transform 700ms $out-generic;
 
 				&.left {
 					transform: translate(-700px, $content-y-offset);
@@ -500,7 +507,9 @@
 			position: fixed;
 			overflow: hidden;
 
-			transition: opacity 350ms $out-generic, transform 700ms $out-generic;
+			transition:
+				opacity 350ms $out-generic,
+				transform 700ms $out-generic;
 		}
 
 		@media screen and (max-width: $mobile-width) {

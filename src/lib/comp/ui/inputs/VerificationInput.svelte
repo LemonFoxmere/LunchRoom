@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { createEventDispatcher, onMount } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 
-    const disp = createEventDispatcher();
+	const disp = createEventDispatcher();
 
 	// create external binding for ease of access
 	export let input: HTMLInputElement | null = null;
@@ -25,9 +25,21 @@
 			const field = fieldList[i];
 
 			field.oninput = () => {
-				field.value = field.value.toUpperCase().replace(/[^A-Z0-9]/g, "").charAt(0); // prevent erroneous input
+				field.value = field.value
+					.toUpperCase()
+					.replace(/[^A-Z0-9]/g, "")
+					.charAt(0); // prevent erroneous input
 
 				if (field.value.length !== 0 && i + 1 !== fieldList.length) fieldList[i + 1].focus(); // advance to next field. We control that here so it work with autofills
+
+				// update binder value to reflect changes
+				value = fieldList.map((field) => field.value).join("");
+
+				// once the binder value is 6 characters long, blur everything and dispatch a submit event
+				if (value.length === 6) {
+					field.blur();
+					disp("submit");
+				}
 			};
 
 			field.onkeydown = (e: KeyboardEvent) => {
@@ -36,34 +48,34 @@
 					return;
 				}
 
-				if (/^[a-zA-Z0-9]$/.test(e.key) || e.key === "ArrowRight" || (e.key === "Tab" && !e.shiftKey)) {
+				if (
+					/^[a-zA-Z0-9]$/.test(e.key) ||
+					e.key === "ArrowRight" ||
+					(e.key === "Tab" && !e.shiftKey)
+				) {
 					if (i + 1 !== fieldList.length) {
 						// field.blur();
-						setTimeout(() => { // wait for default event to pass first
+						setTimeout(() => {
+							// wait for default event to pass first
 							if (/^[a-zA-Z0-9]$/.test(e.key)) field.value = `${e.key}`.toUpperCase();
-							if (e.key === "ArrowRight" || (e.key === "Tab" && !e.shiftKey)) fieldList[i + 1].focus();
+							if (e.key === "ArrowRight" || (e.key === "Tab" && !e.shiftKey))
+								fieldList[i + 1].focus();
 						}, 0);
 					}
-				} else if (e.key === "ArrowLeft" || e.key === "Backspace" || (e.key === "Tab" && e.shiftKey)) {
+				} else if (
+					e.key === "ArrowLeft" ||
+					e.key === "Backspace" ||
+					(e.key === "Tab" && e.shiftKey)
+				) {
 					if (i !== 0) {
 						// field.blur();
-						setTimeout(() => { // wait for default event to pass first
+						setTimeout(() => {
+							// wait for default event to pass first
 							if (e.key === "Backspace") field.value = "";
 							fieldList[i - 1].focus();
 						}, 0);
 					}
 				}
-
-				setTimeout(() => {
-					// update binder value to reflect changes
-					value = fieldList.map(field => field.value).join("");
-
-					// once the binder value is 6 characters long, blur everything and dispatch a submit event
-					if (value.length === 6) {
-						field.blur();
-						disp("submit");
-					}
-				}, 0);
 			};
 
 			field.onpaste = async (e: ClipboardEvent) => {
@@ -89,96 +101,100 @@
 					fieldList[i].value = pastedText.charAt(i);
 					fieldList[i].blur();
 					// stagger 10ms for animation purposes
-					await new Promise(r => setTimeout(r, 10));
+					await new Promise((r) => setTimeout(r, 10));
 				}
 			};
 		}
 
 		// add observer functions to the external binder field
-		if (input !== null) input.onfocus = (e: FocusEvent) => {
-			e.preventDefault();
-			v1Field.focus();
-		};
+		if (input !== null)
+			input.onfocus = (e: FocusEvent) => {
+				e.preventDefault();
+				v1Field.focus();
+			};
 	});
 
-	$: if (value === "" && !!fieldList) { // used for clearing the values
+	$: if (value === "" && !!fieldList) {
+		// used for clearing the values
 		for (let i = 0; i < fieldList.length; i++) fieldList[i].value = "";
 	}
 </script>
 
 <main>
-	<input bind:this={v1Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+	<input bind:this={v1Field} type="text" class="monospace" placeholder=" " {disabled} />
 	<div class="min-margin"></div>
-	<input bind:this={v2Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+	<input bind:this={v2Field} type="text" class="monospace" placeholder=" " {disabled} />
 	<div class="min-margin"></div>
-	<input bind:this={v3Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+	<input bind:this={v3Field} type="text" class="monospace" placeholder=" " {disabled} />
 	<div class="min-margin"></div>
-	<input bind:this={v4Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+	<input bind:this={v4Field} type="text" class="monospace" placeholder=" " {disabled} />
 	<div class="min-margin"></div>
-	<input bind:this={v5Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+	<input bind:this={v5Field} type="text" class="monospace" placeholder=" " {disabled} />
 	<div class="min-margin"></div>
-	<input bind:this={v6Field} type="text" class="monospace" placeholder=" " disabled={disabled}>
+	<input bind:this={v6Field} type="text" class="monospace" placeholder=" " {disabled} />
 
-	<input id="psuedo" bind:this={input} bind:value={value} type="text">
+	<input id="psuedo" bind:this={input} bind:value type="text" />
 </main>
 
 <style lang="scss">
-    @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-    main {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 50px;
+	main {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+		height: 50px;
 
-        .min-margin {
-            min-width: 3px;
-            width: 3px;
-        }
+		.min-margin {
+			min-width: 3px;
+			width: 3px;
+		}
 
-        input {
-            width: 48px;
-            height: 48px;
-            margin-right: 17px;
-            outline: none;
+		input {
+			width: 48px;
+			height: 48px;
+			margin-right: 17px;
+			outline: none;
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-size: calc(16px);
-            font-weight: 600;
-            color: $white;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+			font-size: calc(16px);
+			font-weight: 600;
+			color: $white;
+			caret-color: $black;
 
-            transition: color 700ms $out-cubic;
+			transition: color 700ms $out-cubic;
 
-            &:nth-child(6) {
-                margin: 0;
-            }
+			&:nth-child(6) {
+				margin: 0;
+			}
 
-            &:not(:placeholder-shown) {
-                color: $black;
-            }
+			&:not(:placeholder-shown) {
+				color: $black;
+				caret-color: $black;
+			}
 
-            &#psuedo {
-                display: none;
-                pointer-events: none;
-            }
-        }
+			&#psuedo {
+				display: none;
+				pointer-events: none;
+			}
+		}
 
-        @media screen and (max-width: $mobile-width) {
-            max-width: 388px;
+		@media screen and (max-width: $mobile-width) {
+			max-width: 388px;
 
-            input {
-                width: 100%;
-                max-width: 48px;
-                min-width: 32px;
-                height: auto;
-                aspect-ratio: 1/1;
+			input {
+				width: 100%;
+				max-width: 48px;
+				min-width: 32px;
+				height: auto;
+				aspect-ratio: 1/1;
 
-                margin-right: auto;
-            }
-        }
-    }
+				margin-right: auto;
+			}
+		}
+	}
 </style>

@@ -9,23 +9,24 @@
 </a>
 
 <style lang="scss">
-	@import "$static/stylesheets/guideline";
+    @import "$static/stylesheets/guideline";
 
-	h1 {
-		margin-bottom: 10px;
-		white-space: nowrap;
-	}
-	p {
-		font-size: 16px;
-	}
+    h1 {
+        margin-bottom: 10px;
+        white-space: nowrap;
+    }
 
-	a {
-		width: fit-content;
-		height: fit-content;
-		padding: 0px;
-		margin: 0px;
+    p {
+        font-size: 16px;
+    }
 
-		position: absolute;
-		bottom: -80px;
-	}
+    a {
+        width: fit-content;
+        height: fit-content;
+        padding: 0;
+        margin: 0;
+
+        position: absolute;
+        bottom: -80px;
+    }
 </style>

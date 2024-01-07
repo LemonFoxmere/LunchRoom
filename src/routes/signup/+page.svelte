@@ -5,8 +5,11 @@
 	import IntroFC from "./../../lib/comp/signup/flowContent/IntroFC.svelte";
 	import NameFC from "./../../lib/comp/signup/flowContent/NameFC.svelte";
 	import PasswordFC from "./../../lib/comp/signup/flowContent/PasswordFC.svelte";
+	import RedirectFC from "./../../lib/comp/signup/flowContent/RedirectFC.svelte";
 	import VerifFC from "./../../lib/comp/signup/flowContent/VerifFC.svelte";
 	import NavArrows from "./../../lib/comp/ui/general/NavArrows.svelte";
+
+	import Cookies from "js-cookie";
 
 	export interface uniqueSignupProcessStatus {
 		state: null | "processing" | "success" | "failed";
@@ -108,7 +111,7 @@
 		}
 
 		// assuming the code was correct, store the returned JWT in the cookie as a temporary signup token
-		const body = await response.json();
+		const body: SignUpDto = await response.json();
 		const accessToken = body.access_token;
 
 		// store access token as a session cookie
@@ -119,8 +122,6 @@
 </script>
 
 <script lang="ts">
-	import Cookies from "js-cookie";
-
 	let navStep = 0;
 
 	let nameValue: string;
@@ -142,13 +143,21 @@
 	let leftClickable: boolean;
 	let rightClickable: boolean;
 
+	// the individual content height for tuning the button heights
+	let introContentHeight = 120;
+	let nameContentHeight = 120;
+	let handleContentHeight = 120;
+	let emailContentHeight = 120;
+	let verifContentHeight = 120;
+
 	// nav position : height
-	const navButtonHeight: Record<number, number> = {
-		0: 80, // intro
-		1: 104, // name
-		2: 104, // handle
-		3: 104, // email
-		4: 124, // verification
+	let navButtonHeight: Record<number, number>;
+	$: navButtonHeight = {
+		0: introContentHeight / 2 + 12 + 35, // intro
+		1: nameContentHeight / 2 + 12 + 35, // name
+		2: handleContentHeight / 2 + 12 + 35, // handle
+		3: emailContentHeight / 2 + 12 + 35, // email
+		4: verifContentHeight / 2 + 12 + 35, // verification
 		5: 300 // password
 	};
 	// UI variables
@@ -158,15 +167,9 @@
 	// nav position : action
 	const navButtonActions: Record<number, (() => void) | null> = {
 		0: null, // no action for the intro
-		1: () => {
-			if (nameField) nameField.focus();
-		},
-		2: () => {
-			if (handleField) handleField.focus();
-		},
-		3: () => {
-			if (emailField) emailField.focus();
-		},
+		1: null,
+		2: null,
+		3: null,
 		4: () => {
 			// if the valid email is now different from the original one, send a verification email
 			if (lastEmail !== emailValue) {
@@ -180,9 +183,7 @@
 			// focus the field
 			if (verifField) verifField.focus();
 		},
-		5: () => {
-			if (passwordField) passwordField.focus();
-		}
+		5: null
 	};
 
 	// nav position : (left disabled condition, right disabled condition)
@@ -209,7 +210,7 @@
 
 		// run navButtonActions
 		const navAction = navButtonActions[navStep];
-		if (!!navAction) navAction();
+		if (navAction) navAction();
 	};
 	const navLeft = () => {
 		navStep--;
@@ -217,12 +218,12 @@
 
 		// run navButtonActions
 		const navAction = navButtonActions[navStep];
-		if (!!navAction) navAction();
+		if (navAction) navAction();
 	};
 
-	let handleStatus: uniqueSignupProcessStatus = { state: null, message: "" };
-	let emailStatus: uniqueSignupProcessStatus = { state: null, message: "" };
-	let verifCodeStatus: uniqueSignupProcessStatus = { state: null, message: "" };
+	const handleStatus: uniqueSignupProcessStatus = { state: null, message: "" };
+	const emailStatus: uniqueSignupProcessStatus = { state: null, message: "" };
+	const verifCodeStatus: uniqueSignupProcessStatus = { state: null, message: "" };
 
 	let checkTimeout: ReturnType<typeof setTimeout>;
 	const checkHandleAvailablility = () => {
@@ -278,7 +279,7 @@
 	};
 
 	let resendCooldownInterval: ReturnType<typeof setInterval>;
-	let resendCooldownTime: number = 0;
+	let resendCooldownTime = 0;
 	const cooldownResend = () => {
 		clearInterval(resendCooldownInterval);
 		resendCooldownTime = 30; // reset back to 30 seconds
@@ -311,7 +312,7 @@
 				email: lastEmail,
 				name: nameValue,
 				handle: handleValue,
-				type: "NORMAL",
+				role: "NORMAL",
 				password: passwordValue
 			})
 		};
@@ -331,7 +332,7 @@
 		}
 
 		// if response ok, store the returned JWT in the cookie as a temporary session token.
-		const body = await resp.json();
+		const body: SignUpDto = await resp.json();
 		const accessToken = body.access_token;
 
 		// store access token in cookies
@@ -343,8 +344,8 @@
 			message: ""
 		};
 
-		// TODO: redirect to profile page
-		window.location.href = "/";
+		// move to the next flow content
+		navRight();
 	};
 </script>
 
@@ -354,14 +355,18 @@
 			id="intro"
 			class="flow-content {navStep === 0 ? 'visible' : ''} {navStep > 0 ? 'left' : 'right'}"
 		>
-			<IntroFC />
+			<IntroFC bind:contentHeight={introContentHeight} />
 		</section>
 
 		<section
 			id="name"
 			class="flow-content {navStep === 1 ? 'visible' : ''} {navStep > 1 ? 'left' : 'right'}"
 		>
-			<NameFC bind:input={nameField} bind:value={nameValue} />
+			<NameFC
+				bind:input={nameField}
+				bind:value={nameValue}
+				bind:contentHeight={nameContentHeight}
+			/>
 		</section>
 
 		<!-- Form fields -->
@@ -373,6 +378,7 @@
 				{nameValue}
 				status={handleStatus}
 				bind:input={handleField}
+				bind:contentHeight={handleContentHeight}
 				bind:value={handleValue}
 				on:input={checkHandleAvailablility}
 			/>
@@ -386,6 +392,7 @@
 				status={emailStatus}
 				bind:input={emailField}
 				bind:value={emailValue}
+				bind:contentHeight={emailContentHeight}
 				on:input={checkEmailAvailablility}
 			/>
 		</section>
@@ -399,6 +406,7 @@
 				{resendCooldownTime}
 				bind:input={verifField}
 				bind:value={verifCode}
+				bind:contentHeight={verifContentHeight}
 				on:submit={checkVerificationCode}
 				on:resend-code={resendVerificationCode}
 			/>
@@ -415,12 +423,19 @@
 				on:submit={requestNewUser}
 			/>
 		</section>
+
+		<section
+			id="password"
+			class="flow-content {navStep === 6 ? 'visible' : ''} {navStep > 6 ? 'left' : 'right'}"
+		>
+			<RedirectFC bind:name={nameValue} />
+		</section>
 	</section>
 
 	<!-- Normal nav buttons -->
 	<section
 		id="nav-button-container"
-		style="transform: translateY({navHeight}px); opacity: {navStep === 5
+		style="transform: translateY({navHeight - 10}px); opacity: {navStep >= 5
 			? '0'
 			: '1'}; pointer-events: {navStep === 5 ? 'none' : 'all'};"
 	>
@@ -438,9 +453,13 @@
 		justify-content: center;
 		align-items: center;
 
+		$content-y-offset: -10px;
+
 		#flow-content-container {
 			width: 100%;
+			max-width: 100vw;
 			height: 100%;
+			overflow-x: hidden;
 
 			display: flex;
 			justify-content: center;
@@ -453,34 +472,39 @@
 				align-items: center;
 				flex-direction: column;
 				width: calc(100% - 40px);
+				height: 100%;
 				max-width: 600px;
+
+				transform: translate(0px, $content-y-offset); // y offset for appearance sake
 
 				opacity: 0;
 				pointer-events: none;
 
 				transition: opacity 300ms ease-in-out, transform 700ms $out-generic;
-				transform: translateX(0px);
 
 				&.left {
-					transform: translateX(-700px);
+					transform: translate(-700px, $content-y-offset);
 				}
 				&.right {
-					transform: translateX(700px);
+					transform: translate(700px, $content-y-offset);
 				}
 				&.visible {
 					opacity: 1;
 					pointer-events: all;
-					transform: translateX(0px);
+					transform: translate(0px, $content-y-offset);
 				}
 			}
 		}
 
 		#nav-button-container {
-			position: absolute;
-
-			opacity: 1;
+			position: fixed;
+			overflow: hidden;
 
 			transition: opacity 350ms $out-generic, transform 700ms $out-generic;
+		}
+
+		@media screen and (max-width: $mobile-width) {
+			height: calc(100vh - $urlbar-height - $navbar-height);
 		}
 	}
 </style>

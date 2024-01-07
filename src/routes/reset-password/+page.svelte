@@ -14,10 +14,12 @@
 
 	let navStep = 0;
 
+	let emailContentHeight = 120;
+	let verifContentHeight = 120;
 	// nav position : height
 	const navButtonHeight: Record<number, number> = {
-		0: 104, // email
-		1: 124 // verification
+		0: emailContentHeight / 2, // email
+		1: verifContentHeight / 2 + 12 + 35 // verification
 	};
 	// UI variables
 	$: navHeight =
@@ -58,7 +60,7 @@
 
 		// run navButtonActions
 		const navAction = navButtonActions[navStep];
-		if (!!navAction) navAction();
+		if (navAction) navAction();
 	};
 	const navLeft = () => {
 		navStep--;
@@ -66,20 +68,20 @@
 
 		// run navButtonActions
 		const navAction = navButtonActions[navStep];
-		if (!!navAction) navAction();
+		if (navAction) navAction();
 	};
 
-	let emailStatus: uniqueSignupProcessStatus = { state: null, message: "" };
+	const emailStatus: uniqueSignupProcessStatus = { state: null, message: "" };
 	let emailField: HTMLInputElement;
 	let emailValue: string;
 	let lastEmail: string;
 
-	let verifCodeStatus: uniqueSignupProcessStatus = { state: null, message: "" };
+	const verifCodeStatus: uniqueSignupProcessStatus = { state: null, message: "" };
 	let verifField: HTMLInputElement;
 	let verifCode: string;
 
 	let resendCooldownInterval: ReturnType<typeof setInterval>;
-	let resendCooldownTime: number = 0;
+	let resendCooldownTime = 0;
 	let checkTimeout: ReturnType<typeof setTimeout>;
 
 	const cooldownResend = () => {
@@ -175,7 +177,12 @@
 			id="email"
 			class="flow-content {navStep === 0 ? 'visible' : ''} {navStep > 0 ? 'left' : 'right'}"
 		>
-			<EmailFC status={emailStatus} bind:input={emailField} bind:value={emailValue} />
+			<EmailFC
+				status={emailStatus}
+				bind:input={emailField}
+				bind:value={emailValue}
+				bind:contentHeight={emailContentHeight}
+			/>
 		</section>
 
 		<section
@@ -187,6 +194,7 @@
 				{resendCooldownTime}
 				bind:input={verifField}
 				bind:value={verifCode}
+				bind:contentHeight={verifContentHeight}
 				on:submit={checkVerificationCode}
 				on:resend-code={resendVerificationCode}
 			/>
@@ -276,6 +284,10 @@
 			opacity: 1;
 
 			transition: opacity 350ms $out-generic, transform 700ms $out-generic;
+		}
+
+		@media screen and (max-width: $mobile-width) {
+			height: calc(100vh - $urlbar-height - 2 * $navbar-height);
 		}
 	}
 </style>

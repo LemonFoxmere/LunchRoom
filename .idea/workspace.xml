@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="30622dc4-9ee5-4cf3-b3b7-a6f95b8b8bb6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/client.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/dto.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.eslintrc.cjs" beforeDir="false" afterPath="$PROJECT_DIR$/.eslintrc.cjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/reset-password/flowContent/EmailFC.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/reset-password/flowContent/EmailFC.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/reset-password/flowContent/PasswordFC.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/reset-password/flowContent/PasswordFC.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/reset-password/flowContent/RedirectFC.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/reset-password/flowContent/RedirectFC.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/EmailFC.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/EmailFC.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/HandleFC.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/HandleFC.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/IntroFC.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/IntroFC.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/NameFC.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/NameFC.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/PasswordFC.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/PasswordFC.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/VerifFC.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/signup/flowContent/VerifFC.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/ui/account/SignInLock.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/ui/account/SignInLock.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/ui/general/NavArrows.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/ui/general/NavArrows.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/comp/ui/inputs/VerificationInput.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/comp/ui/inputs/VerificationInput.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/+layout.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/+layout.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/+page.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/+page.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/reset-password/+page.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/reset-password/+page.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/signin/+page.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/signin/+page.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/signup/+page.svelte" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/signup/+page.svelte" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/stylesheets/fonts.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/stylesheets/fonts.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/stylesheets/global.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/stylesheets/global.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/stylesheets/guideline.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/stylesheets/guideline.scss" beforeDir="false" afterPath="$PROJECT_DIR$/static/stylesheets/guideline.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/svelte.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/svelte.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FormatOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="OptimizeOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2aSZa6jLfYWz6mGr13XUA4R9d94" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/Users/lemonfoxmere/lunchroom/client/src",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.standard": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.standard": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "yarn",
+    "prettierjs.PrettierConfiguration.Package": "/Users/lemonfoxmere/lunchroom/client/node_modules/prettier",
+    "settings.editor.selected.configurable": "Errors",
+    "ts.external.directory.path": "/Users/lemonfoxmere/lunchroom/client/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="30622dc4-9ee5-4cf3-b3b7-a6f95b8b8bb6" name="Changes" comment="" />
+      <created>1704314000654</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1704314000654</updated>
+      <workItem from="1704314001899" duration="314000" />
+      <workItem from="1704314399844" duration="5688000" />
+      <workItem from="1704320109489" duration="989000" />
+      <workItem from="1704321107623" duration="5000" />
+      <workItem from="1704321117241" duration="12935000" />
+      <workItem from="1704430813525" duration="5234000" />
+      <workItem from="1704581035519" duration="818000" />
+      <workItem from="1704581861853" duration="401000" />
+      <workItem from="1704582269614" duration="1755000" />
+      <workItem from="1704584031525" duration="1474000" />
+      <workItem from="1704585534601" duration="66000" />
+      <workItem from="1704585709060" duration="18000" />
+      <workItem from="1704585732897" duration="1650000" />
+      <workItem from="1704587391861" duration="496000" />
+      <workItem from="1704587901678" duration="132000" />
+      <workItem from="1704588044072" duration="756000" />
+      <workItem from="1704588807486" duration="78000" />
+      <workItem from="1704588891793" duration="58000" />
+      <workItem from="1704588955579" duration="31000" />
+      <workItem from="1704588992899" duration="84000" />
+      <workItem from="1704589082647" duration="40000" />
+      <workItem from="1704589128313" duration="27000" />
+      <workItem from="1704589161239" duration="19000" />
+      <workItem from="1704589186574" duration="54000" />
+      <workItem from="1704589245613" duration="32000" />
+      <workItem from="1704589284871" duration="929000" />
+      <workItem from="1704590223464" duration="177000" />
+      <workItem from="1704590404814" duration="961000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

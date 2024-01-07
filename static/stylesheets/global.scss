@@ -1,21 +1,23 @@
-@import "./guideline.scss";
+@import "guideline";
 
-html{
-    background-color: $white;
+html {
+  background-color: $white;
 }
 
-body, html{
-    margin:0; padding:0; // remove margin stuff
-    box-sizing: border-box;
+body, html {
+  margin: 0;
+  padding: 0; // remove margin stuff
+  box-sizing: border-box;
 
-    background-color: $white;
-    width: 100vw; height: fit-content;
+  background-color: $white;
+  width: 100vw;
+  height: fit-content;
 }
 
-.no-drag{
-    -webkit-user-drag: none;
-    -moz-user-select: none;
-    user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
+.no-drag {
+  -webkit-user-drag: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }

@@ -149,281 +149,283 @@
 </main>
 
 <style lang="scss">
-	@import "$static/stylesheets/guideline";
+    @import "$static/stylesheets/guideline";
 
-	$stagger: 40ms; // Delay between animations
+    $stagger: 40ms; // Delay between animations
 
-	main {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		align-items: center;
+    main {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
 
-		#navbar {
-			@extend .glass-heavy;
+        #navbar {
+            @extend .glass-heavy;
 
-			width: 100%;
-			min-height: $navbar-height;
-			height: $navbar-height;
-			display: flex;
-			justify-content: center;
-			align-items: flex-end;
-			position: sticky;
-			top: 0;
+            width: 100%;
+            min-height: $navbar-height;
+            height: $navbar-height;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            position: sticky;
+            top: 0;
 
-			#content {
-				width: calc(100vw - 300px);
-				height: 36px;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				position: relative;
+            #content {
+                width: calc(100vw - 300px);
+                height: 36px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
 
-				animation: shrink forwards;
-				animation-play-state: paused;
+                animation: shrink forwards;
+                animation-play-state: paused;
 
-				@keyframes shrink {
-					from {
-						transform: translateY(0px);
-					}
-					to {
-						transform: translateY(-11px);
-					}
-				}
+                @keyframes shrink {
+                    from {
+                        transform: translateY(0px);
+                    }
+                    to {
+                        transform: translateY(-11px);
+                    }
+                }
 
-				#logo {
-					position: absolute;
-					left: 0px;
-					height: 36px;
-					display: flex;
-					justify-content: center;
-					align-items: center;
+                #logo {
+                    position: absolute;
+                    left: 0;
+                    height: 36px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
 
-					img {
-						animation: logo-shrink forwards;
-						animation-play-state: paused;
-						animation-timing-function: $out-expo;
+                    img {
+                        animation: logo-shrink forwards;
+                        animation-play-state: paused;
+                        animation-timing-function: $out-expo;
 
-						@keyframes logo-shrink {
-							from {
-								transform: scale(100%);
-							}
-							to {
-								transform: scale(80%);
-							}
-						}
+                        @keyframes logo-shrink {
+                            from {
+                                transform: scale(100%);
+                            }
+                            to {
+                                transform: scale(80%);
+                            }
+                        }
 
-						@media screen and (max-width: $tablet-width) {
-							animation: none;
-						}
-					}
-				}
+                        @media screen and (max-width: $tablet-width) {
+                            animation: none;
+                        }
+                    }
+                }
 
-				#cta-container {
-					position: absolute;
-					right: 0px;
+                #cta-container {
+                    position: absolute;
+                    right: 0;
 
-					height: 36px;
-					width: fit-content;
-					display: flex;
-					justify-content: center;
-					align-items: center;
-					overflow: visible;
+                    height: 36px;
+                    width: fit-content;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    overflow: visible;
 
-					.cta {
-						display: flex;
-						flex-direction: row-reverse;
+                    .cta {
+                        display: flex;
+                        flex-direction: row-reverse;
 
-						animation: cta-shrink forwards;
-						animation-play-state: paused;
-						animation-timing-function: $out-expo;
+                        animation: cta-shrink forwards;
+                        animation-play-state: paused;
+                        animation-timing-function: $out-expo;
 
-						@keyframes cta-shrink {
-							from {
-								transform: scale(100%);
-							}
-							to {
-								transform: scale(90%);
-							}
-						}
+                        @keyframes cta-shrink {
+                            from {
+                                transform: scale(100%);
+                            }
+                            to {
+                                transform: scale(90%);
+                            }
+                        }
 
-						a {
-							text-decoration: none;
-							margin-right: 48px;
+                        a {
+                            text-decoration: none;
+                            margin-right: 48px;
 
-							&:first-child {
-								margin: 0px;
-							}
+                            &:first-child {
+                                margin: 0;
+                            }
 
-							button {
-								display: flex;
-								align-items: center;
+                            button {
+                                display: flex;
+                                align-items: center;
 
-								svg {
-									margin-left: 8px;
-									height: 14px;
-								}
-							}
-						}
-					}
-				}
+                                svg {
+                                    margin-left: 8px;
+                                    height: 14px;
+                                }
+                            }
+                        }
+                    }
+                }
 
-				@media screen and (max-width: $tablet-width) {
-					width: calc(100vw - 50px);
-				}
+                @media screen and (max-width: $tablet-width) {
+                    width: calc(100vw - 50px);
+                }
 
-				@media screen and (max-width: $mobile-width) {
-					animation: none;
-				}
+                @media screen and (max-width: $mobile-width) {
+                    animation: none;
+                }
 
-				&.minimal {
-					#logo {
-						left: 50%;
-						transform: translateX(-50%);
-					}
-					#cta-container {
-						pointer-events: none;
-						opacity: 0;
-					}
-				}
-			}
+                &.minimal {
+                    #logo {
+                        left: 50%;
+                        transform: translateX(-50%);
+                    }
 
-			@media screen and (max-width: $mobile-width) {
-				align-items: center;
-				min-height: $mobile-navbar-height;
-				height: $mobile-navbar-height;
-				transition: background-color 300ms $out-cubic;
+                    #cta-container {
+                        pointer-events: none;
+                        opacity: 0;
+                    }
+                }
+            }
 
-				&.active {
-					background-color: $white;
-				}
-			}
-		}
+            @media screen and (max-width: $mobile-width) {
+                align-items: center;
+                min-height: $mobile-navbar-height;
+                height: $mobile-navbar-height;
+                transition: background-color 300ms $out-cubic;
 
-		#mobile-menu {
-			@extend .glass-light;
+                &.active {
+                    background-color: $white;
+                }
+            }
+        }
 
-			width: 100%;
-			height: calc(100% - $navbar-height);
-			position: fixed;
-			top: $navbar-height;
-			z-index: 100;
+        #mobile-menu {
+            @extend .glass-light;
 
-			overflow: hidden;
+            width: 100%;
+            max-width: 100vw;
+            height: calc(100% - $navbar-height);
+            position: fixed;
+            top: $navbar-height;
+            z-index: 100;
 
-			pointer-events: all;
+            overflow: hidden;
 
-			transition: 500ms $out-cubic;
-			transition-property: backdrop-filter, -webkit-backdrop-filter, opacity;
+            pointer-events: all;
 
-			#menu-bg {
-				width: 100%;
-				height: fit-content;
-				box-sizing: border-box;
-				padding: 0px 20px 8px 20px;
+            transition: 500ms $out-cubic;
+            transition-property: backdrop-filter, -webkit-backdrop-filter, opacity;
 
-				display: flex;
-				flex-direction: column;
-				align-items: flex-start;
-				justify-content: flex-start;
+            #menu-bg {
+                width: 100%;
+                height: fit-content;
+                box-sizing: border-box;
+                padding: 0 20px 8px 20px;
 
-				background-color: $white;
-				box-shadow: 0px 20px 70px 0px hsla(0, 0%, 0%, 20%);
-				border-radius: 0px 0px 22px 22px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                justify-content: flex-start;
 
-				transform: translateY(0px);
-				transform-origin: top;
-				transition: 400ms $out-cubic;
-				transition-property: transform;
+                background-color: $white;
+                box-shadow: 0 20px 70px 0 hsla(0, 0%, 0%, 20%);
+                border-radius: 0 0 22px 22px;
 
-				.menu-items {
-					width: 100%;
+                transform: translateY(0px);
+                transform-origin: top;
+                transition: 400ms $out-cubic;
+                transition-property: transform;
 
-					@for $i from 1 through 5 {
-						// Change the number based on the number of buttons
-						&:nth-child(#{$i}) {
-							animation: fly-in 500ms $out-cubic #{($i - 1) * $stagger} forwards;
-							animation-fill-mode: both;
-						}
-					}
+                .menu-items {
+                    width: 100%;
 
-					@keyframes fly-in {
-						0% {
-							opacity: 0;
-							transform: translateY(-15px);
-						}
-						100% {
-							opacity: 1;
-							transform: translateY(0);
-						}
-					}
-				}
+                    @for $i from 1 through 5 {
+                        // Change the number based on the number of buttons
+                        &:nth-child(#{$i}) {
+                            animation: fly-in 500ms $out-cubic #{($i - 1) * $stagger} forwards;
+                            animation-fill-mode: both;
+                        }
+                    }
 
-				a {
-					display: flex;
+                    @keyframes fly-in {
+                        0% {
+                            opacity: 0;
+                            transform: translateY(-15px);
+                        }
+                        100% {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                }
 
-					padding: 22px 8px;
-					box-sizing: border-box;
-					text-decoration: none;
+                a {
+                    display: flex;
 
-					&:active {
-						button {
-							color: $tertiary;
-						}
-					}
+                    padding: 22px 8px;
+                    box-sizing: border-box;
+                    text-decoration: none;
 
-					button {
-						font-size: 18px;
-					}
-				}
+                    &:active {
+                        button {
+                            color: $tertiary;
+                        }
+                    }
 
-				hr {
-					margin: 0px;
-					height: 2px;
-					width: calc(100% + 40px);
+                    button {
+                        font-size: 18px;
+                    }
+                }
 
-					border: none;
-					background-color: $pentinary;
-				}
-			}
+                hr {
+                    margin: 0;
+                    height: 2px;
+                    width: calc(100% + 40px);
 
-			&.disabled {
-				opacity: 0;
-				pointer-events: none;
+                    border: none;
+                    background-color: $pentinary;
+                }
+            }
 
-				transition: 400ms $in-quart;
-				transition-property: backdrop-filter, -webkit-backdrop-filter, opacity;
+            &.disabled {
+                opacity: 0;
+                pointer-events: none;
 
-				#menu-bg {
-					transform: translateY(-15px);
-					transition: 400ms $in-quint;
+                transition: 400ms $in-quart;
+                transition-property: backdrop-filter, -webkit-backdrop-filter, opacity;
 
-					.menu-items {
-						@for $i from 1 through 5 {
-							// Change the number based on the number of buttons
-							&:nth-child(#{$i}) {
-								animation: fly-out 250ms $in-cubic #{($i - 1) * $stagger} forwards;
-							}
-						}
-					}
+                #menu-bg {
+                    transform: translateY(-15px);
+                    transition: 400ms $in-quint;
 
-					@keyframes fly-out {
-						0% {
-							opacity: 1;
-							transform: translateY(0);
-						}
-						100% {
-							opacity: 0;
-							transform: translateY(-15px);
-						}
-					}
-				}
-			}
+                    .menu-items {
+                        @for $i from 1 through 5 {
+                            // Change the number based on the number of buttons
+                            &:nth-child(#{$i}) {
+                                animation: fly-out 250ms $in-cubic #{($i - 1) * $stagger} forwards;
+                            }
+                        }
+                    }
 
-			@media screen and (max-width: $mobile-width) {
-				top: $mobile-navbar-height;
-			}
-		}
-	}
+                    @keyframes fly-out {
+                        0% {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                        100% {
+                            opacity: 0;
+                            transform: translateY(-15px);
+                        }
+                    }
+                }
+            }
+
+            @media screen and (max-width: $mobile-width) {
+                top: $mobile-navbar-height;
+            }
+        }
+    }
 </style>

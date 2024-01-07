@@ -2,88 +2,95 @@
 	import LoadingSpinner from "$lib/comp/ui/general/LoadingSpinner.svelte";
 	import type { uniqueSignupProcessStatus } from "$route/signup/+page.svelte";
 	import { createEventDispatcher } from "svelte";
+
 	const disp = createEventDispatcher();
 
 	export let status: uniqueSignupProcessStatus;
 
 	export let input: HTMLInputElement;
 	export let value: string;
+	export let contentHeight: number;
 
 	const oninput = () => {
 		disp("input");
 	};
 </script>
 
-<h1>Let's reset your password. What's your email?</h1>
+<main bind:clientHeight={contentHeight}>
+	<h1>Let's reset your password. What's your email?</h1>
 
-<input
-	bind:this={input}
-	bind:value
-	on:input={oninput}
-	type="email"
-	class="large hide-placeholder"
-	placeholder="example@lunchroom.ink"
-/>
+	<input
+		bind:this={input}
+		bind:value
+		on:input={oninput}
+		type="email"
+		class="large hide-placeholder"
+		placeholder="triplepaw@lunchroom.ink"
+	/>
 
-<div id="message-container">
-	{#if status.state !== null}
-		{#if status.state === "processing"}
-			<LoadingSpinner />
-		{:else}
-			<h6 class={status.state}>{status.message}</h6>
+	<div id="message-container">
+		{#if status.state !== null}
+			{#if status.state === "processing"}
+				<LoadingSpinner />
+			{:else}
+				<h6 class={status.state}>{status.message}</h6>
+			{/if}
 		{/if}
-	{/if}
-</div>
+	</div>
+</main>
 
 <style lang="scss">
-	@import "$static/stylesheets/guideline";
+    @import "$static/stylesheets/guideline";
 
-	h1 {
-		margin-bottom: 28px;
-		white-space: nowrap;
-	}
+    main {
 
-	div {
-		width: 100%;
-		height: fit-content;
-		position: relative;
+        h1 {
+            margin-bottom: 28px;
+        }
 
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
+        div {
+            width: 100%;
+            height: fit-content;
+            position: relative;
 
-	input {
-		width: 100%;
-		text-align: center;
-		transition: opacity 700ms ease-in-out, transform 700ms $out-generic;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-		&::-webkit-contacts-auto-fill-button {
-			visibility: hidden;
-			display: none !important;
-			pointer-events: none;
-			width: 0px !important;
-			margin: 0px !important;
-		}
-	}
+        input {
+            width: 100%;
+            text-align: center;
+            transition: opacity 700ms ease-in-out, transform 700ms $out-generic;
 
-	#message-container {
-		position: absolute;
-		bottom: -130px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
+            &::-webkit-contacts-auto-fill-button {
+                visibility: hidden;
+                display: none !important;
+                pointer-events: none;
+                width: 0 !important;
+                margin: 0 !important;
+            }
+        }
 
-		h6 {
-			font-size: 16px;
-			position: relative;
-		}
+        #message-container {
+            position: absolute;
+            bottom: -130px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
 
-		.failed {
-			color: $red;
-		}
-		.success {
-			color: $green;
-		}
-	}
+            h6 {
+                font-size: 16px;
+                position: relative;
+            }
+
+            .failed {
+                color: $red;
+            }
+
+            .success {
+                color: $green;
+            }
+        }
+    }
 </style>

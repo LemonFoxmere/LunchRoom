@@ -12,9 +12,7 @@
 			width="24px"
 			height="24px"
 			viewBox="0 0 24 24"
-			version="1.1"
 			xmlns="http://www.w3.org/2000/svg"
-			xmlns:xlink="http://www.w3.org/1999/xlink"
 		>
 			<g
 				id="Icons"
@@ -41,9 +39,7 @@
 			width="24px"
 			height="24px"
 			viewBox="0 0 24 24"
-			version="1.1"
 			xmlns="http://www.w3.org/2000/svg"
-			xmlns:xlink="http://www.w3.org/1999/xlink"
 		>
 			<g
 				id="Icons"
@@ -66,25 +62,25 @@
 </main>
 
 <style lang="scss">
-	@import "$static/stylesheets/guideline";
+    @import "$static/stylesheets/guideline";
 
-	button {
-		width: 24px;
-		height: 24px;
-		border-radius: 24px;
+    button {
+        width: 24px;
+        height: 24px;
+        border-radius: 24px;
 
-		opacity: 1;
+        opacity: 1;
 
-		transition: opacity 250ms ease-in-out;
+        transition: opacity 250ms ease-in-out;
 
-		&#left {
-			margin-right: 36px;
-		}
+        &#left {
+            margin-right: 36px;
+        }
 
-		&:disabled {
-			opacity: 0.5;
-			color: $tertiary;
-			pointer-events: none;
-		}
-	}
+        &:disabled {
+            opacity: 0.5;
+            color: $tertiary;
+            pointer-events: none;
+        }
+    }
 </style>

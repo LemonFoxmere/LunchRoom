@@ -22,7 +22,7 @@
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, calc(-50% + $navbar-height/2));
-		width: 100vw;
+		width: 100%;
 		height: fit-content;
 		display: flex;
 		align-items: center;

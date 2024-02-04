@@ -207,7 +207,7 @@
 				}
 
 				@media screen and (max-width: $tablet-width) {
-					width: calc(100vw - 50px);
+					width: calc(100% - 50px);
 				}
 
 				@media screen and (max-width: $mobile-width) {

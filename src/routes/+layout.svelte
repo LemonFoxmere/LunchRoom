@@ -49,6 +49,10 @@
 	main {
 		width: 100%;
 		display: flex;
+
+		padding: 0px;
+		box-sizing: border-box;
+
 		flex-direction: column;
 		justify-content: flex-start;
 		align-items: center;

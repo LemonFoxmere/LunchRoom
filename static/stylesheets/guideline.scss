@@ -139,7 +139,7 @@ $tablet-width: 1000px;
 button {
     font-family: "Figtree", system-ui, Helvetica, sans-serif;
 
-    border: 2px solid $black;
+    border: 1.5px solid $quaternary;
     border-radius: 10px;
     font-size: 16px;
     font-weight: 400;
@@ -162,13 +162,13 @@ button {
 
     @media(hover: hover) {
         &:hover {
-            border-color: $tertiary;
+            border-color: $pentinary;
             color: $tertiary;
         }
     }
 
     &:active {
-        border-color: $tertiary;
+        border-color: $pentinary;
         color: $tertiary;
     }
 
@@ -201,6 +201,7 @@ button {
 
     &.solid {
         background-color: $black;
+        border-color: $black;
 
         font-weight: 400;
         letter-spacing: 0.12px;
@@ -217,6 +218,16 @@ button {
             background-color: $primary;
             border-color: $primary;
         }
+
+        @media screen and (max-width: $mobile-width) {
+            font-weight: 500;
+        }
+    }
+
+    &.small {
+        font-size: 15px;
+        font-weight: 400;
+        padding: 10px 20px;
 
         @media screen and (max-width: $mobile-width) {
             font-weight: 500;

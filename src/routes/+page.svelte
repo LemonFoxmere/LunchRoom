@@ -67,6 +67,7 @@
 				display: flex;
 				flex-direction: row;
 				margin: 0 0 0 82px;
+				box-sizing: border-box;
 
 				button {
 					width: 128px;
@@ -90,9 +91,21 @@
 					align-items: center;
 					margin: 42px 0 0 0;
 
+					width: 100%;
+
+					a {
+						width: 100%;
+						display: flex;
+						justify-content: center;
+						align-items: center;
+
+						text-decoration: none;
+					}
+
 					button {
-						width: calc(100% - 60px);
+						width: calc(100% - 40px);
 						margin-bottom: 12px;
+						margin-right: 0px;
 
 						&:last-child {
 							margin: 0;
@@ -116,6 +129,7 @@
 			}
 
 			@media screen and (max-width: $mobile-width) {
+				width: 100%;
 				height: calc(100vh - $urlbar-height - $navbar-height);
 				flex-direction: column;
 			}

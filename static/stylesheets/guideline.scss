@@ -9,9 +9,11 @@ $quaternary: hsl(0, 0%, 66%);
 $pentinary: hsl(0, 0%, 79%);
 $solid-white: hsl(0, 0%, 100%);
 
-$green: hsl(112, 59%, 42%);
+$green: hsl(112, 48%, 47%);
 $red: hsl(356, 80%, 51%);
 $yellow: hsl(40, 82%, 55%);
+$gold: hsl(38, 81%, 49%);
+$amber: hsl(22, 80%, 53%);
 $blue: hsl(214, 72%, 52%);
 
 // TRANSITION CURVES
@@ -145,7 +147,7 @@ button {
     font-weight: 400;
     color: $primary;
     background: none;
-    letter-spacing: -0.44px;
+    letter-spacing: 0.06px;
 
     padding: 6px 16px;
     margin: 0;
@@ -204,7 +206,6 @@ button {
         border-color: $black;
 
         font-weight: 400;
-        letter-spacing: 0.12px;
         color: $white;
 
         @media(hover: hover) {
@@ -236,6 +237,10 @@ button {
 
     &.large {
         padding: 10px 24px;
+    }
+
+    &:disabled{
+        pointer-events: none;
     }
 }
 

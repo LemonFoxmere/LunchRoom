@@ -1,9 +1,10 @@
 <script lang="ts">
 	import MenuButton from "../MenuButton.svelte";
+	import MobileMenu from "../MobileMenu.svelte";
 	import BlankBar, { TopBarLayout } from "../TopBar.svelte";
-	import MobileMenu from "./../MobileMenu.svelte";
 
-	export let accessToken: string | undefined;
+	// use access token as needed
+	// export let accessToken: string | undefined;
 	export let url: string;
 
 	export let animResolution: number;
@@ -39,6 +40,7 @@
 		{topBarLayout}
 		{closeMobileMenu}
 	>
+		<!-- Mobile menu opening and closing button -->
 		<section class="only-phone cta">
 			<MenuButton opened={mobileMenuOpened} on:click={toggleMobileMenu} />
 		</section>
@@ -47,19 +49,7 @@
 			class="exclude-phone cta"
 			style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms"
 		>
-			{#if !accessToken}
-				<a href="/signin">
-					<button class="text">Sign In</button>
-				</a>
-			{/if}
-
-			<a target="_blank">
-				<button class="text">Community</button>
-			</a>
-
-			<a href="https://github.com/LemonFoxmere/LunchRoom" target="_blank">
-				<button class="text">GitHub</button>
-			</a>
+			<!-- Desktop / Tablet Content Here -->
 		</section>
 	</BlankBar>
 
@@ -67,27 +57,9 @@
 
 	<MobileMenu {mobileMenuOpened} {closeMobileMenu}>
 		<section class={mobileMenuOpened ? "" : "disabled"} id="mobile-cta">
-			{#if !accessToken}
-				<a class="menu-items" href="/signin" on:click={closeMobileMenu}>
-					<button class="text">Sign in</button>
-				</a>
-
-				<hr class="menu-items" />
-			{/if}
-
+			<!-- Mobile Menu Here -->
 			<a class="menu-items" target="_blank" on:click={closeMobileMenu}>
 				<button class="text">Community</button>
-			</a>
-
-			<hr class="menu-items" />
-
-			<a
-				class="menu-items"
-				href="https://github.com/LemonFoxmere/LunchRoom"
-				target="_blank"
-				on:click={closeMobileMenu}
-			>
-				<button class="text">GitHub</button>
 			</a>
 		</section>
 	</MobileMenu>

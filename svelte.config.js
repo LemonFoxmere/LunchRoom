@@ -23,7 +23,8 @@ const config = {
 		alias: {
 			$static: "./static",
 			$comp: "$lib/comp",
-			$route: "src/routes"
+			$route: "src/routes",
+			$server: "../server"
 		}
 	}
 };

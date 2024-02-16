@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ProfileBar from "$lib/comp/ui/navbar/bars/ProfileBar.svelte";
 	import { onMount } from "svelte";
 	import type { PageData } from "./$types";
 	import DefaultBar from "./../lib/comp/ui/navbar/bars/DefaultBar.svelte";
@@ -19,11 +20,10 @@
 
 	enum barTypes {
 		default = "default",
-		profile = "customer",
-		artistProfile = "artist"
+		profile = "profile"
 	}
 	const urlSpecificBar: Record<string, `${barTypes}`> = {
-		"/profile": barTypes.default
+		"/profile": barTypes.profile
 	};
 	let navbarBarType: `${barTypes}`;
 	$: navbarBarType = urlSpecificBar[data.url] ?? barTypes.default;
@@ -38,6 +38,8 @@
 			{navbarAnimDelay}
 			{navbarLogoDelay}
 		/>
+	{:else if navbarBarType === barTypes.profile}
+		<ProfileBar url={data.url} {animResolution} {navbarAnimDelay} {navbarLogoDelay} />
 	{/if}
 
 	<slot />
@@ -50,7 +52,6 @@
 		width: 100%;
 		display: flex;
 
-		padding: 0px;
 		box-sizing: border-box;
 
 		flex-direction: column;

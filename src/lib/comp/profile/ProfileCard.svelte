@@ -28,7 +28,9 @@
 				<div id="seperator"></div>
 
 				{#if profileData.bio}
-					<p id="bio">{profileData.bio}</p>
+					<p id="bio">
+						{profileData.bio}
+					</p>
 				{:else}
 					<!-- if there is no bio, show the follower count where the bio would be -->
 					<section id="follower-container">
@@ -190,7 +192,7 @@
 					}
 
 					#seperator {
-						height: 10px;
+						height: 15px;
 					}
 
 					#bio {

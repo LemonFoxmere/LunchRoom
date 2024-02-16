@@ -46,14 +46,12 @@ h6{
 }
 
 p, a, ol, ul, li, pre{
-    font-family: system-ui, "Inter", Helvetica, sans-serif;
+    font-family: "Figtree", system-ui, Helvetica, sans-serif;
     font-size: calc(16px + var(--font-offset));
-    font-weight: 300;
-    letter-spacing: -0.07px;
-}
-p, pre{
-    color: $primary;
+    line-height: 20px;
     font-weight: 400;
+
+    color: $tertiary;
 }
 a{
     color: $blue;

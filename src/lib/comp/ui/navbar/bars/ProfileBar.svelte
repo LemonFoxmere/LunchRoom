@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { profilePageState } from "$route/profile/+page.svelte";
 	import MenuButton from "../MenuButton.svelte";
+	import MobileMenu from "../MobileMenu.svelte";
 	import BlankBar, { TopBarLayout } from "../TopBar.svelte";
-	import MobileMenu from "./../MobileMenu.svelte";
 
-	export let accessToken: string | undefined;
+	// use access token as needed
+	// export let accessToken: string | undefined;
 	export let url: string;
 
 	export let animResolution: number;
@@ -27,6 +29,15 @@
 	const closeMobileMenu = () => {
 		mobileMenuOpened = false;
 	};
+
+	const toggleToClient = () => {
+		$profilePageState.type = "client";
+		closeMobileMenu();
+	};
+	const toggleToArtist = () => {
+		$profilePageState.type = "artist";
+		closeMobileMenu();
+	};
 </script>
 
 <main>
@@ -39,27 +50,31 @@
 		{topBarLayout}
 		{closeMobileMenu}
 	>
-		<section class="only-phone cta">
-			<MenuButton opened={mobileMenuOpened} on:click={toggleMobileMenu} />
-		</section>
-
 		<section
 			class="exclude-phone cta"
 			style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms"
 		>
-			{#if !accessToken}
-				<a href="/signin">
-					<button class="text">Sign In</button>
-				</a>
-			{/if}
+			<!-- Desktop / Tablet Content Here -->
+			<section id="client-artist-sel">
+				<button
+					id="client"
+					disabled={$profilePageState.type === "client"}
+					class="{$profilePageState.type === 'client' ? 'solid' : ''} small"
+					on:click={toggleToClient}>Client</button
+				>
+				<button
+					id="artist"
+					disabled={$profilePageState.type === "artist"}
+					class="{$profilePageState.type === 'artist' ? 'solid' : ''} small"
+					on:click={toggleToArtist}>Artist</button
+				>
+			</section>
+			<a href="/account"> <button class="text">Account Settings</button></a>
+		</section>
 
-			<a target="_blank">
-				<button class="text">Community</button>
-			</a>
-
-			<a href="https://github.com/LemonFoxmere/LunchRoom" target="_blank">
-				<button class="text">GitHub</button>
-			</a>
+		<!-- Mobile menu opening and closing button -->
+		<section class="only-phone cta">
+			<MenuButton opened={mobileMenuOpened} on:click={toggleMobileMenu} />
 		</section>
 	</BlankBar>
 
@@ -67,27 +82,34 @@
 
 	<MobileMenu {mobileMenuOpened} {closeMobileMenu}>
 		<section class={mobileMenuOpened ? "" : "disabled"} id="mobile-cta">
-			{#if !accessToken}
-				<a class="menu-items" href="/signin" on:click={closeMobileMenu}>
-					<button class="text">Sign in</button>
-				</a>
+			<!-- Mobile Menu Here -->
+			<section class="mobile menu-items" id="client-artist-sel">
+				<h1>Profile Type</h1>
 
-				<hr class="menu-items" />
-			{/if}
+				<section id="cta">
+					<button
+						id="client"
+						disabled={$profilePageState.type === "client"}
+						class="{$profilePageState.type === 'client' ? 'solid' : ''} small"
+						on:click={toggleToClient}>Client</button
+					>
+					<button
+						id="artist"
+						disabled={$profilePageState.type === "artist"}
+						class="{$profilePageState.type === 'artist' ? 'solid' : ''} small"
+						on:click={toggleToArtist}>Artist</button
+					>
+				</section>
+			</section>
 
 			<a class="menu-items" target="_blank" on:click={closeMobileMenu}>
-				<button class="text">Community</button>
+				<button class="text">Account Settings</button>
 			</a>
 
 			<hr class="menu-items" />
 
-			<a
-				class="menu-items"
-				href="https://github.com/LemonFoxmere/LunchRoom"
-				target="_blank"
-				on:click={closeMobileMenu}
-			>
-				<button class="text">GitHub</button>
+			<a class="menu-items" target="_blank" on:click={closeMobileMenu}>
+				<button class="text">Log Out</button>
 			</a>
 		</section>
 	</MobileMenu>
@@ -183,6 +205,45 @@
 			}
 		}
 
+		#client-artist-sel {
+			// margin-right: 42px;
+			display: flex;
+
+			button {
+				&#client {
+					border-radius: 10px 0px 0px 10px;
+					border-right: none;
+				}
+				&#artist {
+					border-radius: 0px 10px 10px 0px;
+					border-left: none;
+				}
+			}
+
+			&.mobile {
+				margin: 5px 0px 20px 0px;
+				width: 100%;
+				display: flex;
+				flex-direction: column;
+
+				#cta {
+					margin-top: 14px;
+					display: flex;
+
+					button {
+						width: 100%;
+						height: 50px;
+						font-size: 16px;
+					}
+				}
+
+				h1 {
+					font-size: 32px;
+					width: 100%;
+				}
+			}
+		}
+
 		.cta {
 			display: flex;
 			flex-direction: row-reverse;
@@ -190,6 +251,9 @@
 			animation: cta-shrink forwards;
 			animation-play-state: paused;
 			animation-timing-function: $out-expo;
+
+			display: flex;
+			align-items: center;
 
 			@keyframes cta-shrink {
 				from {
@@ -202,7 +266,7 @@
 
 			a {
 				text-decoration: none;
-				margin-right: 48px;
+				margin-right: 42px;
 
 				&:first-child {
 					margin: 0;

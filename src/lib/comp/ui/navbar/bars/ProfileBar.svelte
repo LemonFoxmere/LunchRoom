@@ -32,11 +32,11 @@
 
 	const toggleToClient = () => {
 		$profilePageState.type = "client";
-		closeMobileMenu();
+		// closeMobileMenu();
 	};
 	const toggleToArtist = () => {
 		$profilePageState.type = "artist";
-		closeMobileMenu();
+		// closeMobileMenu();
 	};
 </script>
 

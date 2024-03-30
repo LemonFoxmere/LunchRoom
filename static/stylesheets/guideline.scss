@@ -16,6 +16,28 @@ $gold: hsl(38, 81%, 49%);
 $amber: hsl(22, 80%, 53%);
 $blue: hsl(214, 72%, 52%);
 
+$error: $red;
+$warning: $gold;
+$success: $green;
+.error {
+    color: $error !important; // override default colors
+}
+.warning {
+    color: $warning !important; // override default colors
+}
+.success {
+    color: $success !important; // override default colors
+}
+.error-bg {
+    background-color: $error !important; // override default colors
+}
+.warning-bg {
+    background-color: $warning !important; // override default colors
+}
+.success-bg {
+    background-color: $success !important; // override default colors
+}
+
 // TRANSITION CURVES
 $in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
 $in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19);
@@ -44,7 +66,7 @@ $mobile-navbar-height: 70px;
 $navbar-height: 60px;
 
 $mobile-width: 621px;
-$tablet-width: 1000px;
+$tablet-width: 1100px;
 
 // RESPONSIVE DESIGN
 .only-phone {

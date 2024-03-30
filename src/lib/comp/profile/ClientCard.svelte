@@ -20,7 +20,7 @@
 		</p>
 
 		<!-- show the status for the phone right above the cta -->
-		<h2 class="only-phone" id="status">Pending Artist Verification</h2>
+		<h2 class="only-phone warning" id="status">Pending Artist Verification</h2>
 
 		<section id="cta">
 			<button id="detail" class="small solid">View Details</button>
@@ -74,7 +74,7 @@
 					margin-right: 15px;
 				}
 				#name {
-					font-weight: 500;
+					font-weight: 400;
 					font-size: 24px;
 					color: $secondary;
 				}
@@ -90,16 +90,6 @@
 				font-size: 22px;
 				color: $secondary;
 				margin-top: 7px;
-
-				&.error {
-					color: $red;
-				}
-				&.warning {
-					color: $gold;
-				}
-				&.success {
-					color: $green;
-				}
 			}
 
 			#desc {

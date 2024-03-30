@@ -1,4 +1,11 @@
 <script lang="ts">
+	export let title: string;
+	export let status: "active" | "filled" | "inactive";
+
+	export let views: number;
+	export let earning: number;
+	export let slots: number;
+	export let slotsFilled: number;
 </script>
 
 <main>
@@ -8,8 +15,8 @@
 		<section id="title">
 			<section id="content">
 				<div id="text-container">
-					<div id="status-light"></div>
-					<h1>Commission</h1>
+					<div id="status-light" class={status ?? "active"}></div>
+					<h1>{title}</h1>
 				</div>
 				<div id="stats-container">
 					<!-- Views -->
@@ -35,7 +42,7 @@
 								</g>
 							</g>
 						</svg>
-						<p>0</p>
+						<p>{views ?? 0}</p>
 					</div>
 
 					<!-- Total money made -->
@@ -56,7 +63,7 @@
 								></path>
 							</g>
 						</svg>
-						<p>$0</p>
+						<p>${earning ?? 0}</p>
 					</div>
 
 					<!-- Slots -->
@@ -78,7 +85,7 @@
 								></path>
 							</g>
 						</svg>
-						<p>0/0</p>
+						<p>{slotsFilled ?? 0}/{slots ?? 0}</p>
 					</div>
 				</div>
 			</section>
@@ -113,7 +120,7 @@
 		box-sizing: border-box;
 
 		#content-container {
-			padding: 20px 30px;
+			padding: 25px 35px;
 			box-sizing: border-box;
 
 			height: 100%;
@@ -134,13 +141,13 @@
 				#placeholder {
 					font-style: italic;
 					color: $quaternary;
-					margin: 5px 0px;
+					margin: 10px 0px;
 				}
 			}
 
 			hr {
 				width: calc(100% - 60px);
-				margin-top: 20px;
+				margin-top: 25px;
 				margin-bottom: 20px;
 				border-color: $quaternary;
 			}
@@ -218,6 +225,16 @@
 
 							background-color: $green;
 							margin-right: 15px;
+
+							&.active {
+								background-color: $green;
+							}
+							&.filled {
+								background-color: $gold;
+							}
+							&.inactive {
+								background-color: $red;
+							}
 						}
 					}
 				}

@@ -1,4 +1,5 @@
 <script lang="ts" context="module">
+	import ArtistCardSummary from "./../../lib/comp/profile/ArtistCardSummary.svelte";
 	export interface ProfilePageState {
 		type: "client" | "artist";
 		client: {
@@ -12,7 +13,7 @@
 	}
 
 	export const profilePageState = writable<ProfilePageState>({
-		type: "client",
+		type: "artist",
 		client: {
 			activeCommSorting: "latest",
 			allCommSorting: "latest"
@@ -25,6 +26,10 @@
 </script>
 
 <script lang="ts">
+	import ArtistCard from "$lib/comp/profile/ArtistCard.svelte";
+	import ClientCard from "$lib/comp/profile/ClientCard.svelte";
+	import ClientCardSummary from "$lib/comp/profile/ClientCardSummary.svelte";
+	import NewCommission from "$lib/comp/profile/NewCommission.svelte";
 	import ProfileCard from "$lib/comp/profile/ProfileCard.svelte";
 	import { writable } from "svelte/store";
 	import type { PageData } from "./$types";
@@ -54,9 +59,9 @@
 			<!-- Change title name dynamically based on the state of the page -->
 			<h1>
 				{#if $profilePageState.type === "client"}
-					My Commissions
+					Current Commissions
 				{:else}
-					Active Commissions
+					Active Commission Posts
 				{/if}
 			</h1>
 
@@ -109,15 +114,21 @@
 		{#if $profilePageState.type === "client"}
 			<!-- Client side cards -->
 
-			<p id="card-place-holder">No Commissions Yet...</p>
+			<!-- <p id="card-place-holder">No Commissions Yet...</p> -->
 
-			<!-- <ClientCard /> -->
+			<ClientCard />
 		{:else}
 			<!-- Artist side cards -->
 
-			<p id="card-place-holder">No Activities Yet...</p>
-
-			<!-- <ArtistCard /> -->
+			<!-- <p id="card-place-holder">No Activities Yet...</p> -->
+			<ArtistCard
+				title="My Commission"
+				status="active"
+				views={0}
+				earning={0}
+				slots={5}
+				slotsFilled={0}
+			/>
 		{/if}
 	</section>
 
@@ -125,7 +136,16 @@
 		<!-- Section Title -->
 		<section id="title">
 			<!-- Change title name dynamically based on the state of the page -->
-			<h1>All Commissions</h1>
+			<section id="text-container">
+				<h1>
+					{#if $profilePageState.type === "client"}
+						Past Commissions
+					{:else}
+						All Commission Posts
+					{/if}
+				</h1>
+				<button id="new-comm" class="solid small exclude-phone">New Commission</button>
+			</section>
 
 			<div id="filter-container">
 				<p>Sort By</p>
@@ -173,19 +193,27 @@
 			</div>
 		</section>
 
-		{#if $profilePageState.type === "client"}
-			<!-- Client side cards -->
+		<section id="cards">
+			{#if $profilePageState.type === "client"}
+				<!-- Client side cards -->
 
-			<p id="card-place-holder">No Commissions Yet...</p>
+				<NewCommission />
 
-			<!-- <ClientCard /> -->
-		{:else}
-			<!-- Artist side cards -->
+				<ClientCardSummary name="Digital Art" />
 
-			<p id="card-place-holder">No Commissions Yet...</p>
+				<!-- <p class="exclude-phone" id="card-place-holder">No Commissions Yet...</p> -->
+			{:else}
+				<!-- Artist side cards -->
 
-			<!-- <ArtistCard /> -->
-		{/if}
+				<NewCommission />
+
+				<ArtistCardSummary name="Digital Art" />
+
+				<!-- <p class="exclude-phone" id="card-place-holder">No Commissions Yet...</p> -->
+
+				<!-- <ArtistCard /> -->
+			{/if}
+		</section>
 	</section>
 </main>
 
@@ -205,6 +233,13 @@
 		align-items: flex-start;
 
 		#all-comms {
+			#cards {
+				width: 100%;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
+			}
+
 			#latest {
 				border-radius: 10px 0px 0px 10px;
 				border-right: none;
@@ -234,6 +269,22 @@
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
+
+				flex-wrap: wrap;
+				row-gap: 20px;
+
+				#text-container {
+					display: flex;
+					align-items: center;
+
+					h1 {
+						margin-right: 25px;
+					}
+
+					#new-comm {
+						margin-right: 30px;
+					}
+				}
 
 				#filter-container {
 					display: flex;
@@ -320,6 +371,8 @@
 					flex-direction: column;
 					justify-content: center;
 					align-items: flex-start;
+
+					row-gap: 0px;
 
 					h1 {
 						font-size: 32px;

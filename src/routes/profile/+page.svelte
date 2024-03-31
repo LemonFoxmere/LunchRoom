@@ -1,5 +1,4 @@
 <script lang="ts" context="module">
-	import ArtistCardSummary from "./../../lib/comp/profile/ArtistCardSummary.svelte";
 	export interface ProfilePageState {
 		type: "client" | "artist";
 		client: {
@@ -26,7 +25,6 @@
 </script>
 
 <script lang="ts">
-	import ArtistCard from "$lib/comp/profile/ArtistCard.svelte";
 	import ClientCard from "$lib/comp/profile/ClientCard.svelte";
 	import ClientCardSummary from "$lib/comp/profile/ClientCardSummary.svelte";
 	import NewCommission from "$lib/comp/profile/NewCommission.svelte";
@@ -57,13 +55,16 @@
 		<!-- Section Title -->
 		<section id="title">
 			<!-- Change title name dynamically based on the state of the page -->
-			<h1>
-				{#if $profilePageState.type === "client"}
-					Current Commissions
-				{:else}
-					Active Commission Posts
-				{/if}
-			</h1>
+			<section id="text-container">
+				<h1>
+					{#if $profilePageState.type === "client"}
+						Current Commissions
+					{:else}
+						Active Commission Posts
+					{/if}
+				</h1>
+				<button id="new-comm" class="solid small exclude-phone">New Commission</button>
+			</section>
 
 			<div id="filter-container">
 				<p>Sort By</p>
@@ -120,15 +121,16 @@
 		{:else}
 			<!-- Artist side cards -->
 
-			<!-- <p id="card-place-holder">No Activities Yet...</p> -->
-			<ArtistCard
+			<p id="card-place-holder">No Activities Yet...</p>
+
+			<!-- <ArtistCard
 				title="My Commission"
 				status="active"
 				views={0}
 				earning={0}
 				slots={5}
 				slotsFilled={0}
-			/>
+			/> -->
 		{/if}
 	</section>
 
@@ -136,16 +138,13 @@
 		<!-- Section Title -->
 		<section id="title">
 			<!-- Change title name dynamically based on the state of the page -->
-			<section id="text-container">
-				<h1>
-					{#if $profilePageState.type === "client"}
-						Past Commissions
-					{:else}
-						All Commission Posts
-					{/if}
-				</h1>
-				<button id="new-comm" class="solid small exclude-phone">New Commission</button>
-			</section>
+			<h1>
+				{#if $profilePageState.type === "client"}
+					Past Commissions
+				{:else}
+					All Commission Posts
+				{/if}
+			</h1>
 
 			<div id="filter-container">
 				<p>Sort By</p>
@@ -207,7 +206,11 @@
 
 				<NewCommission />
 
-				<ArtistCardSummary name="Digital Art" />
+				<pre>
+					{JSON.stringify(data.posts, null, 4)}
+				</pre>
+
+				<!-- <ArtistCardSummary name="Digital Art" /> -->
 
 				<!-- <p class="exclude-phone" id="card-place-holder">No Commissions Yet...</p> -->
 

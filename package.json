@@ -34,6 +34,7 @@
     "@types/js-cookie": "^3.0.6",
     "js-cookie": "^3.0.5",
     "sass": "^1.66.1",
-    "scss": "^0.2.4"
+    "scss": "^0.2.4",
+    "svelte-bricks": "^0.2.1"
   }
 }

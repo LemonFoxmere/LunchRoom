@@ -1,15 +1,43 @@
 <script lang="ts">
 	export let name: string;
+
+	export let postId: number;
+	export let views: number;
+	export let earning: number;
+	export let slots: number;
+	export let slotsTaken: number;
+	export let closed: boolean;
+	export let suspended: boolean;
+
+	let filled: boolean;
+	$: filled = slots === slotsTaken;
+
+	let postStatus: "warning" | "success" | "error";
+	$: postStatus = suspended ? "error" : filled ? "warning" : "success";
 </script>
 
-<main>
-	<img id="thumbnail" class="no-drag" src="/images/card-1.jpg" alt="" />
+<main id={`${postId}`} class={closed ? "closed" : ""}>
+	<img
+		id="thumbnail"
+		class="no-drag"
+		src="/images/card-{Math.round(Math.random() * 2) + 1}.jpg"
+		alt=""
+	/>
 
 	<section id="content-container">
 		<section id="title-container">
 			<section id="text-container">
-				<div id="status-light" class="warning-bg" />
-				<h1 id="title">{name}</h1>
+				{#if !closed}
+					<!-- show a status light if the post isn't closed -->
+					<div id="status-light" class="{postStatus}-bg" />
+				{/if}
+
+				<section id="title-text-container">
+					<h1 id="title">{name}</h1>
+					{#if closed}
+						<p>closed</p>
+					{/if}
+				</section>
 			</section>
 
 			<div id="stats-container">
@@ -36,7 +64,7 @@
 							</g>
 						</g>
 					</svg>
-					<p>0</p>
+					<p>{views ?? 0}</p>
 				</div>
 
 				<!-- Total money made -->
@@ -57,7 +85,7 @@
 							></path>
 						</g>
 					</svg>
-					<p>$0</p>
+					<p>${Math.round(earning * 100) / 100 ?? 0}</p>
 				</div>
 
 				<!-- Slots -->
@@ -79,7 +107,7 @@
 							></path>
 						</g>
 					</svg>
-					<p>0/0</p>
+					<p>{slotsTaken ?? 0}/{slots ?? 0}</p>
 				</div>
 			</div>
 		</section>
@@ -98,16 +126,23 @@
 	main {
 		position: relative;
 
-		margin-top: 35px;
-
+		// margin-top: 35px;
 		display: flex;
 		flex-direction: column;
 
-		width: calc(50% - 12px);
 		height: fit-content;
 		box-sizing: border-box;
 
 		overflow: hidden;
+
+		&.closed {
+			opacity: 0.5;
+			transition: 150ms opacity linear;
+
+			&:hover {
+				opacity: 1;
+			}
+		}
 
 		#content-container {
 			padding: 25px;
@@ -142,16 +177,26 @@
 						margin-right: 15px;
 					}
 
-					#title {
-						font-weight: 700;
-						font-size: 36px;
+					#title-text-container {
+						display: flex;
+						flex-direction: column;
+						align-items: flex-start;
+						margin-bottom: 10px;
 
-						width: 100%;
-						height: 48px;
+						width: fit-content;
 
-						white-space: nowrap;
-						overflow-x: hidden;
-						text-overflow: ellipsis;
+						#title {
+							font-weight: 700;
+							font-size: 36px;
+
+							width: 100%;
+							height: 42px;
+							margin-bottom: 2px;
+
+							white-space: nowrap;
+							overflow-x: hidden;
+							text-overflow: ellipsis;
+						}
 					}
 				}
 
@@ -201,15 +246,21 @@
 
 			width: 100%;
 			height: auto;
-			aspect-ratio: 2.25/1;
+			min-height: 300px;
+			max-height: calc(100vh - 300px);
 			object-fit: cover;
 
 			border-radius: 18px 18px 0px 0px;
 		}
 
 		@media screen and (max-width: $tablet-width) {
-			width: calc(50% - 10px);
-			margin-top: 30px;
+			&.closed {
+				#content-container {
+					#title-container {
+						margin-right: 0px;
+					}
+				}
+			}
 
 			#content-container {
 				padding: 20px;
@@ -229,10 +280,14 @@
 							margin: 0px 15px;
 						}
 
-						#title {
-							width: fit-content;
-							text-align: center;
-							margin-top: 10px;
+						#title-text-container {
+							align-items: center;
+
+							#title {
+								width: fit-content;
+								text-align: center;
+								margin-top: 10px;
+							}
 						}
 					}
 				}
@@ -253,8 +308,13 @@
 		}
 
 		@media screen and (max-width: $mobile-width) {
-			padding-left: 0px;
-			width: 100%;
+			&.closed {
+				#content-container {
+					#title-container {
+						margin: 0px;
+					}
+				}
+			}
 
 			#content-container {
 				width: 100%;

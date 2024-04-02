@@ -25,14 +25,34 @@
 </script>
 
 <script lang="ts">
+	import ArtistCard from "$lib/comp/profile/ArtistCard.svelte";
 	import ClientCard from "$lib/comp/profile/ClientCard.svelte";
 	import ClientCardSummary from "$lib/comp/profile/ClientCardSummary.svelte";
 	import NewCommission from "$lib/comp/profile/NewCommission.svelte";
 	import ProfileCard from "$lib/comp/profile/ProfileCard.svelte";
+	import { onMount } from "svelte";
+	import { Masonry } from "svelte-bricks";
 	import { writable } from "svelte/store";
 	import type { PageData } from "./$types";
 
+	import { TABLET_VIEWPORT_WIDTH } from "$lib/@const/dynamic.env";
+	import ArtistCardSummary from "$lib/comp/profile/ArtistCardSummary.svelte";
+
 	export let data: PageData;
+
+	// initialize the min width for the masonry cards
+	let minMasonryColWidth = 450;
+
+	const init = () => {
+		// add listener for window resize so that we can update the min width for the masonry cards
+		const updateMasonryColWidth = () => {
+			minMasonryColWidth = window.innerWidth > TABLET_VIEWPORT_WIDTH ? 450 : 300;
+		};
+		window.addEventListener("resize", updateMasonryColWidth);
+		// trigger this update once
+		updateMasonryColWidth();
+	};
+	onMount(init);
 </script>
 
 <main>
@@ -121,16 +141,26 @@
 		{:else}
 			<!-- Artist side cards -->
 
-			<p id="card-place-holder">No Activities Yet...</p>
+			{#each data.posts.filter((e) => !e.closed) as post}
+				<!-- <ArtistCardSummary
+					name={post.name}
+					views={post.views}
+					earning={post.earning}
+					slots={post.slots}
+					slotsTaken={0}
+					closed={post.closed}
+				/> -->
+				<ArtistCard
+					title={post.name}
+					status="active"
+					views={0}
+					earning={0}
+					slots={5}
+					slotsFilled={0}
+				/>
+			{/each}
 
-			<!-- <ArtistCard
-				title="My Commission"
-				status="active"
-				views={0}
-				earning={0}
-				slots={5}
-				slotsFilled={0}
-			/> -->
+			<p id="card-place-holder">No Activities Yet...</p>
 		{/if}
 	</section>
 
@@ -206,14 +236,50 @@
 
 				<NewCommission />
 
-				<pre>
-					{JSON.stringify(data.posts, null, 4)}
-				</pre>
+				<!-- <MasonryLayout
+					items={[...data.posts, ...data.posts]}
+					gap="10px"
+					breakpointCols={{
+						// breakpoint (in px) : number of columns
+						default: 2 // display 2 columns by default
+					}}
+				>
+					{#each [...data.posts, ...data.posts] as post}
+						<ArtistCardSummary
+							name={post.name}
+							views={post.views}
+							earning={post.earning}
+							slots={post.slots}
+							slotsTaken={0}
+							closed={post.closed}
+							suspended={false}
+						/>
+					{/each}
 
-				<!-- <ArtistCardSummary name="Digital Art" /> -->
+				</MasonryLayout> -->
+
+				<Masonry
+					items={data.posts}
+					minColWidth={minMasonryColWidth}
+					maxColWidth={600}
+					idKey={"id"}
+					animate={false}
+					gap={20}
+					let:item
+				>
+					<ArtistCardSummary
+						postId={item.id}
+						name={item.name}
+						views={item.views}
+						earning={item.earning}
+						slots={item.slots}
+						slotsTaken={0}
+						closed={item.closed}
+						suspended={false}
+					/>
+				</Masonry>
 
 				<!-- <p class="exclude-phone" id="card-place-holder">No Commissions Yet...</p> -->
-
 				<!-- <ArtistCard /> -->
 			{/if}
 		</section>
@@ -237,10 +303,20 @@
 
 		#all-comms {
 			#cards {
+				padding-top: 30px;
+				box-sizing: border-box;
+
 				width: 100%;
-				display: flex;
-				flex-wrap: wrap;
-				justify-content: space-between;
+
+				// display: grid;
+				// grid-template-columns: repeat(2, 50%);
+				// grid-auto-flow: dense;
+				// column-gap: 20px;
+				// row-gap: 20px;
+
+				// display: flex;
+				// flex-wrap: wrap;
+				// justify-content: space-between;
 			}
 
 			#latest {

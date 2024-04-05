@@ -22,7 +22,7 @@
 		height: auto;
 		aspect-ratio: 2.618 / 1;
 
-		margin-top: 35px;
+		margin-bottom: 20px;
 		border-radius: 18px;
 
 		svg {

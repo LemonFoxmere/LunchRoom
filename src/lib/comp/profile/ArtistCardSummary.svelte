@@ -1,7 +1,6 @@
 <script lang="ts">
 	export let name: string;
 
-	export let postId: number;
 	export let views: number;
 	export let earning: number;
 	export let slots: number;
@@ -16,13 +15,8 @@
 	$: postStatus = suspended ? "error" : filled ? "warning" : "success";
 </script>
 
-<main id={`${postId}`} class={closed ? "closed" : ""}>
-	<img
-		id="thumbnail"
-		class="no-drag"
-		src="/images/card-{Math.round(Math.random() * 2) + 1}.jpg"
-		alt=""
-	/>
+<main class={closed ? "closed" : ""}>
+	<img id="thumbnail" class="no-drag" src="/images/card-3.jpg" alt="" />
 
 	<section id="content-container">
 		<section id="title-container">
@@ -115,7 +109,10 @@
 		<section id="cta">
 			<button id="detail" class="small">View</button>
 
-			<button id="edit" class="small">Share</button>
+			<!-- only show the button if the commission isn't closed -->
+			{#if !closed}
+				<button id="edit" class="small">Share</button>
+			{/if}
 		</section>
 	</section>
 </main>

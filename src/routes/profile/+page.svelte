@@ -30,6 +30,7 @@
 	import ClientCardSummary from "$lib/comp/profile/ClientCardSummary.svelte";
 	import NewCommission from "$lib/comp/profile/NewCommission.svelte";
 	import ProfileCard from "$lib/comp/profile/ProfileCard.svelte";
+	import anime from "animejs";
 	import { onMount } from "svelte";
 	import { Masonry } from "svelte-bricks";
 	import { writable } from "svelte/store";
@@ -37,11 +38,85 @@
 
 	import { TABLET_VIEWPORT_WIDTH } from "$lib/@const/dynamic.env";
 	import ArtistCardSummary from "$lib/comp/profile/ArtistCardSummary.svelte";
+	import type { CommissionPost } from "$server/src/posts/commissions/commissions.repository";
 
 	export let data: PageData;
 
+	// UI bindings
+	let allCommsParent: HTMLElement;
+
 	// initialize the min width for the masonry cards
 	let minMasonryColWidth = 450;
+
+	// initialize and update the active commission posts based on the sorting method currently used
+	let allCommissionPosts: CommissionPost[] = data.posts;
+	let activeCommissionPosts: CommissionPost[] = data.posts.filter((e: CommissionPost) => !e.closed);
+
+	// defining the sorting function for commission posts
+	const sorterCallback = (a: CommissionPost, b: CommissionPost, method: "latest" | "name") => {
+		// get sorting criteria
+		const aCrit = method === "latest" ? a.updated_at : a.name;
+		const bCrit = method === "latest" ? b.updated_at : b.name;
+
+		if (aCrit < bCrit) {
+			return -1;
+		} else if (aCrit > bCrit) {
+			return 1;
+		} else {
+			return 0;
+		}
+	};
+
+	// updating active commission posts once the sorting method is changed
+	const updateActiveCommSorting = (method: "latest" | "name") => {
+		if ($profilePageState.artist.activeCommSorting === method) return; // don't animate if the sorting method hasn't changed
+
+		const sortPost = () => {
+			$profilePageState.artist.activeCommSorting = method;
+			// sort posts
+			activeCommissionPosts.sort((a, b) => sorterCallback(a, b, method));
+			// update UI by reassignment
+			activeCommissionPosts = activeCommissionPosts;
+		};
+	};
+	// updating all commission posts once the sorting method is changed
+	const updateAllCommSorting = (method: "latest" | "name") => {
+		if ($profilePageState.artist.allCommSorting === method) return; // don't animate if the sorting method hasn't changed
+		$profilePageState.artist.allCommSorting = method;
+
+		const sortPost = () => {
+			// split the open and closed comm posts and sort them seperately
+			const closedSubarr = allCommissionPosts.filter((e: CommissionPost) => e.closed);
+			const openSubarr = [...activeCommissionPosts];
+
+			closedSubarr.sort((a, b) => sorterCallback(a, b, method));
+			openSubarr.sort((a, b) => sorterCallback(a, b, method));
+
+			// assign new value and update UI by reassignment
+			allCommissionPosts = [...openSubarr, ...closedSubarr];
+
+			// reshow the posts after a little delay
+			setTimeout(() => {
+				anime({
+					targets: ".allCommissionCards",
+					opacity: 1,
+					scale: 1,
+					duration: 400,
+					easing: "easeOutCubic"
+				});
+			}, 50);
+		};
+
+		// start the hiding animation
+		anime({
+			targets: ".allCommissionCards",
+			opacity: 0,
+			scale: 0.95,
+			duration: 300,
+			easing: "easeOutCubic",
+			complete: sortPost
+		});
+	};
 
 	const init = () => {
 		// add listener for window resize so that we can update the min width for the masonry cards
@@ -49,6 +124,11 @@
 			minMasonryColWidth = window.innerWidth > TABLET_VIEWPORT_WIDTH ? 450 : 300;
 		};
 		window.addEventListener("resize", updateMasonryColWidth);
+
+		// initialize sorted arrays
+		updateActiveCommSorting($profilePageState.artist.activeCommSorting);
+		updateAllCommSorting($profilePageState.artist.allCommSorting);
+
 		// trigger this update once
 		updateMasonryColWidth();
 	};
@@ -96,7 +176,7 @@
 							id="latest"
 							class="small {$profilePageState.client.activeCommSorting === 'latest' ? 'solid' : ''}"
 							disabled={$profilePageState.client.activeCommSorting === "latest"}
-							on:click={() => ($profilePageState.client.activeCommSorting = "latest")}
+							on:click={() => updateActiveCommSorting("latest")}
 						>
 							Latest
 						</button>
@@ -104,7 +184,7 @@
 							id="name"
 							class="small {$profilePageState.client.activeCommSorting === 'name' ? 'solid' : ''}"
 							disabled={$profilePageState.client.activeCommSorting === "name"}
-							on:click={() => ($profilePageState.client.activeCommSorting = "name")}
+							on:click={() => updateActiveCommSorting("name")}
 						>
 							Name
 						</button>
@@ -115,7 +195,7 @@
 							id="latest"
 							class="small {$profilePageState.artist.activeCommSorting === 'latest' ? 'solid' : ''}"
 							disabled={$profilePageState.artist.activeCommSorting === "latest"}
-							on:click={() => ($profilePageState.artist.activeCommSorting = "latest")}
+							on:click={() => updateActiveCommSorting("latest")}
 						>
 							Latest
 						</button>
@@ -123,7 +203,7 @@
 							id="name"
 							class="small {$profilePageState.artist.activeCommSorting === 'name' ? 'solid' : ''}"
 							disabled={$profilePageState.artist.activeCommSorting === "name"}
-							on:click={() => ($profilePageState.artist.activeCommSorting = "name")}
+							on:click={() => updateActiveCommSorting("name")}
 						>
 							Name
 						</button>
@@ -186,7 +266,7 @@
 							id="latest"
 							class="small {$profilePageState.client.allCommSorting === 'latest' ? 'solid' : ''}"
 							disabled={$profilePageState.client.allCommSorting === "latest"}
-							on:click={() => ($profilePageState.client.allCommSorting = "latest")}
+							on:click={() => updateAllCommSorting("latest")}
 						>
 							Latest
 						</button>
@@ -194,7 +274,7 @@
 							id="name"
 							class="small {$profilePageState.client.allCommSorting === 'name' ? 'solid' : ''}"
 							disabled={$profilePageState.client.allCommSorting === "name"}
-							on:click={() => ($profilePageState.client.allCommSorting = "name")}
+							on:click={() => updateAllCommSorting("name")}
 						>
 							Name
 						</button>
@@ -205,7 +285,7 @@
 							id="latest"
 							class="small {$profilePageState.artist.allCommSorting === 'latest' ? 'solid' : ''}"
 							disabled={$profilePageState.artist.allCommSorting === "latest"}
-							on:click={() => ($profilePageState.artist.allCommSorting = "latest")}
+							on:click={() => updateAllCommSorting("latest")}
 						>
 							Latest
 						</button>
@@ -213,7 +293,7 @@
 							id="name"
 							class="small {$profilePageState.artist.allCommSorting === 'name' ? 'solid' : ''}"
 							disabled={$profilePageState.artist.allCommSorting === "name"}
-							on:click={() => ($profilePageState.artist.allCommSorting = "name")}
+							on:click={() => updateAllCommSorting("name")}
 						>
 							Name
 						</button>
@@ -259,7 +339,7 @@
 				</MasonryLayout> -->
 
 				<Masonry
-					items={data.posts}
+					items={allCommissionPosts}
 					minColWidth={minMasonryColWidth}
 					maxColWidth={600}
 					idKey={"id"}
@@ -267,16 +347,17 @@
 					gap={20}
 					let:item
 				>
-					<ArtistCardSummary
-						postId={item.id}
-						name={item.name}
-						views={item.views}
-						earning={item.earning}
-						slots={item.slots}
-						slotsTaken={0}
-						closed={item.closed}
-						suspended={false}
-					/>
+					<div class="allCommissionCards">
+						<ArtistCardSummary
+							name={item.name}
+							views={item.views}
+							earning={item.earning}
+							slots={item.slots}
+							slotsTaken={0}
+							closed={item.closed}
+							suspended={false}
+						/>
+					</div>
 				</Masonry>
 
 				<!-- <p class="exclude-phone" id="card-place-holder">No Commissions Yet...</p> -->

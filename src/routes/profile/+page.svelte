@@ -25,109 +25,77 @@
 </script>
 
 <script lang="ts">
-	import ArtistCard from "$lib/comp/profile/ArtistCard.svelte";
-	import ClientCard from "$lib/comp/profile/ClientCard.svelte";
-	import ClientCardSummary from "$lib/comp/profile/ClientCardSummary.svelte";
-	import NewCommission from "$lib/comp/profile/NewCommission.svelte";
 	import ProfileCard from "$lib/comp/profile/ProfileCard.svelte";
-	import anime from "animejs";
 	import { onMount } from "svelte";
-	import { Masonry } from "svelte-bricks";
 	import { writable } from "svelte/store";
 	import type { PageData } from "./$types";
 
-	import { TABLET_VIEWPORT_WIDTH } from "$lib/@const/dynamic.env";
-	import ArtistCardSummary from "$lib/comp/profile/ArtistCardSummary.svelte";
+	import { API_HOST, TABLET_VIEWPORT_WIDTH } from "$lib/@const/dynamic.env";
+	import CardMasonry from "$lib/comp/profile/sections/CardMasonry.svelte";
+	import ArtistCardList from "$lib/comp/profile/sections/artist/ArtistCardList.svelte";
 	import type { CommissionPost } from "$server/src/posts/commissions/commissions.repository";
+	import type { UserProfile } from "$server/src/user/profile/profile.repository";
+	import LoadScreen from "./../../lib/comp/ui/general/LoadScreen.svelte";
 
 	export let data: PageData;
-
-	// UI bindings
-	let allCommsParent: HTMLElement;
 
 	// initialize the min width for the masonry cards
 	let minMasonryColWidth = 450;
 
-	// initialize and update the active commission posts based on the sorting method currently used
-	let allCommissionPosts: CommissionPost[] = data.posts;
-	let activeCommissionPosts: CommissionPost[] = data.posts.filter((e: CommissionPost) => !e.closed);
+	// the active commission posts all commission posts
+	let allCommissionPosts: CommissionPost[] = [];
+	let activeCommissionPosts: CommissionPost[] = [];
 
-	// defining the sorting function for commission posts
-	const sorterCallback = (a: CommissionPost, b: CommissionPost, method: "latest" | "name") => {
-		// get sorting criteria
-		const aCrit = method === "latest" ? a.updated_at : a.name;
-		const bCrit = method === "latest" ? b.updated_at : b.name;
+	let allLoaded: boolean = false;
+	let profile: UserProfile;
 
-		if (aCrit < bCrit) {
-			return -1;
-		} else if (aCrit > bCrit) {
-			return 1;
-		} else {
-			return 0;
+	// Initialize and load all data on page load
+	const loadData = async (): Promise<number | null> => {
+		// load in data for the user's profile
+		let profileResp: Response;
+		try {
+			profileResp = await fetch(`${API_HOST}/user/profile?access_token=${data.accessToken}`);
+		} catch (e) {
+			console.log(typeof e, e);
+			// TODO: test later
+			return 1; // todo: change later to status code
 		}
+		profile = await profileResp.json();
+
+		// get the current artist posts from the server
+		let postResp: Response;
+		try {
+			postResp = await fetch(`${API_HOST}/commissions?access_token=${data.accessToken}`);
+		} catch (e) {
+			console.log(typeof e, e);
+			return 1; // todo: change later to status code
+		}
+		// assign posts
+		allCommissionPosts = await postResp.json();
+		activeCommissionPosts = allCommissionPosts.filter((e: CommissionPost) => !e.closed);
+
+		return null;
 	};
 
-	// updating active commission posts once the sorting method is changed
-	const updateActiveCommSorting = (method: "latest" | "name") => {
-		if ($profilePageState.artist.activeCommSorting === method) return; // don't animate if the sorting method hasn't changed
+	const init = async () => {
+		// first, we check if the use is logged in with a valid accessToken. If not, redirect to the signin page
+		if (!data.accessToken) window.location.href = "/signin";
 
-		const sortPost = () => {
-			$profilePageState.artist.activeCommSorting = method;
-			// sort posts
-			activeCommissionPosts.sort((a, b) => sorterCallback(a, b, method));
-			// update UI by reassignment
-			activeCommissionPosts = activeCommissionPosts;
-		};
-	};
-	// updating all commission posts once the sorting method is changed
-	const updateAllCommSorting = (method: "latest" | "name") => {
-		if ($profilePageState.artist.allCommSorting === method) return; // don't animate if the sorting method hasn't changed
-		$profilePageState.artist.allCommSorting = method;
+		// asynchronously load the data
+		loadData().then((status) => {
+			if (status !== null) {
+				console.error(status);
+				return;
+			}
 
-		const sortPost = () => {
-			// split the open and closed comm posts and sort them seperately
-			const closedSubarr = allCommissionPosts.filter((e: CommissionPost) => e.closed);
-			const openSubarr = [...activeCommissionPosts];
-
-			closedSubarr.sort((a, b) => sorterCallback(a, b, method));
-			openSubarr.sort((a, b) => sorterCallback(a, b, method));
-
-			// assign new value and update UI by reassignment
-			allCommissionPosts = [...openSubarr, ...closedSubarr];
-
-			// reshow the posts after a little delay
-			setTimeout(() => {
-				anime({
-					targets: ".allCommissionCards",
-					opacity: 1,
-					scale: 1,
-					duration: 400,
-					easing: "easeOutCubic"
-				});
-			}, 50);
-		};
-
-		// start the hiding animation
-		anime({
-			targets: ".allCommissionCards",
-			opacity: 0,
-			scale: 0.95,
-			duration: 300,
-			easing: "easeOutCubic",
-			complete: sortPost
+			allLoaded = true;
 		});
-	};
 
-	const init = () => {
 		// add listener for window resize so that we can update the min width for the masonry cards
 		const updateMasonryColWidth = () => {
 			minMasonryColWidth = window.innerWidth > TABLET_VIEWPORT_WIDTH ? 450 : 300;
 		};
 		window.addEventListener("resize", updateMasonryColWidth);
-
-		// initialize sorted arrays
-		updateActiveCommSorting($profilePageState.artist.activeCommSorting);
-		updateAllCommSorting($profilePageState.artist.allCommSorting);
 
 		// trigger this update once
 		updateMasonryColWidth();
@@ -136,235 +104,56 @@
 </script>
 
 <main>
-	<section id="profile">
-		<!-- Profile Card -->
-		<ProfileCard profileData={data.profile} />
+	{#if !allLoaded}
+		<LoadScreen />
+	{:else}
+		<section id="profile">
+			<!-- Profile Card -->
+			<ProfileCard profileData={profile} />
 
-		<!-- CTA -->
-		<section id="account-setting-container">
-			<!-- desktop -->
-			<button class="text underlined only-desktop" id="edit">Edit Profile</button>
-			<button class="text underlined only-desktop" id="copy-link">Copy Link to Profile</button>
-			<!-- tablet and mobile -->
-			<button class="underlined small exclude-desktop" id="edit">Edit Profile</button>
-			<button class="underlined small exclude-desktop" id="copy-link">Copy Link to Profile</button>
-		</section>
-	</section>
-
-	<section id="active-comms" class="comm-sections">
-		<!-- Section Title -->
-		<section id="title">
-			<!-- Change title name dynamically based on the state of the page -->
-			<section id="text-container">
-				<h1>
-					{#if $profilePageState.type === "client"}
-						Current Commissions
-					{:else}
-						Active Commission Posts
-					{/if}
-				</h1>
-				<button id="new-comm" class="solid small exclude-phone">New Commission</button>
+			<!-- CTA -->
+			<section id="account-setting-container">
+				<!-- desktop -->
+				<button class="text underlined only-desktop" id="edit">Edit Profile</button>
+				<button class="text underlined only-desktop" id="copy-link">Copy Link to Profile</button>
+				<!-- tablet and mobile -->
+				<button class="underlined small exclude-desktop" id="edit">Edit Profile</button>
+				<button class="underlined small exclude-desktop" id="copy-link">Copy Link to Profile</button
+				>
 			</section>
-
-			<div id="filter-container">
-				<p>Sort By</p>
-
-				<!-- sort button organized by current profile type -->
-				{#if $profilePageState.type === "client"}
-					<section id="cta">
-						<button
-							id="latest"
-							class="small {$profilePageState.client.activeCommSorting === 'latest' ? 'solid' : ''}"
-							disabled={$profilePageState.client.activeCommSorting === "latest"}
-							on:click={() => updateActiveCommSorting("latest")}
-						>
-							Latest
-						</button>
-						<button
-							id="name"
-							class="small {$profilePageState.client.activeCommSorting === 'name' ? 'solid' : ''}"
-							disabled={$profilePageState.client.activeCommSorting === "name"}
-							on:click={() => updateActiveCommSorting("name")}
-						>
-							Name
-						</button>
-					</section>
-				{:else if $profilePageState.type === "artist"}
-					<section id="cta">
-						<button
-							id="latest"
-							class="small {$profilePageState.artist.activeCommSorting === 'latest' ? 'solid' : ''}"
-							disabled={$profilePageState.artist.activeCommSorting === "latest"}
-							on:click={() => updateActiveCommSorting("latest")}
-						>
-							Latest
-						</button>
-						<button
-							id="name"
-							class="small {$profilePageState.artist.activeCommSorting === 'name' ? 'solid' : ''}"
-							disabled={$profilePageState.artist.activeCommSorting === "name"}
-							on:click={() => updateActiveCommSorting("name")}
-						>
-							Name
-						</button>
-					</section>
-				{/if}
-			</div>
 		</section>
 
-		{#if $profilePageState.type === "client"}
-			<!-- Client side cards -->
+		{#if $profilePageState.type === "artist"}
+			<section id="artist-content">
+				<!-- The active commissions section -->
+				<ArtistCardList
+					title={"Active Commission Posts"}
+					bind:posts={activeCommissionPosts}
+					bind:method={$profilePageState.artist.activeCommSorting}
+				>
+					<button id="new-comm" class="solid small exclude-phone">New Commission</button>
+				</ArtistCardList>
 
-			<!-- <p id="card-place-holder">No Commissions Yet...</p> -->
-
-			<ClientCard />
-		{:else}
-			<!-- Artist side cards -->
-
-			{#each data.posts.filter((e) => !e.closed) as post}
-				<!-- <ArtistCardSummary
-					name={post.name}
-					views={post.views}
-					earning={post.earning}
-					slots={post.slots}
-					slotsTaken={0}
-					closed={post.closed}
-				/> -->
-				<ArtistCard
-					title={post.name}
-					status="active"
-					views={0}
-					earning={0}
-					slots={5}
-					slotsFilled={0}
+				<!-- The all commissions section -->
+				<CardMasonry
+					title={"All Commission Posts"}
+					bind:posts={allCommissionPosts}
+					bind:method={$profilePageState.artist.allCommSorting}
+					{minMasonryColWidth}
 				/>
-			{/each}
-
-			<p id="card-place-holder">No Activities Yet...</p>
+			</section>
+		{:else}
+			<section id="artist-content">
+				<!-- The all commissions section -->
+				<CardMasonry
+					title={"All Commission Posts"}
+					posts={[]}
+					bind:method={$profilePageState.client.allCommSorting}
+					{minMasonryColWidth}
+				/>
+			</section>
 		{/if}
-	</section>
-
-	<section id="all-comms" class="comm-sections">
-		<!-- Section Title -->
-		<section id="title">
-			<!-- Change title name dynamically based on the state of the page -->
-			<h1>
-				{#if $profilePageState.type === "client"}
-					Past Commissions
-				{:else}
-					All Commission Posts
-				{/if}
-			</h1>
-
-			<div id="filter-container">
-				<p>Sort By</p>
-
-				<!-- sort button organized by current profile type -->
-				{#if $profilePageState.type === "client"}
-					<section id="cta">
-						<button
-							id="latest"
-							class="small {$profilePageState.client.allCommSorting === 'latest' ? 'solid' : ''}"
-							disabled={$profilePageState.client.allCommSorting === "latest"}
-							on:click={() => updateAllCommSorting("latest")}
-						>
-							Latest
-						</button>
-						<button
-							id="name"
-							class="small {$profilePageState.client.allCommSorting === 'name' ? 'solid' : ''}"
-							disabled={$profilePageState.client.allCommSorting === "name"}
-							on:click={() => updateAllCommSorting("name")}
-						>
-							Name
-						</button>
-					</section>
-				{:else if $profilePageState.type === "artist"}
-					<section id="cta">
-						<button
-							id="latest"
-							class="small {$profilePageState.artist.allCommSorting === 'latest' ? 'solid' : ''}"
-							disabled={$profilePageState.artist.allCommSorting === "latest"}
-							on:click={() => updateAllCommSorting("latest")}
-						>
-							Latest
-						</button>
-						<button
-							id="name"
-							class="small {$profilePageState.artist.allCommSorting === 'name' ? 'solid' : ''}"
-							disabled={$profilePageState.artist.allCommSorting === "name"}
-							on:click={() => updateAllCommSorting("name")}
-						>
-							Name
-						</button>
-					</section>
-				{/if}
-			</div>
-		</section>
-
-		<section id="cards">
-			{#if $profilePageState.type === "client"}
-				<!-- Client side cards -->
-
-				<NewCommission />
-
-				<ClientCardSummary name="Digital Art" />
-
-				<!-- <p class="exclude-phone" id="card-place-holder">No Commissions Yet...</p> -->
-			{:else}
-				<!-- Artist side cards -->
-
-				<NewCommission />
-
-				<!-- <MasonryLayout
-					items={[...data.posts, ...data.posts]}
-					gap="10px"
-					breakpointCols={{
-						// breakpoint (in px) : number of columns
-						default: 2 // display 2 columns by default
-					}}
-				>
-					{#each [...data.posts, ...data.posts] as post}
-						<ArtistCardSummary
-							name={post.name}
-							views={post.views}
-							earning={post.earning}
-							slots={post.slots}
-							slotsTaken={0}
-							closed={post.closed}
-							suspended={false}
-						/>
-					{/each}
-
-				</MasonryLayout> -->
-
-				<Masonry
-					items={allCommissionPosts}
-					minColWidth={minMasonryColWidth}
-					maxColWidth={600}
-					idKey={"id"}
-					animate={false}
-					gap={20}
-					let:item
-				>
-					<div class="allCommissionCards">
-						<ArtistCardSummary
-							name={item.name}
-							views={item.views}
-							earning={item.earning}
-							slots={item.slots}
-							slotsTaken={0}
-							closed={item.closed}
-							suspended={false}
-						/>
-					</div>
-				</Masonry>
-
-				<!-- <p class="exclude-phone" id="card-place-holder">No Commissions Yet...</p> -->
-				<!-- <ArtistCard /> -->
-			{/if}
-		</section>
-	</section>
+	{/if}
 </main>
 
 <style lang="scss">
@@ -381,6 +170,15 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: flex-start;
+
+		#artist-content {
+			width: 100%;
+			margin-top: 100px;
+
+			display: flex;
+			flex-direction: column;
+			row-gap: 120px;
+		}
 
 		#all-comms {
 			#cards {
@@ -507,14 +305,6 @@
 
 		@media screen and (max-width: $tablet-width) {
 			width: 100%; // adjust to full size
-
-			#active-comms {
-				#title {
-					h1 {
-						font-size: 32px;
-					}
-				}
-			}
 
 			#profile {
 				#account-setting-container {

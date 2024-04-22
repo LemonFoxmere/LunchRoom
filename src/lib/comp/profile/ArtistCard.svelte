@@ -108,8 +108,6 @@
 
 	main {
 		position: relative;
-
-		margin-top: 35px;
 		border-radius: 18px;
 
 		width: 100%;

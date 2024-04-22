@@ -1,4 +1,9 @@
 <script lang="ts">
+	export let title: string;
+	// TODO: fill in later
+	export let status: "active" | "filled" | "inactive";
+
+	export let name: string; // change later to user UID
 </script>
 
 <main>
@@ -10,7 +15,7 @@
 			<h2 id="name">Lemon Foxmere</h2>
 		</section>
 
-		<h1 id="title">Digital Painting</h1>
+		<h1 id="title">{title}</h1>
 		<h2 class="exclude-phone warning" id="status">Pending Artist Verification</h2>
 
 		<p id="desc">

@@ -3,7 +3,6 @@
 	import { onMount } from "svelte";
 	import { Masonry } from "svelte-bricks";
 	import ArtistCardSummary from "../ArtistCardSummary.svelte";
-	import NewCommission from "../NewCommission.svelte";
 
 	export let title: string;
 	export let posts: CommissionPost[];
@@ -121,9 +120,6 @@
 	</section>
 
 	<section id="posts">
-		<!-- New commission button for the mobile users -->
-		<NewCommission />
-
 		<Masonry
 			items={posts}
 			minColWidth={minMasonryColWidth}

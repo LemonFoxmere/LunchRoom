@@ -131,7 +131,9 @@
 					bind:posts={activeCommissionPosts}
 					bind:method={$profilePageState.artist.activeCommSorting}
 				>
-					<button id="new-comm" class="solid small exclude-phone">New Commission</button>
+					<a href="/profile/new/post">
+						<button id="new-comm" class="solid small exclude-phone">New Commission</button>
+					</a>
 				</ArtistCardList>
 
 				<!-- The all commissions section -->

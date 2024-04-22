@@ -2,6 +2,7 @@
 	import { type CommissionPost } from "$server/src/posts/commissions/commissions.repository";
 	import { onMount } from "svelte";
 	import ArtistCard from "../../ArtistCard.svelte";
+	import NewCommission from "../../NewCommission.svelte";
 
 	export let title: string;
 	export let posts: CommissionPost[];
@@ -107,6 +108,9 @@
 
 	<!-- The actual posts -->
 	<section id="posts">
+		<!-- New commission button for the mobile users -->
+		<NewCommission />
+
 		{#each posts as post}
 			<div
 				class="cards {cardDisabled ? 'hidden' : ''}"

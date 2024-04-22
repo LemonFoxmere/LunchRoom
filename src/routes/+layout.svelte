@@ -20,10 +20,12 @@
 
 	enum barTypes {
 		default = "default",
-		profile = "profile"
+		profile = "profile",
+		none = "none"
 	}
 	const urlSpecificBar: Record<string, `${barTypes}`> = {
-		"/profile": barTypes.profile
+		"/profile": barTypes.profile,
+		"/profile/new/post": barTypes.none
 	};
 	let navbarBarType: `${barTypes}`;
 	$: navbarBarType = urlSpecificBar[data.url] ?? barTypes.default;

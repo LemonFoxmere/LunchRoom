@@ -51,6 +51,10 @@
 				<a href="/signin">
 					<button class="text">Sign In</button>
 				</a>
+			{:else}
+				<a href="/profile">
+					<button class="text">My Profile</button>
+				</a>
 			{/if}
 
 			<a target="_blank">

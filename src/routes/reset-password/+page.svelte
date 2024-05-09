@@ -1,11 +1,6 @@
 <script lang="ts">
 	import { API_HOST } from "$lib/@const/dynamic.env";
 	import NavArrows from "$lib/comp/ui/general/NavArrows.svelte";
-	import {
-		codeValid,
-		sendVerificationEmail,
-		type uniqueSignupProcessStatus
-	} from "$route/signup/+page.svelte";
 	import Cookies from "js-cookie";
 	import EmailFC from "./../../lib/comp/reset-password/flowContent/EmailFC.svelte";
 	import PasswordFC from "./../../lib/comp/reset-password/flowContent/PasswordFC.svelte";

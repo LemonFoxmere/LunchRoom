@@ -3,7 +3,8 @@
 	import BlankBar, { TopBarLayout } from "../TopBar.svelte";
 	import MobileMenu from "./../MobileMenu.svelte";
 
-	export let accessToken: string | undefined;
+	export let accessToken: string | null;
+	export let avatarUrl: string;
 	export let url: string;
 
 	export let animResolution: number;
@@ -39,29 +40,43 @@
 		{topBarLayout}
 		{closeMobileMenu}
 	>
-		<section class="only-phone cta">
-			<MenuButton opened={mobileMenuOpened} on:click={toggleMobileMenu} />
+		<section id="mobile-cta-container" class="only-phone cta">
+			{#if !accessToken}
+				<MenuButton opened={mobileMenuOpened} on:click={toggleMobileMenu} />
+			{:else}
+				<button id="avatar" class="cta-buttons text" on:click={toggleMobileMenu}>
+					<img src={avatarUrl} alt="Profile Picture" />
+				</button>
+			{/if}
 		</section>
 
 		<section
+			id="desktop-cta-container"
 			class="exclude-phone cta"
 			style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms"
 		>
 			{#if !accessToken}
-				<a href="/signin">
+				<a id="sign-in" class="cta-links" href="/signin">
 					<button class="text">Sign In</button>
 				</a>
 			{:else}
-				<a href="/profile">
-					<button class="text">My Profile</button>
+				<a id="avatar" class="cta-links" href="/profile">
+					<button class="text">
+						<img src={avatarUrl} alt="Profile Picture" />
+					</button>
 				</a>
 			{/if}
 
-			<a target="_blank">
+			<a id="community" class="cta-links" target="_blank">
 				<button class="text">Community</button>
 			</a>
 
-			<a href="https://github.com/LemonFoxmere/LunchRoom" target="_blank">
+			<a
+				id="github"
+				class="cta-links"
+				href="https://github.com/LemonFoxmere/LunchRoom"
+				target="_blank"
+			>
 				<button class="text">GitHub</button>
 			</a>
 		</section>
@@ -110,6 +125,86 @@
 		top: 0;
 
 		z-index: 10;
+
+		.cta {
+			display: flex;
+			flex-direction: row-reverse;
+
+			animation: cta-shrink forwards;
+			animation-play-state: paused;
+			animation-timing-function: $out-expo;
+
+			&#mobile-cta-container {
+				#avatar {
+					$avatar-size: 48px;
+
+					width: $avatar-size;
+					height: $avatar-size;
+
+					border-radius: 100%;
+
+					img {
+						width: 100%;
+						height: 100%;
+					}
+				}
+			}
+
+			&#desktop-cta-container {
+				display: flex;
+				align-items: center;
+
+				.cta-links {
+					text-decoration: none;
+					margin-right: 48px;
+
+					&:first-child {
+						margin: 0;
+					}
+
+					button {
+						display: flex;
+						align-items: center;
+
+						svg {
+							margin-left: 8px;
+							height: 14px;
+						}
+					}
+				}
+
+				#avatar {
+					$avatar-size: 42px;
+					width: $avatar-size;
+					height: $avatar-size;
+					border-radius: 100%;
+
+					button {
+						padding: 0px;
+						width: 100%;
+						height: 100%;
+
+						img {
+							display: block;
+							margin: 0;
+
+							width: 100%;
+							height: 100%;
+							object-fit: cover;
+						}
+					}
+				}
+			}
+
+			@keyframes cta-shrink {
+				from {
+					transform: scale(100%);
+				}
+				to {
+					transform: scale(90%);
+				}
+			}
+		}
 
 		#mobile-cta {
 			width: 100%;
@@ -182,43 +277,6 @@
 							opacity: 0;
 							transform: translateY(-15px);
 						}
-					}
-				}
-			}
-		}
-
-		.cta {
-			display: flex;
-			flex-direction: row-reverse;
-
-			animation: cta-shrink forwards;
-			animation-play-state: paused;
-			animation-timing-function: $out-expo;
-
-			@keyframes cta-shrink {
-				from {
-					transform: scale(100%);
-				}
-				to {
-					transform: scale(90%);
-				}
-			}
-
-			a {
-				text-decoration: none;
-				margin-right: 48px;
-
-				&:first-child {
-					margin: 0;
-				}
-
-				button {
-					display: flex;
-					align-items: center;
-
-					svg {
-						margin-left: 8px;
-						height: 14px;
 					}
 				}
 			}

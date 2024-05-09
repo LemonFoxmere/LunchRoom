@@ -1,10 +1,8 @@
-import type { RequestEvent } from "@sveltejs/kit";
+import type { RequestEvent } from "./$types";
 
-export async function load(event: RequestEvent) {
+export const load = async (event: RequestEvent) => {
 	return {
-		// return user cookies
-		// signInText: event.url.pathname.split("/")[event.url.pathname.split("/").length -1] === "signin" ? "Sign Up" : "Sign In",
-		accessToken: event.cookies.get("access_token"),
-		url: event.url.pathname
+		url: event.request.url,
+		session: event.locals.session
 	};
-}
+};

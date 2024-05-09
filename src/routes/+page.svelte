@@ -1,14 +1,19 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import type { PageData } from "./$types";
 
 	export let data: PageData;
+
+	onMount(() => {
+		(async () => {})();
+	});
 </script>
 
 <main>
 	<div id="frontpage">
 		<section id="title">
-			<h1>YCH</h1>
-			<h3><em>Noun:</em> Your Commission Here</h3>
+			<h1>UMG</h1>
+			<h4>ur mom gay 🤪</h4>
 		</section>
 
 		<section id="cta">
@@ -16,7 +21,6 @@
 				<a href="/signup">
 					<button>Sign Up</button>
 				</a>
-				<button class="text">What?</button>
 			{:else}
 				<a href="/profile">
 					<button class="solid"> View Profile</button>
@@ -44,11 +48,14 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			flex-direction: row;
+			flex-direction: column;
+
+			row-gap: 32px;
 
 			#title {
 				display: flex;
 				flex-direction: column;
+				align-items: center;
 
 				h1 {
 					font-size: 64px;
@@ -56,17 +63,16 @@
 					transform: translate(-10px, 0px);
 				}
 
-				h3 {
+				h4 {
 					margin-top: 12px;
 					font-weight: 400;
-					color: $primary;
+					color: $tertiary;
 				}
 			}
 
 			#cta {
 				display: flex;
 				flex-direction: row;
-				margin: 0 0 0 82px;
 				box-sizing: border-box;
 
 				button {
@@ -133,11 +139,6 @@
 				height: calc(100vh - $urlbar-height - $navbar-height);
 				flex-direction: column;
 			}
-		}
-
-		p {
-			width: min(600px, calc(100% - 50px));
-			margin-bottom: 200px;
 		}
 
 		@media screen and (max-width: $mobile-width) {

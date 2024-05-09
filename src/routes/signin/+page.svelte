@@ -1,375 +1,450 @@
 <script lang="ts">
-	import { API_HOST } from "$lib/@const/dynamic.env";
-	import Cookies from "js-cookie";
-	import SignInLock from "./../../lib/comp/ui/account/SignInLock.svelte";
-	import LoadingDots from "./../../lib/comp/ui/general/LoadingDots.svelte";
-	import PasswordVisibleToggle from "./../../lib/comp/ui/general/PasswordVisibleToggle.svelte";
+	import LoadingDots from "$lib/comp/ui/general/LoadingDots.svelte";
+	import { BASE_URL, supabase } from "$lib/supabaseClient";
+	import { onMount } from "svelte";
 
-	import type { PageData } from "./$types";
+	let authorized = false;
+	let authorizing = false;
 
-	let inputField: HTMLElement;
-	let emailInput: HTMLInputElement;
-	let passwordInput: HTMLInputElement;
-	let keepSigninInput: HTMLInputElement;
+	let errorMsg: string;
 
-	let authStatus: "norm" | "pending" | "fail" | "success" = "norm";
+	let email: string = "";
+	let emailField: HTMLInputElement;
 
-	export let data: PageData;
+	let password: string = "";
+	let passwordField: HTMLInputElement;
 
-	const animateInputFailure = () => {
-		inputField.classList.remove("no-anim");
-		inputField.onanimationend = () => {
-			inputField.classList.add("no-anim");
-			inputField.onanimationend = null;
+	// email validation
+	$: emailIsValid = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email);
+
+	// animate the error shake for a certain text box
+	const animateInputFailure = (field: HTMLInputElement) => {
+		field.classList.remove("no-anim");
+		field.onanimationend = () => {
+			field.classList.add("no-anim");
+			field.onanimationend = null;
 		};
 	};
 
-	const signin = async () => {
-		// do not perform the request if the auth status is pending
-		if (authStatus === "pending") return;
-		authStatus = "pending";
+	// check if the fields are filled out correctly.
+	const fieldsValid = (): boolean => {
+		if (email && emailIsValid && password) return true;
 
-		const email = emailInput.value;
-		const password = passwordInput.value;
-
-		// check if email and password are empty
-		if (!email || !password || !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email)) {
-			animateInputFailure();
-			authStatus = "norm";
-			return;
+		if (!password) {
+			errorMsg = "Please enter a password";
+			animateInputFailure(passwordField);
+		}
+		if (!emailIsValid) {
+			errorMsg = "Please a valid email address";
+			animateInputFailure(emailField);
+		}
+		if (!email) {
+			errorMsg = "Please enter your email";
+			animateInputFailure(emailField);
 		}
 
-		const resp = await fetch(`${API_HOST}/auth/signin/`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				email: email,
-				password: password
-			})
-		});
-
-		// in the case of login failure, set a cooldown of 3 seconds and set status to failed
-		if (!resp.ok) {
-			setTimeout(() => {
-				authStatus = "fail";
-				animateInputFailure();
-			}, 1000);
-			return;
-		}
-
-		const body = await resp.json();
-
-		const accessToken = body.access_token;
-
-		// store access token in cookies
-		if (keepSigninInput.checked) {
-			Cookies.set("access_token", accessToken, { expires: 7 });
-		} else {
-			Cookies.set("access_token", accessToken);
-		}
-
-		authStatus = "success";
-
-		// TODO: redirect to profile page
-		window.location.href = "/";
+		return false;
 	};
 
-	let passwordVisible = false;
+	const signinWithEmail = async () => {
+		errorMsg = "";
+		if (!fieldsValid()) return; // check if the fields are filled out correctly.
+
+		authorizing = true;
+
+		const { error } = await supabase.auth.signInWithPassword({
+			email: email,
+			password: password
+		});
+
+		if (error) {
+			// delay 1 second before denying access
+
+			setTimeout(() => {
+				animateInputFailure(passwordField);
+				animateInputFailure(emailField);
+
+				errorMsg = error.message;
+
+				if (errorMsg == "Invalid login credentials") errorMsg = "Incorrect email or password.";
+
+				authorizing = false;
+			}, 1000);
+		} else {
+			authorized = true;
+			authorizing = false;
+
+			// redirect to the home page. TODO: redirect to the profile page later.
+			location.href = "/";
+		}
+	};
+
+	const signupWithOauth = async (provider: "google" | "discord" | "twitter") => {
+		const { error } = await supabase.auth.signInWithOAuth({
+			provider: provider,
+			options: {
+				redirectTo: `${BASE_URL}/`
+			}
+		});
+		if (error) {
+			errorMsg = error.message;
+		}
+	};
+
+	const init = () => {};
+
+	onMount(init);
 </script>
 
-<SignInLock accessTokenExist={data.accessTokenExist}>
-	<main>
-		<h1>Sign in to <span>LunchRoom</span></h1>
-
-		<form>
-			<section bind:this={inputField} id="input-container" class="no-anim">
-				<input
-					bind:this={emailInput}
-					id="email-input"
-					class={`${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
-					type="email"
-					placeholder="triplepaw@lunchroom.ink"
-				/>
-
-				<div id="password-container">
-					<input
-						bind:this={passwordInput}
-						id="password-input"
-						class={`${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
-						type={`${passwordVisible ? "text" : "password"}`}
-						placeholder="••••••••••"
-					/>
-
-					<div id="toggle-visible">
-						<PasswordVisibleToggle bind:passwordVisible />
-					</div>
-				</div>
+<main>
+	<!-- We need another layer of container around the sign up box to account for overflow padding -->
+	<section id="signup-box-container">
+		<div id="signup-box">
+			<section id="title-container">
+				<h1>Sign in to LunchRoom</h1>
+				<p>Welcome back!</p>
 			</section>
 
-			<button
-				id="submit"
-				type="submit"
-				class={`solid ${authStatus === "pending" || authStatus === "success" ? "disabled" : ""}`}
-				on:click={signin}
-			>
-				{#if authStatus === "pending" || authStatus === "success"}
-					<LoadingDots />
-				{:else}
-					Sign in
-				{/if}
-			</button>
+			<section id="form-container">
+				<!-- Email sign up -->
+				<form id="email-form">
+					<section id="input-container">
+						<!-- email -->
+						<section class="input-section" id="email">
+							<h6>Email</h6>
+							<input
+								bind:this={emailField}
+								bind:value={email}
+								class="no-anim"
+								type="text"
+								placeholder="example@lunchroom.ink"
+							/>
+						</section>
 
-			<a
-				id="keep-signin-container"
-				on:click={() => {
-					keepSigninInput.click();
-				}}
-			>
-				<div id="checkbox-container">
-					<input bind:this={keepSigninInput} id="checkbox" type="checkbox" checked />
+						<!-- password -->
+						<section class="input-section" id="password">
+							<h6>Password</h6>
+							<input
+								bind:this={passwordField}
+								bind:value={password}
+								class="no-anim"
+								type="password"
+								placeholder="••••••••••"
+							/>
+						</section>
+					</section>
 
-					<svg x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;">
-						<style type="text/css">
-							.st0 {
-								stroke: currentColor;
-								fill: currentColor;
-								stroke-miterlimit: 10;
-							}
-						</style>
-						<path
-							class="st0"
-							d="M9.9,18c-0.3,0-0.5-0.1-0.7-0.3l-4.9-5.2c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l4.1,4.4l8.4-9.2
-							c0.3-0.4,1-0.5,1.4-0.2c0.4,0.3,0.5,1,0.2,1.4c0,0-0.1,0.1-0.1,0.1l-9.1,10C10.4,17.9,10.1,18,9.9,18L9.9,18z"
-						/>
-					</svg>
-				</div>
+					<section id="cta">
+						<!-- submit -->
+						<button
+							id="submit"
+							class="solid"
+							type="submit"
+							disabled={authorizing}
+							on:click={signinWithEmail}
+						>
+							{#if !authorizing}
+								Continue
+							{:else}
+								<LoadingDots />
+							{/if}
+						</button>
 
-				<p id="label" class="no-drag">Keep me signed in</p>
-			</a>
+						<!-- error message -->
+						{#if errorMsg}
+							<p class="error">
+								{errorMsg}
+								{#if errorMsg == "Incorrect email or password."}
+									<a class="error" href="/reset-password">Did you forgor?</a>
+								{/if}
+							</p>
+						{/if}
+					</section>
+				</form>
 
-			{#if authStatus === "fail"}
-				<p id="password-reset">
-					Incorrect email or password. Try again or <a href="/reset-password">reset password</a>.
-				</p>
-			{/if}
-		</form>
+				<!-- Oauth sign up -->
+				<section id="oauth-form">
+					<h6>Alternatively, continue with one of these platforms.</h6>
 
-		<a id="signup" href="/signup">I don't have an account</a>
-	</main>
-</SignInLock>
+					<section id="logos">
+						<button id="google" on:click={() => signupWithOauth("google")}>
+							<img src="/logos/google.svg" alt="" />
+						</button>
+						<button id="discord" on:click={() => signupWithOauth("discord")}>
+							<img src="/logos/discord.svg" alt="" />
+						</button>
+						<button id="twitter" on:click={() => signupWithOauth("twitter")}>
+							<img src="/logos/twitter.svg" alt="" />
+						</button>
+					</section>
+				</section>
+			</section>
+
+			<section id="redirect">
+				<a href="/signup" id="signin">I don't have an account</a>
+			</section>
+		</div>
+	</section>
+</main>
 
 <style lang="scss">
 	@import "$static/stylesheets/guideline";
 
 	main {
 		width: 100%;
-		height: calc(100vh - 2 * $navbar-height);
-		padding: 0 20px;
-		box-sizing: border-box;
+		height: 100%;
+
 		display: flex;
 		justify-content: center;
-		align-items: center;
-		flex-direction: column;
+		align-items: flex-start;
 
-		h1 {
-			font-size: 36px;
-		}
-
-		form {
-			position: relative;
-
+		#signup-box-container {
 			width: 100%;
-			max-width: 600px;
-			margin-top: 28px;
+			height: 100%;
+			min-height: fit-content;
+
+			padding: 40px 15px;
 
 			display: flex;
 			justify-content: center;
 			align-items: center;
+		}
+		#signup-box {
+			width: fit-content;
+			height: fit-content;
+			padding: 40px 40px 65px 40px;
+
+			position: relative;
+			border: 1px solid $quaternary;
+			border-radius: 18px;
+
+			display: flex;
 			flex-direction: column;
+			row-gap: 40px;
 
-			#input-container {
-				animation: 400ms 1 forwards shake;
-				width: 100%;
+			#title-container {
+				display: flex;
+				flex-direction: column;
+				row-gap: 10px;
 
-				&.no-anim {
-					// the normal state of the input fields
-					animation: none;
-
-					input {
-						border-color: $black;
-						transition: border-color 500ms $in-cubic;
-						transition-delay: 300ms;
-					}
-				}
-
-				#password-container {
-					position: relative;
-					display: flex;
-					justify-content: center;
-					align-content: center;
-
-					input {
-						padding-right: 50px;
-						box-sizing: border-box;
-					}
-
-					#toggle-visible {
-						position: absolute;
-						width: fit-content;
-						height: fit-content;
-
-						right: 0px;
-					}
-				}
-
-				input {
+				h1 {
 					width: 100%;
-					height: 46px;
-					padding: 0 14px;
-					box-sizing: border-box;
-					transition: none;
+					white-space: nowrap;
 
-					border: 2px solid $red;
-					border-radius: 10px;
-					background: none;
+					padding-right: 50px;
 
+					font-size: 36px;
+					line-height: 36px;
+				}
+
+				p {
+					width: 100%;
 					font-size: 16px;
-
-					&::placeholder {
-						color: $quaternary;
-					}
-
-					&#email-input {
-						border-radius: 10px 10px 0 0;
-					}
-
-					&#password-input {
-						border-radius: 0 0 10px 10px;
-						transform: translateY(-2px);
-					}
+					font-weight: 350;
 				}
 			}
 
-			#keep-signin-container {
-				position: relative;
+			#form-container {
 				display: flex;
-				align-items: center;
-				margin-top: 48px;
-				cursor: pointer;
+				flex-direction: column;
 
-				#checkbox-container {
+				width: 100%;
+
+				row-gap: 40px;
+
+				#email-form {
 					display: flex;
-					align-items: center;
-					justify-content: center;
-					width: 20px;
-					height: 20px;
+					flex-direction: column;
 
-					#checkbox {
-						appearance: none;
-						width: 100%;
-						height: 100%;
-						margin: 0;
-						padding: 0;
+					row-gap: 30px;
 
-						background-color: $white;
-						border: 1.5px solid $black;
-						border-radius: 4px;
+					#input-container {
+						display: flex;
+						flex-direction: column;
 
-						cursor: pointer;
-						pointer-events: none;
+						row-gap: 15px;
 
-						&:checked {
-							background-color: $black;
+						.input-section {
+							width: 100%;
+
+							h6 {
+								color: $primary;
+								margin-bottom: 5px;
+								font-weight: 600;
+							}
+
+							input {
+								width: 100%;
+								border: 1px solid $red;
+								height: 46px;
+								font-size: 16px;
+								padding: 0px 15px;
+
+								animation: 400ms 1 shake;
+
+								&.no-anim {
+									// the normal state of the input fields
+									animation: none;
+
+									border-color: $quaternary;
+									transition: border-color 500ms $in-cubic;
+								}
+							}
+
+							&#password {
+								position: relative;
+								display: flex;
+								flex-direction: column;
+								justify-content: center;
+							}
 						}
 					}
 
-					svg {
-						position: absolute;
-						pointer-events: none;
-						transform: translate(0px, 0.5px);
-						width: 15px;
-						height: 15px;
-						color: $white;
+					#cta {
+						display: flex;
+						flex-direction: column;
+						row-gap: 15px;
+						align-items: center;
+
+						#submit {
+							width: 100%;
+							height: 48px;
+						}
 					}
 				}
+				#oauth-form {
+					display: flex;
+					flex-direction: column;
 
-				#label {
-					margin-left: 14px;
-					font-size: 16px;
-					transform: translateY(-0.6px);
+					row-gap: 10px;
+
+					h6 {
+						color: $primary;
+						margin-bottom: 5px;
+						font-weight: 600;
+					}
+
+					#logos {
+						display: flex;
+						height: 55px;
+
+						column-gap: 10px;
+
+						button {
+							flex: 1;
+							min-width: 55px;
+							border: 1px solid $quaternary;
+							border-radius: 8px;
+
+							display: flex;
+							justify-content: center;
+							align-items: center;
+
+							img {
+								height: 20px;
+							}
+
+							&#google {
+								background-color: #fff;
+								img {
+									height: 24px;
+								}
+							}
+							&#discord {
+								background-color: #5865f2;
+							}
+
+							&#twitter {
+								background-color: black;
+							}
+
+							&:hover {
+								opacity: 0.8;
+							}
+						}
+					}
 				}
 			}
 
-			#submit {
-				min-width: 100px;
-				padding: 10px 24px;
-				margin-top: 24px;
-			}
+			#redirect {
+				display: flex;
+				column-gap: 30px;
 
-			#password-reset {
 				position: absolute;
-				bottom: -70px;
+				bottom: 15px;
+				align-self: center;
 
-				font-size: 16px;
-				font-weight: 400;
-				color: $red;
-
-				a {
-					color: $red;
-					font-size: 16px;
-					font-weight: 400;
+				#signin {
+					color: $quaternary;
 					text-decoration: underline;
 				}
 			}
 		}
 
-		#signup {
-			position: absolute;
-			bottom: 14px;
-
-			font-size: 16px;
-			font-weight: 400;
-			color: $quaternary;
-		}
-
 		@media screen and (max-width: $mobile-width) {
-			height: calc(100vh - $urlbar-height - $navbar-height);
+			height: fit-content;
 
-			h1 {
-				text-align: center;
-				font-size: 32px;
+			#signup-box-container {
+				padding: 0px 15px 50px 15px;
 			}
 
-			form {
-				margin-top: 32px;
-				$icon-size: 32px;
+			#signup-box {
+				border: none;
+				padding: 0px;
 
-				input {
-					height: 46px;
-					padding: 0 16px;
-					font-size: 16px;
-				}
+				width: 100%;
+				height: 100%;
 
-				#submit {
-					height: 46px;
-					width: 100%;
-				}
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: flex-start;
+				row-gap: 35px;
 
-				#keep-signin-container {
-					#checkbox-container {
-						width: 22px;
-						height: 22px;
+				#title-container {
+					row-gap: 5px;
+
+					h1 {
+						text-align: center;
+						line-height: 42px;
+						white-space: wrap;
+
+						padding-right: 0px;
 					}
 
-					#label {
-						font-size: 14px;
+					p {
+						text-align: center;
+						font-size: 16px;
+						font-weight: 400;
 					}
+				}
+
+				#form-container {
+					#email-form {
+						row-gap: 25px;
+
+						#input-container {
+							row-gap: 15px;
+						}
+					}
+
+					#oauth-form {
+						h6 {
+							align-self: center;
+							text-align: center;
+						}
+					}
+				}
+
+				#redirect {
+					position: relative;
+					bottom: unset;
+					align-self: center;
 				}
 			}
 		}
 
+		// animation definitions
 		@keyframes shake {
 			0% {
 				transform: translateX(0px);
@@ -390,10 +465,5 @@
 				transform: translateX(0px);
 			}
 		}
-	}
-
-	.disabled {
-		pointer-events: none !important;
-		cursor: default;
 	}
 </style>

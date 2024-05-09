@@ -1,451 +1,293 @@
-<script lang="ts" context="module">
-	import { API_HOST } from "$lib/@const/dynamic.env";
-	import EmailFC from "./../../lib/comp/signup/flowContent/EmailFC.svelte";
-	import HandleFC from "./../../lib/comp/signup/flowContent/HandleFC.svelte";
-	import IntroFC from "./../../lib/comp/signup/flowContent/IntroFC.svelte";
-	import NameFC from "./../../lib/comp/signup/flowContent/NameFC.svelte";
-	import PasswordFC from "./../../lib/comp/signup/flowContent/PasswordFC.svelte";
-	import RedirectFC from "./../../lib/comp/signup/flowContent/RedirectFC.svelte";
-	import VerifFC from "./../../lib/comp/signup/flowContent/VerifFC.svelte";
-	import NavArrows from "./../../lib/comp/ui/general/NavArrows.svelte";
-
-	import Cookies from "js-cookie";
-
-	export interface uniqueSignupProcessStatus {
-		state: null | "processing" | "success" | "failed";
-		message: string;
-	}
-
-	export const handleValid = async (handle: string): Promise<[boolean, string]> => {
-		// returns an error message or null for success
-		// check handle validity first
-		if (handle.length < 1 || handle.length > 15) {
-			return [false, "Your handle's length must be between 1 and 15 characters."];
-		}
-		if (/^[0-9]$/.test(handle[0])) {
-			return [false, "Your handle cannot begin with a number."];
-		}
-		if (!/^[a-zA-Z0-9_]+$/.test(handle)) {
-			return [false, "Your handle must only contain letters, numbers, and underscores."];
-		}
-
-		// check if handle exists on the server
-		const response = await fetch(`${API_HOST}/user/check-exists`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				handle: handle
-			})
-		});
-
-		const handleExists = await response.json();
-
-		if (handleExists) {
-			return [false, "This handle has already been taken. Try another one."];
-		}
-
-		return [true, "Looks Good!"];
-	};
-
-	export const emailValid = async (email: string): Promise<[boolean, string]> => {
-		// returns an error message or null for success
-		// check email validity first
-		if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email)) {
-			return [false, "Please enter a valid email address."];
-		}
-
-		// check if handle exists on the server
-		const response = await fetch(`${API_HOST}/user/check-exists`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				email: email
-			})
-		});
-
-		const emailExists = await response.json();
-
-		if (emailExists) {
-			return [false, "This email is already in use. Try another one."];
-		}
-
-		return [true, "Looks Good!"];
-	};
-
-	export const sendVerificationEmail = async (email: string, name?: string): Promise<void> => {
-		// returns verification code
-		// send a simple get request to the server with the name and the email
-		await fetch(`${API_HOST}/auth/get-email-code`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				email: email,
-				name: name || ""
-			})
-		});
-	};
-
-	export const codeValid = async (code: string, email: string): Promise<[boolean, string]> => {
-		// returns an error message or null for success
-		// send code along with email to verify the email
-		const response = await fetch(`${API_HOST}/auth/verify-email-code`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				email: email,
-				code: code
-			})
-		});
-
-		// if the response is not ok, it's most likely a 403 and means the code was wrong
-		if (!response.ok) {
-			return [false, "Incorrect verification code."];
-		}
-
-		// assuming the code was correct, store the returned JWT in the cookie as a temporary signup token
-		const body: SignUpDto = await response.json();
-		const accessToken = body.access_token;
-
-		// store access token as a session cookie
-		Cookies.set("validation_token", accessToken);
-
-		return [true, "Looks Good!"];
-	};
-</script>
-
 <script lang="ts">
-	let navStep = 0;
+	import LoadingDots from "$lib/comp/ui/general/LoadingDots.svelte";
+	import { BASE_URL, supabase } from "$lib/supabaseClient";
+	import { onMount } from "svelte";
+	import { cubicOut, quadInOut } from "svelte/easing";
+	import { fly } from "svelte/transition";
 
-	let nameValue: string;
+	let authorized = false;
+	let authorizing = false;
+
+	let errorMsg = "";
+
+	let name: string = "";
 	let nameField: HTMLInputElement;
 
-	let handleValue: string;
-	let handleField: HTMLInputElement;
-
-	let emailValue: string;
-	let lastEmail: string;
+	let email: string = "";
 	let emailField: HTMLInputElement;
 
-	let verifCode: string;
-	let verifField: HTMLInputElement;
-
-	let passwordValue: string;
+	let password: string = "";
 	let passwordField: HTMLInputElement;
 
-	let leftClickable: boolean;
-	let rightClickable: boolean;
+	// email validation
+	$: emailIsValid = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email);
 
-	// the individual content height for tuning the button heights
-	let introContentHeight = 65;
-	let nameContentHeight = 120;
-	let handleContentHeight = 120;
-	let emailContentHeight = 120;
-	let verifContentHeight = 120;
+	// password requirements
+	$: pwLengthReq = (password.length || 0) >= 6 && (password.length || 0) <= 30;
+	$: pwHasNumber = /\d/.test(password);
+	$: pwHasCapLetter = /[A-Z]/.test(password);
+	$: pwHasSpecialChar = /[!@#$%^&*()'"=`_+{}[\]/:;<>,.?~\\|-]/.test(password);
+	$: pwIsValid = pwLengthReq && pwHasNumber && pwHasCapLetter && pwHasSpecialChar;
 
-	// nav position : height
-	let navButtonHeight: Record<number, number>;
-	$: navButtonHeight = {
-		0: introContentHeight / 2 + 12 + 35, // intro
-		1: nameContentHeight / 2 + 12 + 35, // name
-		2: handleContentHeight / 2 + 12 + 35, // handle
-		3: emailContentHeight / 2 + 12 + 35, // email
-		4: verifContentHeight / 2 + 12 + 35, // verification
-		5: 300 // password
-	};
-	// UI variables
-	$: navHeight =
-		navButtonHeight[navStep] ?? navButtonHeight[Object.keys(navButtonHeight).length - 1];
+	let passwordFocused = false;
+	const focusPasswordField = () => (passwordFocused = true);
+	const blurPasswordField = () => (passwordFocused = false);
 
-	// nav position : action
-	const navButtonActions: Record<number, (() => void) | null> = {
-		0: null, // no action for the intro
-		1: null,
-		2: null,
-		3: null,
-		4: () => {
-			// if the valid email is now different from the original one, send a verification email
-			if (lastEmail !== emailValue) {
-				lastEmail = emailValue; // update last email
-				verifCodeStatus.state = null; // reset verification status to null
-				verifCode = ""; // reset verification code
-
-				sendVerificationEmail(lastEmail, nameValue);
-				cooldownResend(); // start a cooldown for the verification code
-			}
-			// focus the field
-			if (verifField) verifField.focus();
-		},
-		5: null
-	};
-
-	// nav position : (left disabled condition, right disabled condition)
-	let navButtonDisabledCondition: Record<number, [boolean, boolean]>;
-	$: navButtonDisabledCondition = {
-		0: [false, true], // disabled (not clickable), normal (clickable)
-		1: [true, !!nameValue], // name
-		2: [true, handleStatus.state === "success"], // handle
-		3: [true, emailStatus.state === "success"], // email
-		4: [verifCodeStatus.state !== "success", verifCodeStatus.state === "success"], // verification
-		// 4: [false, true], // verification
-		5: [false, true] // verification
-	};
-	// UI variables
-	$: leftClickable = !navButtonDisabledCondition[navStep]
-		? true
-		: navButtonDisabledCondition[navStep][0];
-	$: rightClickable = !navButtonDisabledCondition[navStep]
-		? true
-		: navButtonDisabledCondition[navStep][1];
-
-	const navRight = () => {
-		navStep++;
-
-		// run navButtonActions
-		const navAction = navButtonActions[navStep];
-		if (navAction) navAction();
-	};
-	const navLeft = () => {
-		navStep--;
-		navStep = Math.max(navStep, 0); // clip to 0
-
-		// run navButtonActions
-		const navAction = navButtonActions[navStep];
-		if (navAction) navAction();
-	};
-
-	const handleStatus: uniqueSignupProcessStatus = { state: null, message: "" };
-	const emailStatus: uniqueSignupProcessStatus = { state: null, message: "" };
-	const verifCodeStatus: uniqueSignupProcessStatus = { state: null, message: "" };
-
-	let checkTimeout: ReturnType<typeof setTimeout>;
-	const checkHandleAvailablility = () => {
-		handleStatus.state = "processing";
-		clearTimeout(checkTimeout); // clear the previous timeout
-
-		checkTimeout = setTimeout(async () => {
-			// check if handle is available after 1000ms of delay
-			const [valid, message] = await handleValid(handleField.value);
-
-			if (valid) handleStatus.state = "success";
-			else handleStatus.state = "failed";
-
-			handleStatus.message = message;
-		}, 1000);
-	};
-
-	const checkEmailAvailablility = () => {
-		emailStatus.state = "processing";
-		clearTimeout(checkTimeout); // clear the previous timeout
-
-		checkTimeout = setTimeout(async () => {
-			// check if handle is available after 1000ms of delay
-			const email = emailField.value;
-			const [valid, message] = await emailValid(email);
-
-			// set email status to success and store the valid email
-			if (valid) {
-				emailStatus.state = "success";
-			} else emailStatus.state = "failed";
-
-			emailStatus.message = message;
-		}, 1000);
-	};
-
-	const checkVerificationCode = () => {
-		verifCodeStatus.state = "processing";
-		clearTimeout(checkTimeout); // clear the previous timeout
-
-		checkTimeout = setTimeout(async () => {
-			// check if handle is available after 1000ms of delay
-			const [valid, message] = await codeValid(verifField.value, emailField.value);
-
-			if (valid) {
-				verifCodeStatus.state = "success";
-			} else {
-				verifCode = ""; // reset verification code
-				verifCodeStatus.state = "failed";
-			}
-
-			verifCodeStatus.message = message;
-		}, 1000);
-	};
-
-	let resendCooldownInterval: ReturnType<typeof setInterval>;
-	let resendCooldownTime = 0;
-	const cooldownResend = () => {
-		clearInterval(resendCooldownInterval);
-		resendCooldownTime = 30; // reset back to 30 seconds
-
-		resendCooldownInterval = setInterval(() => {
-			resendCooldownTime--;
-			if (resendCooldownTime === 0) clearInterval(resendCooldownInterval);
-		}, 1000);
-	};
-	const resendVerificationCode = () => {
-		sendVerificationEmail(emailField.value, nameValue);
-		cooldownResend();
-	};
-
-	let signupStatus: uniqueSignupProcessStatus = { state: null, message: "" };
-	const requestNewUser = async () => {
-		signupStatus = {
-			// set the signup status to processing
-			state: "processing",
-			message: ""
+	// animate the error shake for a certain text box
+	const animateInputFailure = (field: HTMLInputElement) => {
+		field.classList.remove("no-anim");
+		field.onanimationend = () => {
+			field.classList.add("no-anim");
+			field.onanimationend = null;
 		};
+	};
 
-		const options = {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${Cookies.get("validation_token")}`
-			},
-			body: JSON.stringify({
-				email: lastEmail,
-				name: nameValue,
-				handle: handleValue,
-				role: "NORMAL",
-				password: passwordValue
-			})
-		};
+	// check if the fields are filled out correctly.
+	const fieldsValid = (): boolean => {
+		if (name && email && password && pwIsValid) return true;
 
-		// clear the signup token to prevent abuse of the token
-		Cookies.remove("validation_token");
-
-		const resp: Response = await fetch(`${API_HOST}/auth/signup`, options);
-		if (!resp.ok) {
-			// handle error here
-			signupStatus = {
-				// set the signup status to failed
-				state: "failed",
-				message: `Something went wrong, please try again later. Status code: ${resp.status}`
-			};
-			return;
+		if (!pwIsValid) {
+			errorMsg = "Please enter a valid password";
+			animateInputFailure(passwordField);
+		}
+		if (!password) {
+			errorMsg = "Please enter a password";
+			animateInputFailure(passwordField);
+		}
+		if (!emailIsValid) {
+			errorMsg = "Please a valid email address";
+			animateInputFailure(emailField);
+		}
+		if (!email) {
+			errorMsg = "Please enter your email";
+			animateInputFailure(emailField);
+		}
+		if (!name) {
+			errorMsg = "Please enter your name";
+			animateInputFailure(nameField);
 		}
 
-		// if response ok, store the returned JWT in the cookie as a temporary session token.
-		const body: SignUpDto = await resp.json();
-		const accessToken = body.access_token;
-
-		// store access token in cookies
-		Cookies.set("access_token", accessToken);
-
-		signupStatus = {
-			// set the signup status to failed
-			state: "success",
-			message: ""
-		};
-
-		// move to the next flow content
-		navRight();
+		return false;
 	};
+
+	const createEmailAccount = async () => {
+		errorMsg = "";
+		if (!fieldsValid()) return; // check if the fields are filled out correctly.
+
+		authorizing = true;
+
+		const { error } = await supabase.auth.signUp({
+			email: email,
+			password: password,
+			options: {
+				data: {
+					full_name: name
+				},
+				emailRedirectTo: `${BASE_URL}`
+			}
+		});
+
+		if (error) {
+			// session is null if the email is already in use.
+			let msg = error.message;
+
+			if (msg === "User already registered") msg = "This email is already in use";
+
+			errorMsg = msg;
+		} else {
+			authorized = true;
+		}
+
+		authorizing = false;
+	};
+
+	const signupWithOauth = async (provider: "google" | "discord" | "twitter") => {
+		const { error } = await supabase.auth.signInWithOAuth({
+			provider: provider,
+			options: {
+				redirectTo: `${BASE_URL}/`
+			}
+		});
+		if (error) {
+			errorMsg = error.message;
+		}
+	};
+
+	const init = () => {};
+
+	onMount(init);
 </script>
 
 <main>
-	<section id="flow-content-container">
+	<!-- We need another layer of container around the sign up box to account for overflow padding -->
+	{#if !authorized}
 		<section
-			id="intro"
-			class="flow-content {navStep === 0 ? 'visible' : ''} {navStep > 0 ? 'left' : 'right'}"
+			id="signup-box-container"
+			transition:fly={{ y: -40, opacity: 0, duration: 300, easing: quadInOut }}
 		>
-			<IntroFC bind:contentHeight={introContentHeight} />
-		</section>
+			<div id="signup-box">
+				<section id="title-container">
+					<h1 class="exclude-phone">Welcome to LunchRoom!</h1>
+					<h1 class="only-phone">Create an account</h1>
+					<p>We'll make this quick</p>
+				</section>
 
+				<section id="form-container">
+					<!-- Email sign up -->
+					<form id="email-form">
+						<section id="input-container">
+							<!-- name -->
+							<section class="input-section" id="name">
+								<h6>Name</h6>
+								<input
+									bind:this={nameField}
+									bind:value={name}
+									class="no-anim"
+									type="text"
+									placeholder="Aaron Kim"
+								/>
+							</section>
+
+							<!-- email -->
+							<section class="input-section" id="email">
+								<h6>Email</h6>
+								<input
+									bind:this={emailField}
+									bind:value={email}
+									class="no-anim"
+									type="text"
+									placeholder="example@lunchroom.ink"
+								/>
+							</section>
+
+							<!-- password -->
+							<section class="input-section" id="password">
+								<h6>Password</h6>
+								<input
+									bind:this={passwordField}
+									bind:value={password}
+									on:focus={focusPasswordField}
+									on:blur={blurPasswordField}
+									class="no-anim"
+									type="password"
+									placeholder="••••••••••"
+								/>
+
+								<!-- password requirement box (for tablet and desktop only) -->
+								<div id="requirement-box" class="{passwordFocused ? '' : 'hidden'} exclude-phone">
+									<section class="requirement">
+										<div id="light" class={pwLengthReq ? "fulfilled" : ""} />
+										<p>Make it between 6 and 30 characters long</p>
+									</section>
+
+									<section class="requirement">
+										<div id="light" class={pwHasNumber ? "fulfilled" : ""} />
+										<p>Include at least 1 number</p>
+									</section>
+
+									<section class="requirement">
+										<div id="light" class={pwHasCapLetter ? "fulfilled" : ""} />
+										<p>Include at least 1 capitcalized letter</p>
+									</section>
+
+									<section class="requirement">
+										<div id="light" class={pwHasSpecialChar ? "fulfilled" : ""} />
+										<p>Include at least 1 special character</p>
+									</section>
+								</div>
+
+								<!-- password requirement box (for mobile only) -->
+								{#if password || passwordFocused}
+									<div id="requirement-box" class="only-phone">
+										<section class="requirement">
+											<div id="light" class={pwLengthReq ? "fulfilled" : ""} />
+											<p>Make it between 6 and 30 characters long</p>
+										</section>
+
+										<section class="requirement">
+											<div id="light" class={pwHasNumber ? "fulfilled" : ""} />
+											<p>Include at least 1 number</p>
+										</section>
+
+										<section class="requirement">
+											<div id="light" class={pwHasCapLetter ? "fulfilled" : ""} />
+											<p>Include at least 1 capitcalized letter</p>
+										</section>
+
+										<section class="requirement">
+											<div id="light" class={pwHasSpecialChar ? "fulfilled" : ""} />
+											<p>Include at least 1 special character</p>
+										</section>
+									</div>
+								{/if}
+							</section>
+						</section>
+
+						<section id="cta">
+							<!-- submit -->
+							<button
+								id="submit"
+								class="solid"
+								type="submit"
+								disabled={authorizing}
+								on:click={createEmailAccount}
+							>
+								{#if !authorizing}
+									Continue
+								{:else}
+									<LoadingDots />
+								{/if}
+							</button>
+
+							<!-- error message -->
+							{#if errorMsg}
+								<p class="error">{errorMsg}</p>
+							{/if}
+						</section>
+					</form>
+
+					<!-- Oauth sign up -->
+					<section id="oauth-form">
+						<h6>Alternatively, continue with one of these platforms.</h6>
+
+						<section id="logos">
+							<button id="google" on:click={() => signupWithOauth("google")}>
+								<img src="/logos/google.svg" alt="" />
+							</button>
+							<button id="discord" on:click={() => signupWithOauth("discord")}>
+								<img src="/logos/discord.svg" alt="" />
+							</button>
+							<button id="twitter" on:click={() => signupWithOauth("twitter")}>
+								<img src="/logos/twitter.svg" alt="" />
+							</button>
+						</section>
+					</section>
+				</section>
+
+				<section id="redirect">
+					<a href="/signin" id="signin">Nevermind, I already have an account</a>
+				</section>
+			</div>
+		</section>
+	{:else}
 		<section
-			id="name"
-			class="flow-content {navStep === 1 ? 'visible' : ''} {navStep > 1 ? 'left' : 'right'}"
+			id="success-container"
+			transition:fly={{ y: 20, opacity: 0, duration: 1000, easing: cubicOut, delay: 250 }}
 		>
-			<NameFC
-				enabled={navStep === 1}
-				bind:input={nameField}
-				bind:value={nameValue}
-				bind:contentHeight={nameContentHeight}
-			/>
-		</section>
+			<svg id="checkmark" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+				/>
+			</svg>
 
-		<!-- Form fields -->
-		<section
-			id="handle"
-			class="flow-content {navStep === 2 ? 'visible' : ''} {navStep > 2 ? 'left' : 'right'}"
-		>
-			<HandleFC
-				{nameValue}
-				status={handleStatus}
-				enabled={navStep === 2}
-				bind:input={handleField}
-				bind:contentHeight={handleContentHeight}
-				bind:value={handleValue}
-				on:input={checkHandleAvailablility}
-			/>
+			<p id="label">
+				We've sent a one time verification link to your email. Click on it and you're all good to
+				go!
+			</p>
 		</section>
-
-		<section
-			id="email"
-			class="flow-content {navStep === 3 ? 'visible' : ''} {navStep > 3 ? 'left' : 'right'}"
-		>
-			<EmailFC
-				status={emailStatus}
-				enabled={navStep === 3}
-				bind:input={emailField}
-				bind:value={emailValue}
-				bind:contentHeight={emailContentHeight}
-				on:input={checkEmailAvailablility}
-			/>
-		</section>
-
-		<section
-			id="verfication"
-			class="flow-content {navStep === 4 ? 'visible' : ''} {navStep > 4 ? 'left' : 'right'}"
-		>
-			<VerifFC
-				status={verifCodeStatus}
-				enabled={navStep === 4}
-				{resendCooldownTime}
-				bind:input={verifField}
-				bind:value={verifCode}
-				bind:contentHeight={verifContentHeight}
-				on:submit={checkVerificationCode}
-				on:resend-code={resendVerificationCode}
-			/>
-		</section>
-
-		<section
-			id="password"
-			class="flow-content {navStep === 5 ? 'visible' : ''} {navStep > 5 ? 'left' : 'right'}"
-		>
-			<PasswordFC
-				status={signupStatus}
-				enabled={navStep === 5}
-				bind:input={passwordField}
-				bind:value={passwordValue}
-				on:submit={requestNewUser}
-			/>
-		</section>
-
-		<section
-			id="password"
-			class="flow-content {navStep === 6 ? 'visible' : ''} {navStep > 6 ? 'left' : 'right'}"
-		>
-			<RedirectFC bind:name={nameValue} />
-		</section>
-	</section>
-
-	<!-- Normal nav buttons -->
-	<section
-		id="nav-button-container"
-		style="transform: translateY({navHeight - 10}px); opacity: {navStep >= 5
-			? '0'
-			: '1'}; pointer-events: {navStep === 5 ? 'none' : 'all'};"
-	>
-		<NavArrows {leftClickable} {rightClickable} leftCallback={navLeft} rightCallback={navRight} />
-	</section>
+	{/if}
 </main>
 
 <style lang="scss">
@@ -453,67 +295,408 @@
 
 	main {
 		width: 100%;
-		height: calc(100vh - 2 * $navbar-height);
+		height: 100%;
+
 		display: flex;
 		justify-content: center;
-		align-items: center;
+		align-items: flex-start;
 
-		$content-y-offset: -10px;
-
-		#flow-content-container {
+		#signup-box-container {
 			width: 100%;
-			max-width: 100vw;
 			height: 100%;
-			overflow-x: hidden;
+			min-height: fit-content;
+
+			padding: 40px 15px;
 
 			display: flex;
 			justify-content: center;
 			align-items: center;
+		}
+		#signup-box {
+			width: fit-content;
+			height: fit-content;
+			padding: 40px 40px 65px 40px;
 
-			.flow-content {
-				position: fixed;
+			position: relative;
+			border: 1px solid $quaternary;
+			border-radius: 18px;
+
+			display: flex;
+			flex-direction: column;
+			row-gap: 40px;
+
+			#title-container {
 				display: flex;
-				justify-content: center;
-				align-items: center;
 				flex-direction: column;
-				width: calc(100% - 40px);
-				height: 100%;
-				max-width: 600px;
+				row-gap: 10px;
 
-				transform: translate(0px, $content-y-offset); // y offset for appearance sake
+				h1 {
+					width: 100%;
+					white-space: nowrap;
 
-				opacity: 0;
-				pointer-events: none;
-
-				transition:
-					opacity 300ms ease-in-out,
-					transform 700ms $out-generic;
-
-				&.left {
-					transform: translate(-700px, $content-y-offset);
+					font-size: 36px;
+					line-height: 36px;
 				}
-				&.right {
-					transform: translate(700px, $content-y-offset);
+
+				p {
+					width: 100%;
+					font-size: 16px;
+					font-weight: 350;
 				}
-				&.visible {
-					opacity: 1;
-					pointer-events: all;
-					transform: translate(0px, $content-y-offset);
+			}
+
+			#form-container {
+				display: flex;
+				flex-direction: column;
+
+				width: 100%;
+
+				row-gap: 40px;
+
+				#email-form {
+					display: flex;
+					flex-direction: column;
+
+					row-gap: 30px;
+
+					#input-container {
+						display: flex;
+						flex-direction: column;
+
+						row-gap: 15px;
+
+						.input-section {
+							width: 100%;
+
+							h6 {
+								color: $primary;
+								margin-bottom: 5px;
+								font-weight: 600;
+							}
+
+							input {
+								width: 100%;
+								border: 1px solid $red;
+								height: 46px;
+								font-size: 16px;
+								padding: 0px 15px;
+
+								animation: 400ms 1 shake;
+
+								&.no-anim {
+									// the normal state of the input fields
+									animation: none;
+
+									border-color: $quaternary;
+									transition: border-color 500ms $in-cubic;
+								}
+							}
+
+							&#password {
+								position: relative;
+								display: flex;
+								flex-direction: column;
+								justify-content: center;
+
+								#requirement-box {
+									@extend .glass-heavy;
+
+									position: absolute;
+									right: -15px;
+									bottom: 0px;
+
+									padding: 20px 25px;
+									border-radius: 12px;
+									box-shadow: 6px 6px 24px hsla(0, 0%, 0%, 20%);
+
+									display: flex;
+									flex-direction: column;
+									row-gap: 7px;
+
+									transform: translate(100%, 25%);
+									transform-origin: left;
+
+									transition:
+										transform 500ms $out-generic-expo,
+										opacity 500ms $out-generic-expo,
+										filter 500ms $out-generic-expo;
+
+									&.hidden {
+										opacity: 0;
+										transform: translate(100%, 25%) scale(90%);
+										filter: blur(5px);
+
+										pointer-events: none;
+									}
+
+									.requirement {
+										display: flex;
+										align-items: center;
+
+										column-gap: 15px;
+
+										#light {
+											width: 8px;
+											height: 8px;
+											border-radius: 100px;
+											background-color: $pentinary;
+
+											transition: background-color 100ms linear;
+
+											&.fulfilled {
+												background-color: $green;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+
+					#cta {
+						display: flex;
+						flex-direction: column;
+						row-gap: 15px;
+						align-items: center;
+
+						#submit {
+							width: 100%;
+							height: 48px;
+						}
+					}
+				}
+				#oauth-form {
+					display: flex;
+					flex-direction: column;
+
+					row-gap: 10px;
+
+					h6 {
+						color: $primary;
+						margin-bottom: 5px;
+						font-weight: 600;
+					}
+
+					#logos {
+						display: flex;
+						height: 55px;
+
+						column-gap: 10px;
+
+						button {
+							flex: 1;
+							min-width: 55px;
+							border: 1px solid $quaternary;
+							border-radius: 8px;
+
+							display: flex;
+							justify-content: center;
+							align-items: center;
+
+							img {
+								height: 20px;
+							}
+
+							&#google {
+								background-color: #fff;
+								img {
+									height: 24px;
+								}
+							}
+							&#discord {
+								background-color: #5865f2;
+							}
+
+							&#twitter {
+								background-color: black;
+							}
+
+							&:hover {
+								opacity: 0.8;
+							}
+						}
+					}
+				}
+			}
+
+			#redirect {
+				position: absolute;
+				bottom: 15px;
+				align-self: center;
+
+				#signin {
+					color: $quaternary;
+					text-decoration: underline;
 				}
 			}
 		}
 
-		#nav-button-container {
-			position: fixed;
-			overflow: hidden;
+		#success-container {
+			position: absolute;
+			align-self: center;
 
-			transition:
-				opacity 350ms $out-generic,
-				transform 700ms $out-generic;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+
+			width: 100%;
+			max-width: 500px;
+			padding-bottom: $navbar-height;
+
+			row-gap: 15px;
+
+			#checkmark {
+				height: 64px;
+				color: $green;
+			}
+
+			#label {
+				font-size: 18px;
+				line-height: 24px;
+				color: $primary;
+				text-align: center;
+			}
+		}
+
+		@media screen and (max-width: 1320px) {
+			// all this bullshit just to move the password thing
+			#signup-box {
+				#form-container {
+					#email-form {
+						#input-container {
+							.input-section {
+								&#password {
+									#requirement-box {
+										width: 100%;
+										height: fit-content;
+
+										left: 0px;
+										top: 0px;
+
+										row-gap: 5px;
+
+										transform: translate(0px, calc(-100% - 10px));
+										transform-origin: bottom;
+
+										&.hidden {
+											opacity: 0;
+											transform: translate(0px, calc(-100% - 10px)) scale(90%);
+											filter: blur(5px);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 		@media screen and (max-width: $mobile-width) {
-			height: calc(100vh - $urlbar-height - $navbar-height);
+			height: fit-content;
+
+			#signup-box-container {
+				padding: 0px 15px 50px 15px;
+			}
+
+			#signup-box {
+				border: none;
+				padding: 0px;
+
+				width: 100%;
+				height: 100%;
+
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: flex-start;
+				row-gap: 35px;
+
+				#title-container {
+					row-gap: 5px;
+
+					h1 {
+						text-align: center;
+						line-height: 42px;
+						white-space: wrap;
+					}
+
+					p {
+						text-align: center;
+						font-size: 16px;
+						font-weight: 400;
+					}
+				}
+
+				#form-container {
+					#email-form {
+						row-gap: 25px;
+
+						#input-container {
+							row-gap: 15px;
+
+							.input-section {
+								&#password {
+									#requirement-box {
+										position: relative;
+										transform: none;
+										transition: none;
+
+										background-color: transparent;
+										backdrop-filter: none;
+										-webkit-backdrop-filter: none;
+										box-shadow: none;
+
+										padding: 30px 10px 20px 10px;
+									}
+								}
+							}
+						}
+					}
+
+					#oauth-form {
+						h6 {
+							align-self: center;
+							text-align: center;
+						}
+					}
+				}
+
+				#redirect {
+					position: relative;
+					bottom: unset;
+					align-self: center;
+				}
+			}
+
+			#success-container {
+				top: 50%;
+				transform: translateY(-50%);
+				padding: 0px 30px;
+			}
+		}
+
+		// animation definitions
+		@keyframes shake {
+			0% {
+				transform: translateX(0px);
+			}
+			20% {
+				transform: translateX(10px);
+			}
+			40% {
+				transform: translateX(-10px);
+			}
+			60% {
+				transform: translateX(5px);
+			}
+			80% {
+				transform: translateX(-5px);
+			}
+			100% {
+				transform: translateX(0px);
+			}
 		}
 	}
 </style>

@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { goto, invalidate } from "$app/navigation";
 	import ProfileBar from "$lib/comp/ui/navbar/bars/ProfileBar.svelte";
 	import { onMount } from "svelte";
 	import type { PageData } from "./$types";
 	import DefaultBar from "./../lib/comp/ui/navbar/bars/DefaultBar.svelte";
 
 	export let data: PageData;
-	$: ({ session, supabase, url } = data);
+	$: ({ url } = data);
 
 	// scroll animation
 	let scrollDist = 0;
@@ -18,24 +17,6 @@
 	const init = async () => {
 		// initialize the UI comps
 		trackScroll();
-
-		// supabase auth listeners
-		const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
-			if (!newSession) {
-				/**
-				 * Queue this as a task so the navigation won't prevent the
-				 * triggering function from completing
-				 */
-				setTimeout(() => {
-					goto("/", { invalidateAll: true });
-				});
-			}
-			if (newSession?.expires_at !== session?.expires_at) {
-				invalidate("supabase:auth");
-			}
-		});
-
-		return () => data.subscription.unsubscribe();
 	};
 
 	onMount(() => {
@@ -53,7 +34,9 @@
 	}
 	const urlSpecificBar: Record<string, `${barTypes}`> = {
 		"/profile": barTypes.profile,
-		"/profile/new/post": barTypes.none
+		"/profile/new/post": barTypes.none,
+		"/auth/confirm/email": barTypes.none,
+		"/auth/confirm/oauth": barTypes.none
 	};
 	let navbarBarType: `${barTypes}`;
 	$: navbarBarType = urlSpecificBar[url] ?? barTypes.default;
@@ -62,7 +45,8 @@
 <main>
 	{#if navbarBarType === barTypes.default}
 		<DefaultBar
-			accessToken={data.payload.accessToken}
+			userId={data.payload.userId}
+			email={data.payload.email}
 			avatarUrl={data.payload.avatarUrl}
 			{url}
 			{animResolution}

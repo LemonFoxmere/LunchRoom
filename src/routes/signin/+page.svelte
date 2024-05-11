@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { enhance } from "$app/forms";
+	import { goto } from "$app/navigation";
 	import LoadingDots from "$lib/comp/ui/general/LoadingDots.svelte";
-	import { BASE_URL, supabase } from "$lib/supabaseClient";
-	import { onMount } from "svelte";
+	import type { SubmitFunction } from "@sveltejs/kit";
 
 	let authorized = false;
 	let authorizing = false;
@@ -46,54 +47,42 @@
 		return false;
 	};
 
-	const signinWithEmail = async () => {
+	const emailSignin: SubmitFunction = () => {
 		errorMsg = "";
 		if (!fieldsValid()) return; // check if the fields are filled out correctly.
-
 		authorizing = true;
 
-		const { error } = await supabase.auth.signInWithPassword({
-			email: email,
-			password: password
-		});
+		return async ({ result }) => {
+			if (result.type === "failure") {
+				setTimeout(() => {
+					animateInputFailure(passwordField);
+					animateInputFailure(emailField);
 
-		if (error) {
-			// delay 1 second before denying access
+					switch (result.status) {
+						case 400:
+							errorMsg = "Invalid email or password.";
+							break;
+						case 401:
+							errorMsg = "Incorrect email or password.";
+							break;
+						default:
+							errorMsg = "Authorization failed. Please try again later.";
+							break;
+					}
 
-			setTimeout(() => {
-				animateInputFailure(passwordField);
-				animateInputFailure(emailField);
-
-				errorMsg = error.message;
-
-				if (errorMsg == "Invalid login credentials") errorMsg = "Incorrect email or password.";
-
+					authorizing = false;
+				}, 1000);
+			} else if (result.type === "redirect") {
+				authorized = true;
 				authorizing = false;
-			}, 1000);
-		} else {
-			authorized = true;
-			authorizing = false;
 
-			// redirect to the home page. TODO: redirect to the profile page later.
-			location.href = "/";
-		}
-	};
-
-	const signupWithOauth = async (provider: "google" | "discord" | "twitter") => {
-		const { error } = await supabase.auth.signInWithOAuth({
-			provider: provider,
-			options: {
-				redirectTo: `${BASE_URL}/`
+				// return home
+				goto("/", {
+					invalidateAll: true
+				});
 			}
-		});
-		if (error) {
-			errorMsg = error.message;
-		}
+		};
 	};
-
-	const init = () => {};
-
-	onMount(init);
 </script>
 
 <main>
@@ -107,7 +96,7 @@
 
 			<section id="form-container">
 				<!-- Email sign up -->
-				<form id="email-form">
+				<form id="email-form" method="post" use:enhance={emailSignin}>
 					<section id="input-container">
 						<!-- email -->
 						<section class="input-section" id="email">
@@ -115,6 +104,7 @@
 							<input
 								bind:this={emailField}
 								bind:value={email}
+								name="email"
 								class="no-anim"
 								type="text"
 								placeholder="example@lunchroom.ink"
@@ -127,6 +117,7 @@
 							<input
 								bind:this={passwordField}
 								bind:value={password}
+								name="password"
 								class="no-anim"
 								type="password"
 								placeholder="••••••••••"
@@ -140,13 +131,31 @@
 							id="submit"
 							class="solid"
 							type="submit"
-							disabled={authorizing}
-							on:click={signinWithEmail}
+							disabled={authorizing || authorized}
+							formaction="?/signin"
 						>
-							{#if !authorizing}
-								Continue
+							{#if !authorized}
+								{#if !authorizing}
+									Continue
+								{:else}
+									<LoadingDots />
+								{/if}
 							{:else}
-								<LoadingDots />
+								<svg
+									id="success-icon"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.25"
+									stroke="currentColor"
+									class="w-6 h-6"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+									/>
+								</svg>
 							{/if}
 						</button>
 
@@ -166,17 +175,17 @@
 				<section id="oauth-form">
 					<h6>Alternatively, continue with one of these platforms.</h6>
 
-					<section id="logos">
-						<button id="google" on:click={() => signupWithOauth("google")}>
+					<form id="logos" method="POST">
+						<button id="google" formaction="?/signin&provider=google">
 							<img src="/logos/google.svg" alt="" />
 						</button>
-						<button id="discord" on:click={() => signupWithOauth("discord")}>
+						<button id="discord" formaction="?/signin&provider=discord">
 							<img src="/logos/discord.svg" alt="" />
 						</button>
-						<button id="twitter" on:click={() => signupWithOauth("twitter")}>
+						<button id="twitter" formaction="?/signin&provider=twitter">
 							<img src="/logos/twitter.svg" alt="" />
 						</button>
-					</section>
+					</form>
 				</section>
 			</section>
 
@@ -309,6 +318,18 @@
 						#submit {
 							width: 100%;
 							height: 48px;
+							display: flex;
+							justify-content: center;
+							align-items: center;
+
+							#success-icon {
+								$icon-size: 32px;
+
+								display: block;
+								width: $icon-size;
+								height: $icon-size;
+								color: $white;
+							}
 						}
 					}
 				}

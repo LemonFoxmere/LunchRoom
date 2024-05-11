@@ -1,7 +1,8 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
-import { redirect, type RequestHandler } from "@sveltejs/kit";
+import { redirect } from "@sveltejs/kit";
+import type { PageServerLoad } from "./$types";
 
-export const GET: RequestHandler = async (event) => {
+export const load: PageServerLoad = async (event) => {
 	const url = event.url;
 	const locals = event.locals;
 	const supabase = locals.supabase;

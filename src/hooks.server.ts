@@ -11,19 +11,20 @@ const supabase: Handle = async ({ event, resolve }) => {
 	 * The Supabase client gets the Auth token from the request cookies.
 	 */
 	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		auth: {
+			flowType: "pkce",
+			autoRefreshToken: false,
+			detectSessionInUrl: false,
+			persistSession: true
+		},
 		cookies: {
 			get: (key) => event.cookies.get(key),
-			/**
-			 * SvelteKit's cookies API requires `path` to be explicitly set in
-			 * the cookie options. Setting `path` to `/` replicates previous/
-			 * standard behavior.
-			 */
-			set: (key, value, options) => {
-				event.cookies.set(key, value, { ...options, path: "/" });
-			},
-			remove: (key, options) => {
-				event.cookies.delete(key, { ...options, path: "/" });
-			}
+			set: (key, value, options) => event.cookies.set(key, value, { ...options, path: "/" }),
+			remove: (key, options) => event.cookies.delete(key, { ...options, path: "/" })
+		},
+		cookieOptions: {
+			sameSite: "lax",
+			secure: false
 		}
 	});
 

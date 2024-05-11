@@ -6,10 +6,9 @@ import type { Actions } from "./$types";
 const OAUTH_PROVIDERS = ["google", "discord", "twitter"];
 
 export const actions: Actions = {
-	signin: async ({ request, url, locals: { supabase } }) => {
+	signup: async ({ url, locals: { supabase } }) => {
 		const provider = url.searchParams.get("provider") as Provider;
 
-		// If a provider is specified, sign in with OAuth
 		if (provider) {
 			if (!OAUTH_PROVIDERS.includes(provider)) {
 				return fail(400, {
@@ -34,24 +33,8 @@ export const actions: Actions = {
 			throw redirect(303, data.url);
 		}
 
-		// Otherwise, attempt to sign in with email and password
-		const formData = await request.formData();
-		const email: string | null = formData.get("email") as string | null;
-		const password: string | null = formData.get("password") as string | null;
-
-		if (!email || !password) {
-			return fail(400, {
-				message: "No email or password specified."
-			});
-		}
-
-		const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-		if (error) {
-			console.error(error);
-			return fail(401, { ...error });
-		} else {
-			return redirect(303, "/");
-		}
+		throw fail(400, {
+			message: "No provider specified."
+		});
 	}
 };

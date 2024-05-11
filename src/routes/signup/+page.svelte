@@ -1,7 +1,6 @@
 <script lang="ts">
 	import LoadingDots from "$lib/comp/ui/general/LoadingDots.svelte";
 	import { BASE_URL, supabase } from "$lib/supabaseClient";
-	import { onMount } from "svelte";
 	import { cubicOut, quadInOut } from "svelte/easing";
 	import { fly } from "svelte/transition";
 
@@ -101,21 +100,17 @@
 		authorizing = false;
 	};
 
-	const signupWithOauth = async (provider: "google" | "discord" | "twitter") => {
-		const { error } = await supabase.auth.signInWithOAuth({
-			provider: provider,
-			options: {
-				redirectTo: `${BASE_URL}/`
-			}
-		});
-		if (error) {
-			errorMsg = error.message;
-		}
-	};
-
-	const init = () => {};
-
-	onMount(init);
+	// const signupWithOauth = async (provider: "google" | "discord" | "twitter") => {
+	// 	const { error } = await supabase.auth.signInWithOAuth({
+	// 		provider: provider,
+	// 		options: {
+	// 			redirectTo: `${BASE_URL}/signup/auth/confirm/oauth/`
+	// 		}
+	// 	});
+	// 	if (error) {
+	// 		errorMsg = error.message;
+	// 	}
+	// };
 </script>
 
 <main>
@@ -250,17 +245,17 @@
 					<section id="oauth-form">
 						<h6>Alternatively, continue with one of these platforms.</h6>
 
-						<section id="logos">
-							<button id="google" on:click={() => signupWithOauth("google")}>
+						<form id="logos" method="post">
+							<button id="google" formaction="?/signup&provider=google">
 								<img src="/logos/google.svg" alt="" />
 							</button>
-							<button id="discord" on:click={() => signupWithOauth("discord")}>
+							<button id="discord" formaction="?/signup&provider=discord">
 								<img src="/logos/discord.svg" alt="" />
 							</button>
-							<button id="twitter" on:click={() => signupWithOauth("twitter")}>
+							<button id="twitter" formaction="?/signup&provider=twitter">
 								<img src="/logos/twitter.svg" alt="" />
 							</button>
-						</section>
+						</form>
 					</section>
 				</section>
 

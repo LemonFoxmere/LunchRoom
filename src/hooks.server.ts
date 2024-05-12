@@ -3,6 +3,7 @@ import { redirect, type Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from "$env/static/public";
+import type { Session } from "@supabase/supabase-js";
 
 const supabase: Handle = async ({ event, resolve }) => {
 	/**
@@ -35,22 +36,33 @@ const supabase: Handle = async ({ event, resolve }) => {
 	 */
 	event.locals.safeGetSession = async () => {
 		const {
-			data: { session }
-		} = await event.locals.supabase.auth.getSession();
-		if (!session) {
-			return { session: null, user: null };
-		}
-
-		const {
 			data: { user },
 			error
 		} = await event.locals.supabase.auth.getUser();
-		if (error) {
+		if (!user || error) {
 			// JWT validation has failed
 			return { session: null, user: null };
 		}
 
-		return { session, user };
+		const {
+			data: { session }
+		} = await event.locals.supabase.auth.getSession();
+		// If there isn't a session, there can't be a user either
+		if (!session) return { session: null, user: null };
+
+		// Workaround for the "Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure" warning
+		const safeSession: Session = {
+			access_token: session.access_token,
+			refresh_token: session.refresh_token,
+			token_type: "bearer",
+			expires_at: session.expires_at,
+			expires_in: session.expires_in,
+			provider_refresh_token: session.provider_refresh_token,
+			provider_token: session.provider_token,
+			user: user
+		};
+
+		return { session: safeSession, user };
 	};
 
 	return resolve(event, {

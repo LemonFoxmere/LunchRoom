@@ -1,11 +1,10 @@
-import { type ServerLoadEvent } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 
-export const load: LayoutServerLoad = async (event: ServerLoadEvent) => {
-	const { supabase } = event.locals;
-
-	let session: { session: any; user: any } | null = await event.locals.safeGetSession();
-	if (!session.session) session = null;
+export const load: LayoutServerLoad = async ({
+	url,
+	locals: { supabase, user, safeGetSession }
+}) => {
+	const { session } = await safeGetSession();
 
 	let payload = {
 		accessToken: null as string | null,
@@ -16,12 +15,12 @@ export const load: LayoutServerLoad = async (event: ServerLoadEvent) => {
 	};
 
 	// fill the payload
-	if (session) {
+	if (session && user) {
 		// get the user's avatar url from the db
 		const { data, error } = await supabase
 			.from("profile")
 			.select("avatar, users(id)")
-			.eq("users.id", session.user.id);
+			.eq("users.id", user.id);
 
 		// assign the avatar url if nothing went wrong
 		let avatarUrl: string | null = null;
@@ -36,16 +35,16 @@ export const load: LayoutServerLoad = async (event: ServerLoadEvent) => {
 		}
 
 		payload = {
-			accessToken: session.session.access_token,
-			fullName: session.user.user_metadata.full_name ?? "",
-			email: session.user.email ?? "",
+			accessToken: session.access_token,
+			fullName: user.user_metadata.full_name ?? "",
+			email: user.email ?? "",
 			avatarUrl: avatarUrl,
-			userId: session.user.id
+			userId: user.id
 		};
 	}
 
 	return {
-		url: event.url.pathname,
+		url: url.pathname,
 		session: session,
 		payload
 	};

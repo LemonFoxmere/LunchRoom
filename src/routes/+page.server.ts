@@ -1,7 +1,7 @@
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ locals: { safeGetSession } }) => {
-	let session: { session: any; user: any } | null = await safeGetSession();
+export const load: PageServerLoad = async ({ locals: { user, safeGetSession } }) => {
+	let session: { session: any } | null = await safeGetSession();
 	if (!session.session) session = null;
 
 	let payload = {
@@ -13,15 +13,15 @@ export const load: PageServerLoad = async ({ locals: { safeGetSession } }) => {
 	};
 
 	// could not get session, therefore return an empty payload
-	if (!session) return payload;
+	if (!session || !user) return payload;
 
 	// assign values to payload
 	payload = {
 		accessToken: session.session.access_token,
-		fullName: session.user.user_metadata.full_name ?? "",
-		email: session.user.email ?? "",
-		avatarUrl: session.user.user_metadata.avatar_url ?? "",
-		userId: session.user.id
+		fullName: user.user_metadata.full_name ?? "",
+		email: user.email ?? "",
+		avatarUrl: user.user_metadata.avatar_url ?? "",
+		userId: user.id
 	};
 
 	return payload;

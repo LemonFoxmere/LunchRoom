@@ -12,8 +12,7 @@
 <main>
 	<div id="frontpage">
 		<section id="title">
-			<h1>UMG</h1>
-			<h4>ur mom gay 🤪</h4>
+			<h1>🤨 Bro what the fuck?</h1>
 		</section>
 
 		<section id="cta">
@@ -23,7 +22,7 @@
 				</a>
 			{:else}
 				<a href="/profile">
-					<button class="solid"> View Profile</button>
+					<button class="solid">View Profile</button>
 				</a>
 			{/if}
 		</section>
@@ -41,6 +40,8 @@
 		align-items: center;
 		flex-direction: column;
 		box-sizing: border-box;
+
+		padding: 0px 20px;
 
 		#frontpage {
 			width: 100%;
@@ -61,6 +62,8 @@
 					font-size: 64px;
 					font-weight: 800;
 					transform: translate(-10px, 0px);
+
+					text-align: center;
 				}
 
 				h4 {
@@ -76,9 +79,6 @@
 				box-sizing: border-box;
 
 				button {
-					width: 128px;
-					height: 46px;
-
 					&.text {
 						text-decoration: underline;
 					}
@@ -109,7 +109,7 @@
 					}
 
 					button {
-						width: calc(100% - 40px);
+						width: 100%;
 						margin-bottom: 12px;
 						margin-right: 0px;
 

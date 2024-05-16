@@ -1,35 +1,59 @@
 <script lang="ts">
-	import type { UserProfile } from "$server/src/user/profile/profile.repository";
+	import { getHighResURL } from "$lib/util/profile/avatar";
+	import { Md5 } from "ts-md5";
 
-	export let profileData: UserProfile = {
-		name: "",
-		appeared_handle: "",
-		bio: null
-	};
+	export let email: string = "";
+	export let name: string = "";
+	export let handle: string | null = null;
+	export let bio: string | null = null;
+
+	export let avatar: string | null = null;
+	export let banner: string | null = null;
+
+	export let accountProvider: string | null = null;
 </script>
 
 <main>
 	<div id="banner">
-		<img src="/images/banner.jpg" class="no-drag" alt="" />
-		<div id="gradient" class="no-drag" />
+		{#if banner}
+			<img src={banner} class="no-drag" alt="" />
+			<div id="gradient" class="no-drag" />
+		{:else}
+			<img
+				id="tmp"
+				src={avatar
+					? getHighResURL(avatar, 512, accountProvider)
+					: `https://gravatar.com/avatar/${Md5.hashStr(email)}?f=y&d=identicon&s=512`}
+				class="no-drag"
+				alt=""
+			/>
+		{/if}
 	</div>
 	<div id="pfp">
-		<img src="/images/pfp.jpg" class="no-drag" alt="" />
+		<img
+			src={avatar
+				? getHighResURL(avatar, 512, accountProvider)
+				: `https://gravatar.com/avatar/${Md5.hashStr(email)}?f=y&d=identicon&s=512`}
+			class="no-drag"
+			alt=""
+		/>
 	</div>
 
 	<section id="descriptor-container">
 		<section id="descriptor-aligner">
 			<section id="name-bio-container">
 				<section id="name-container">
-					<h1 id="name">{profileData.name}</h1>
-					<p class="exclude-phone" id="handle">@{profileData.appeared_handle}</p>
+					<h1 id="name">{name}</h1>
+					{#if handle}
+						<p class="exclude-phone" id="handle">@{handle}</p>
+					{/if}
 				</section>
 
 				<div id="seperator"></div>
 
-				{#if profileData.bio}
+				{#if bio}
 					<p id="bio">
-						{profileData.bio}
+						{bio}
 					</p>
 				{:else}
 					<!-- if there is no bio, show the follower count where the bio would be -->
@@ -40,7 +64,7 @@
 			</section>
 
 			<!-- if there is a bio, show the follower count to the right -->
-			{#if profileData.bio}
+			{#if bio}
 				<section id="follower-container">
 					<!-- Add the follower feature later -->
 					<!-- <p><span>1,017</span> Followers &emsp; <span>21</span> Commissions</p> -->
@@ -74,12 +98,32 @@
 			min-height: calc(1200px / (1.618 * 2));
 			aspect-ratio: calc((1.618 * 2) / 1);
 
+			border-radius: 18px 18px 0px 0px;
+
+			overflow: hidden;
+
 			img {
 				width: 100%;
 				height: 100%;
 
 				border-radius: 18px 18px 0px 0px;
 				object-fit: cover;
+
+				&#tmp {
+					filter: blur(100px) saturate(200%);
+					opacity: 0.7;
+
+					object-fit: fill;
+
+					// all this bullshit's just for performance enchancements
+					-webkit-backface-visibility: hidden;
+					-webkit-perspective: 1000;
+					-webkit-transform: translate3d(0, 0, 0) scale(150%);
+					-webkit-transform: translateZ(0) scale(150%);
+					backface-visibility: hidden;
+					perspective: 1000;
+					transform: translate3d(0, 0, 0) scale(150%);
+				}
 			}
 
 			#gradient {
@@ -108,7 +152,7 @@
 			left: 7%;
 			transform: translateY(calc(-50% - 10px)); // vertical middle & shift down 5px
 
-			box-shadow: 0 5px 33px 0 hsla(0, 0%, 0%, 0.38);
+			filter: drop-shadow(0 5px 33px hsla(0, 0%, 0%, 20%));
 
 			display: flex;
 			justify-content: center;
@@ -140,7 +184,7 @@
 			justify-content: space-between;
 			align-items: center;
 
-			border: 1.5px solid $quaternary;
+			border: 1px solid $quaternary;
 			border-radius: 0px 0px 18px 18px;
 			border-top: none;
 

@@ -77,7 +77,12 @@
 
 		#main-content {
 			width: 100%;
-			height: calc(100vh - $navbar-height);
+			min-height: calc(100vh - $navbar-height);
+			height: fit-content;
+
+			display: flex;
+			justify-content: center;
+			align-items: flex-start;
 		}
 	}
 </style>

@@ -1,3 +1,8 @@
+<script lang="ts" context="module">
+	import { writable } from "svelte/store";
+	export const redirectLink = writable<string | null>(null);
+</script>
+
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
@@ -76,8 +81,11 @@
 				authorized = true;
 				authorizing = false;
 
-				// return home
-				goto("/", {
+				// return to redirect link if there is one. Otherwise go home
+				const dest = $redirectLink ?? "/";
+				if (!dest) $redirectLink = null; // reset the redirect link
+
+				goto(dest, {
 					invalidateAll: true
 				});
 			}

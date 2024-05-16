@@ -1,13 +1,13 @@
 import { redirectLink } from "$route/signin/+page.svelte";
 import { fail, redirect } from "@sveltejs/kit";
 
-export const load = async ({ url, locals: { supabase, safeGetSession } }) => {
+export const load = async ({ locals: { supabase, safeGetSession } }) => {
 	const { session, user } = await safeGetSession();
 
 	// sign in if the user is not already signed in
 	if (!(session && user)) {
 		// set a bounce back link in
-		redirectLink.set("/profile");
+		redirectLink.set("/account");
 		redirect(303, `/signin`);
 	}
 
@@ -50,7 +50,6 @@ export const load = async ({ url, locals: { supabase, safeGetSession } }) => {
 	}
 
 	return {
-		url: url.href,
 		session: session,
 		payload
 	};

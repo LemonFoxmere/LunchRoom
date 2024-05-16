@@ -99,18 +99,6 @@
 
 		authorizing = false;
 	};
-
-	// const signupWithOauth = async (provider: "google" | "discord" | "twitter") => {
-	// 	const { error } = await supabase.auth.signInWithOAuth({
-	// 		provider: provider,
-	// 		options: {
-	// 			redirectTo: `${BASE_URL}/signup/auth/confirm/oauth/`
-	// 		}
-	// 	});
-	// 	if (error) {
-	// 		errorMsg = error.message;
-	// 	}
-	// };
 </script>
 
 <main>

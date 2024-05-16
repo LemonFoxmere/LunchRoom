@@ -1,4 +1,6 @@
+import { redirectLink } from "$route/signin/+page.svelte";
 import { redirect } from "@sveltejs/kit";
+import { get } from "svelte/store";
 import type { PageServerLoad } from "./$types";
 
 const generateRandomString = (length: number) => {
@@ -38,5 +40,9 @@ export const load: PageServerLoad = async ({ url, cookies, locals: { supabase } 
 		throw redirect(303, "/auth/auth-code-error");
 	}
 
-	throw redirect(303, "/");
+	// return to redirect link if there is one. Otherwise go home
+	const dest = get(redirectLink) ?? "/";
+	if (!get(redirectLink)) redirectLink.set(null); // reset the redirect link
+
+	throw redirect(303, dest);
 };

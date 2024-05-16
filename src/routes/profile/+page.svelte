@@ -28,16 +28,20 @@
 	import ProfileCard from "$lib/comp/profile/ProfileCard.svelte";
 	import { onMount } from "svelte";
 	import { writable } from "svelte/store";
-	import type { PageData } from "./$types";
 
-	import { API_HOST, TABLET_VIEWPORT_WIDTH } from "$lib/@const/dynamic.env";
+	import { TABLET_VIEWPORT_WIDTH } from "$lib/@const/dynamic.env";
 	import CardMasonry from "$lib/comp/profile/sections/CardMasonry.svelte";
 	import ArtistCardList from "$lib/comp/profile/sections/artist/ArtistCardList.svelte";
 	import type { CommissionPost } from "$server/src/posts/commissions/commissions.repository";
-	import type { UserProfile } from "$server/src/user/profile/profile.repository";
+	import type { Session } from "@supabase/supabase-js";
+	import type { PageData } from "./$types";
 	import LoadScreen from "./../../lib/comp/ui/general/LoadScreen.svelte";
 
 	export let data: PageData;
+
+	let session: Session;
+	let payload: AppUser;
+	$: ({ session, payload } = data);
 
 	// initialize the min width for the masonry cards
 	let minMasonryColWidth = 450;
@@ -47,50 +51,8 @@
 	let activeCommissionPosts: CommissionPost[] = [];
 
 	let allLoaded: boolean = false;
-	let profile: UserProfile;
-
-	// Initialize and load all data on page load
-	const loadData = async (): Promise<number | null> => {
-		// load in data for the user's profile
-		let profileResp: Response;
-		try {
-			profileResp = await fetch(`${API_HOST}/user/profile?access_token=${data.accessToken}`);
-		} catch (e) {
-			console.log(typeof e, e);
-			// TODO: test later
-			return 1; // todo: change later to status code
-		}
-		profile = await profileResp.json();
-
-		// get the current artist posts from the server
-		let postResp: Response;
-		try {
-			postResp = await fetch(`${API_HOST}/commissions?access_token=${data.accessToken}`);
-		} catch (e) {
-			console.log(typeof e, e);
-			return 1; // todo: change later to status code
-		}
-		// assign posts
-		allCommissionPosts = await postResp.json();
-		activeCommissionPosts = allCommissionPosts.filter((e: CommissionPost) => !e.closed);
-
-		return null;
-	};
 
 	const init = async () => {
-		// first, we check if the use is logged in with a valid accessToken. If not, redirect to the signin page
-		if (!data.accessToken) window.location.href = "/signin";
-
-		// asynchronously load the data
-		loadData().then((status) => {
-			if (status !== null) {
-				console.error(status);
-				return;
-			}
-
-			allLoaded = true;
-		});
-
 		// add listener for window resize so that we can update the min width for the masonry cards
 		const updateMasonryColWidth = () => {
 			minMasonryColWidth = window.innerWidth > TABLET_VIEWPORT_WIDTH ? 450 : 300;
@@ -99,6 +61,8 @@
 
 		// trigger this update once
 		updateMasonryColWidth();
+
+		allLoaded = true;
 	};
 	onMount(init);
 </script>
@@ -109,7 +73,15 @@
 	{:else}
 		<section id="profile">
 			<!-- Profile Card -->
-			<ProfileCard profileData={profile} />
+			<ProfileCard
+				email={session.user.email}
+				name={payload.account.name ?? "N/A"}
+				bio={payload.profile.bio ?? null}
+				handle={payload.account.handle ?? null}
+				avatar={payload.profile.avatar ?? null}
+				banner={payload.profile.banner ?? null}
+				accountProvider={session.user.app_metadata.provider ?? null}
+			/>
 
 			<!-- CTA -->
 			<section id="account-setting-container">

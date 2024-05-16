@@ -1,230 +1,165 @@
 <script lang="ts">
-	import { API_HOST } from "$lib/@const/dynamic.env";
-	import NavArrows from "$lib/comp/ui/general/NavArrows.svelte";
-	import Cookies from "js-cookie";
-	import EmailFC from "./../../lib/comp/reset-password/flowContent/EmailFC.svelte";
-	import PasswordFC from "./../../lib/comp/reset-password/flowContent/PasswordFC.svelte";
-	import RedirectFC from "./../../lib/comp/reset-password/flowContent/RedirectFC.svelte";
-	import VerifFC from "./../../lib/comp/signup/flowContent/VerifFC.svelte";
+	import { enhance } from "$app/forms";
+	import { goto } from "$app/navigation";
+	import LoadingDots from "$lib/comp/ui/general/LoadingDots.svelte";
+	import type { SubmitFunction } from "@sveltejs/kit";
 
-	let navStep = 3;
+	let authorized = false;
+	let authorizing = false;
 
-	let emailContentHeight = 120;
+	let errorMsg: string;
 
-	let verifContentHeight = 120;
-	// nav position : height
-	let navButtonHeight: Record<number, number>;
-	$: navButtonHeight = {
-		0: emailContentHeight / 2 + 12 + 35, // email
-		1: verifContentHeight / 2 + 12 + 35 // verification
-	};
-	// UI variables
-	$: navHeight =
-		navButtonHeight[navStep] ?? navButtonHeight[Object.keys(navButtonHeight).length - 1];
-
-	// nav position : action
-	const navButtonActions: Record<number, (() => void) | null> = {
-		0: null, // no action for the intro
-		1: () => {
-			if (lastEmail !== "" && emailValue !== lastEmail) {
-				// if the last email is not the same as the current one, resent the verification code
-				verifCodeStatus.state = null; // reset verification status to null
-				verifCode = ""; // reset verification code
-				sendVerificationEmail(emailValue);
-				cooldownResend();
-			}
-			// update the last working email
-			lastEmail = emailValue;
-		}
-	};
-
-	// nav position : (left disabled condition, right disabled condition)
-	let navButtonDisabledCondition: Record<number, [boolean, boolean]>;
-	$: navButtonDisabledCondition = {
-		0: [false, /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(emailValue)], // disabled (not clickable), normal (clickable)
-		1: [verifCodeStatus.state !== "success", verifCodeStatus.state === "success"] // verification
-	};
-	// UI variables
-	$: leftClickable = !navButtonDisabledCondition[navStep]
-		? true
-		: navButtonDisabledCondition[navStep][0];
-	$: rightClickable = !navButtonDisabledCondition[navStep]
-		? true
-		: navButtonDisabledCondition[navStep][1];
-
-	const navRight = () => {
-		navStep++;
-
-		// run navButtonActions
-		const navAction = navButtonActions[navStep];
-		if (navAction) navAction();
-	};
-	const navLeft = () => {
-		navStep--;
-		navStep = Math.max(navStep, 0); // clip to 0
-
-		// run navButtonActions
-		const navAction = navButtonActions[navStep];
-		if (navAction) navAction();
-	};
-
+	let email: string = "";
 	let emailField: HTMLInputElement;
-	let emailValue: string;
-	let lastEmail: string;
 
-	const verifCodeStatus: uniqueSignupProcessStatus = { state: null, message: "" };
-	let verifField: HTMLInputElement;
-	let verifCode: string;
-
-	let resendCooldownInterval: ReturnType<typeof setInterval>;
-	let resendCooldownTime = 0;
-	let checkTimeout: ReturnType<typeof setTimeout>;
-
-	const cooldownResend = () => {
-		clearInterval(resendCooldownInterval);
-		resendCooldownTime = 30; // reset back to 30 seconds
-
-		resendCooldownInterval = setInterval(() => {
-			resendCooldownTime--;
-			if (resendCooldownTime === 0) clearInterval(resendCooldownInterval);
-		}, 1000);
-	};
-	const resendVerificationCode = () => {
-		sendVerificationEmail(emailField.value);
-		cooldownResend();
-	};
-
-	const checkVerificationCode = () => {
-		verifCodeStatus.state = "processing";
-		clearTimeout(checkTimeout); // clear the previous timeout
-
-		checkTimeout = setTimeout(async () => {
-			// check if handle is available after 1000ms of delay
-			const [valid, message] = await codeValid(verifField.value, emailField.value);
-
-			if (valid) {
-				verifCodeStatus.state = "success";
-			} else {
-				verifCode = ""; // reset verification code
-				verifCodeStatus.state = "failed";
-			}
-
-			verifCodeStatus.message = message;
-		}, 1000);
-	};
-
-	let resetStatus: uniqueSignupProcessStatus = { state: null, message: "" };
+	let password: string = "";
 	let passwordField: HTMLInputElement;
-	let passwordValue: string;
 
-	const resetPassword = async () => {
-		resetStatus = {
-			// set the signup status to processing
-			state: "processing",
-			message: resetStatus.message // persist the error message
+	// email validation
+	$: emailIsValid = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email);
+
+	// animate the error shake for a certain text box
+	const animateInputFailure = (field: HTMLInputElement) => {
+		field.classList.remove("no-anim");
+		field.onanimationend = () => {
+			field.classList.add("no-anim");
+			field.onanimationend = null;
 		};
+	};
 
-		const options = {
-			method: "PATCH",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${Cookies.get("validation_token")}`
-			},
-			body: JSON.stringify({
-				email: lastEmail,
-				password: passwordValue
-			})
-		};
+	// check if the fields are filled out correctly.
+	const fieldsValid = (): boolean => {
+		if (email && emailIsValid && password) return true;
 
-		const resp: Response = await fetch(`${API_HOST}/auth/resetpassword`, options);
-		if (!resp.ok) {
-			let errorMsg = `Something went wrong, please try again later. Status code: ${resp.status}`;
-			if (resp.status === 400) {
-				errorMsg = "Your new password cannot be the same as your old one.";
-			}
-
-			// set the signup status to failed after 2 seconds of cooldown
-			setTimeout(() => {
-				resetStatus = {
-					state: "failed",
-					message: errorMsg
-				};
-
-				// clear the input field
-				passwordValue = "";
-			}, 1000);
-
-			return;
+		if (!password) {
+			errorMsg = "Please enter a password";
+			animateInputFailure(passwordField);
+		}
+		if (!emailIsValid) {
+			errorMsg = "Please a valid email address";
+			animateInputFailure(emailField);
+		}
+		if (!email) {
+			errorMsg = "Please enter your email";
+			animateInputFailure(emailField);
 		}
 
-		// clear the signup token and any old access token
-		Cookies.remove("validation_token");
-		Cookies.remove("access_token");
+		return false;
+	};
 
-		// if response is ok, move the navStep to 3, showing a redirect screen
-		navStep = 3;
+	const emailSignin: SubmitFunction = () => {
+		errorMsg = "";
+		if (!fieldsValid()) return; // check if the fields are filled out correctly.
+		authorizing = true;
+
+		return async ({ result }) => {
+			if (result.type === "failure") {
+				setTimeout(() => {
+					animateInputFailure(passwordField);
+					animateInputFailure(emailField);
+
+					switch (result.status) {
+						case 400:
+							errorMsg = "Invalid email or password.";
+							break;
+						case 401:
+							errorMsg = "Incorrect email or password.";
+							break;
+						default:
+							errorMsg = "Authorization failed. Please try again later.";
+							break;
+					}
+
+					authorizing = false;
+				}, 1000);
+			} else if (result.type === "redirect") {
+				authorized = true;
+				authorizing = false;
+
+				// return home
+				goto("/", {
+					invalidateAll: true
+				});
+			}
+		};
 	};
 </script>
 
 <main>
-	<section id="flow-content-container">
-		<!-- email -->
-		<section
-			id="email"
-			class="flow-content {navStep === 0 ? 'visible' : ''} {navStep > 0 ? 'left' : 'right'}"
-		>
-			<EmailFC
-				enabled={navStep === 0}
-				bind:input={emailField}
-				bind:value={emailValue}
-				bind:contentHeight={emailContentHeight}
-			/>
-		</section>
+	<!-- We need another layer of container around the sign up box to account for overflow padding -->
+	<section id="signup-box-container">
+		<div id="signup-box">
+			<section id="title-container">
+				<h1>Reset your password</h1>
+				<p>Did you forgor :c</p>
+			</section>
 
-		<section
-			id="verfication"
-			class="flow-content {navStep === 1 ? 'visible' : ''} {navStep > 1 ? 'left' : 'right'}"
-		>
-			<VerifFC
-				status={verifCodeStatus}
-				enabled={navStep === 1}
-				{resendCooldownTime}
-				bind:input={verifField}
-				bind:value={verifCode}
-				bind:contentHeight={verifContentHeight}
-				on:submit={checkVerificationCode}
-				on:resend-code={resendVerificationCode}
-			/>
-		</section>
+			<section id="form-container">
+				<!-- Email sign up -->
+				<form id="email-form" method="post" use:enhance={emailSignin}>
+					<section id="input-container">
+						<!-- email -->
+						<section class="input-section" id="email">
+							<h6>Email</h6>
+							<input
+								bind:this={emailField}
+								bind:value={email}
+								name="email"
+								class="no-anim"
+								type="text"
+								placeholder="example@lunchroom.ink"
+							/>
+						</section>
+					</section>
 
-		<section
-			id="password"
-			class="flow-content {navStep === 2 ? 'visible' : ''} {navStep > 2 ? 'left' : 'right'}"
-		>
-			<PasswordFC
-				status={resetStatus}
-				bind:input={passwordField}
-				bind:value={passwordValue}
-				on:submit={resetPassword}
-			/>
-		</section>
+					<section id="cta">
+						<!-- submit -->
+						<button
+							id="submit"
+							class="solid"
+							type="submit"
+							disabled={authorizing || authorized}
+							formaction="?/signin"
+						>
+							{#if !authorized}
+								{#if !authorizing}
+									Send a reset link
+								{:else}
+									<LoadingDots />
+								{/if}
+							{:else}
+								<svg
+									id="success-icon"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.25"
+									stroke="currentColor"
+									class="w-6 h-6"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+									/>
+								</svg>
+							{/if}
+						</button>
 
-		<section
-			id="redirect"
-			class="flow-content {navStep === 3 ? 'visible' : ''} {navStep > 3 ? 'left' : 'right'}"
-		>
-			<RedirectFC />
-		</section>
+						<!-- error message -->
+						{#if errorMsg}
+							<p class="error">
+								{errorMsg}
+							</p>
+						{/if}
+					</section>
+				</form>
 
-		<!-- Normal nav buttons -->
-		<section
-			id="nav-button-container"
-			style="transform: translateY({navHeight}px); opacity: {navStep >= 2
-				? '0'
-				: '1'}; pointer-events: {navStep >= 2 ? 'none' : 'all'};"
-		>
-			<NavArrows {leftClickable} {rightClickable} leftCallback={navLeft} rightCallback={navRight} />
-		</section>
+				<section id="redirect">
+					<a href="/signin" id="signin">Nevermind, I rembered.</a>
+				</section>
+			</section>
+		</div>
 	</section>
 </main>
 
@@ -233,60 +168,230 @@
 
 	main {
 		width: 100%;
-		height: calc(100vh - 2 * $navbar-height);
+		height: 100%;
+
 		display: flex;
 		justify-content: center;
-		align-items: center;
+		align-items: flex-start;
 
-		#flow-content-container {
+		#signup-box-container {
 			width: 100%;
 			height: 100%;
+			min-height: fit-content;
+
+			padding: 40px 15px;
 
 			display: flex;
 			justify-content: center;
 			align-items: center;
+		}
+		#signup-box {
+			width: fit-content;
+			height: fit-content;
+			padding: 40px 40px 70px 40px;
 
-			.flow-content {
-				position: fixed;
+			position: relative;
+			border: 1px solid $quaternary;
+			border-radius: 18px;
+
+			display: flex;
+			flex-direction: column;
+			row-gap: 30px;
+
+			#title-container {
 				display: flex;
-				justify-content: center;
-				align-items: center;
 				flex-direction: column;
-				width: calc(100% - 40px);
+				row-gap: 10px;
 
-				opacity: 0;
-				pointer-events: none;
+				h1 {
+					width: 100%;
+					white-space: nowrap;
 
-				transition:
-					opacity 300ms ease-in-out,
-					transform 700ms $out-generic;
-				transform: translateX(0px);
+					padding-right: 50px;
 
-				&.left {
-					transform: translateX(-700px);
+					font-size: 36px;
+					line-height: 36px;
 				}
-				&.right {
-					transform: translateX(700px);
+
+				p {
+					width: 100%;
+					font-size: 16px;
+					font-weight: 350;
 				}
-				&.visible {
-					opacity: 1;
-					pointer-events: all;
-					transform: translateX(0px);
+			}
+
+			#form-container {
+				display: flex;
+				flex-direction: column;
+
+				width: 100%;
+				row-gap: 40px;
+
+				#email-form {
+					display: flex;
+					flex-direction: column;
+
+					row-gap: 20px;
+
+					#input-container {
+						display: flex;
+						flex-direction: column;
+
+						row-gap: 15px;
+
+						.input-section {
+							width: 100%;
+
+							h6 {
+								color: $primary;
+								margin-bottom: 5px;
+								font-weight: 600;
+							}
+
+							input {
+								width: 100%;
+								border: 1px solid $red;
+								height: 46px;
+								font-size: 16px;
+								padding: 0px 15px;
+
+								animation: 400ms 1 shake;
+
+								&.no-anim {
+									// the normal state of the input fields
+									animation: none;
+
+									border-color: $quaternary;
+									transition: border-color 500ms $in-cubic;
+								}
+							}
+
+							&#password {
+								position: relative;
+								display: flex;
+								flex-direction: column;
+								justify-content: center;
+							}
+						}
+					}
+
+					#cta {
+						display: flex;
+						flex-direction: column;
+						row-gap: 15px;
+						align-items: center;
+
+						#submit {
+							width: 100%;
+							height: 48px;
+							display: flex;
+							justify-content: center;
+							align-items: center;
+
+							#success-icon {
+								$icon-size: 32px;
+
+								display: block;
+								width: $icon-size;
+								height: $icon-size;
+								color: $white;
+							}
+						}
+					}
+				}
+			}
+
+			#redirect {
+				display: flex;
+				column-gap: 30px;
+
+				position: absolute;
+				bottom: 15px;
+				align-self: center;
+
+				#signin {
+					color: $quaternary;
+					text-decoration: underline;
 				}
 			}
 		}
 
-		#nav-button-container {
-			position: fixed;
-			opacity: 1;
+		@media screen and (max-width: $mobile-width) {
+			height: fit-content;
 
-			transition:
-				opacity 350ms $out-generic,
-				transform 700ms $out-generic;
+			#signup-box-container {
+				padding: 0px 15px 50px 15px;
+			}
+
+			#signup-box {
+				border: none;
+				padding: 0px;
+
+				width: 100%;
+				height: 100%;
+
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: flex-start;
+				row-gap: 35px;
+
+				#title-container {
+					row-gap: 5px;
+
+					h1 {
+						text-align: center;
+						line-height: 42px;
+						white-space: wrap;
+
+						padding-right: 0px;
+					}
+
+					p {
+						text-align: center;
+						font-size: 16px;
+						font-weight: 400;
+					}
+				}
+
+				#form-container {
+					#email-form {
+						row-gap: 25px;
+
+						#input-container {
+							row-gap: 15px;
+						}
+					}
+				}
+
+				#redirect {
+					position: relative;
+					bottom: unset;
+					align-self: center;
+				}
+			}
 		}
 
-		@media screen and (max-width: $mobile-width) {
-			height: calc(100vh - $urlbar-height - 2 * $navbar-height);
+		// animation definitions
+		@keyframes shake {
+			0% {
+				transform: translateX(0px);
+			}
+			20% {
+				transform: translateX(10px);
+			}
+			40% {
+				transform: translateX(-10px);
+			}
+			60% {
+				transform: translateX(5px);
+			}
+			80% {
+				transform: translateX(-5px);
+			}
+			100% {
+				transform: translateX(0px);
+			}
 		}
 	}
 </style>

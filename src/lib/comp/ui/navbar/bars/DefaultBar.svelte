@@ -21,7 +21,8 @@
 	// URL controls
 	const UrlLayouts: Record<string, `${TopBarLayout}`> = {
 		"/signin": TopBarLayout.Minimal,
-		"/signup": TopBarLayout.Minimal
+		"/signup": TopBarLayout.Minimal,
+		"/account": TopBarLayout.Minimal
 	};
 
 	// change the navbar layout based on page url

@@ -1,9 +1,14 @@
 import { BASE_URL } from "$lib/supabaseClient";
 import { type Provider } from "@supabase/supabase-js";
 import { fail, redirect } from "@sveltejs/kit";
-import type { Actions } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 
 const OAUTH_PROVIDERS = ["google", "discord", "twitter"];
+
+export const load: PageServerLoad = async ({ locals: { safeGetSession } }) => {
+	const { session } = await safeGetSession();
+	if (session) redirect(303, `${BASE_URL}/`); // dont need to sign up if the user is already signed in
+};
 
 export const actions: Actions = {
 	signup: async ({ url, locals: { supabase } }) => {

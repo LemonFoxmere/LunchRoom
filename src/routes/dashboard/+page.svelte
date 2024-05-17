@@ -1,4 +1,6 @@
 <script lang="ts" context="module">
+	import Modal from "./../../lib/comp/ui/modals/Modal.svelte";
+	import AccountSettings from "./../../lib/comp/ui/modals/modalContent/AccountSettings.svelte";
 	export interface ProfilePageState {
 		type: "client" | "artist";
 		client: {
@@ -32,6 +34,7 @@
 	import { TABLET_VIEWPORT_WIDTH } from "$lib/@const/dynamic.env";
 	import CardMasonry from "$lib/comp/profile/sections/CardMasonry.svelte";
 	import ArtistCardList from "$lib/comp/profile/sections/artist/ArtistCardList.svelte";
+	import MobileAccountSettings from "$lib/comp/ui/modals/modalContent/MobileAccountSettings.svelte";
 	import type { CommissionPost } from "$server/src/posts/commissions/commissions.repository";
 	import type { Session } from "@supabase/supabase-js";
 	import type { PageData } from "./$types";
@@ -40,8 +43,8 @@
 	export let data: PageData;
 
 	let session: Session;
-	let payload: AppUser;
-	$: ({ session, payload } = data);
+	let user: AppUser;
+	$: ({ session, payload: user } = data);
 
 	// initialize the min width for the masonry cards
 	let minMasonryColWidth = 450;
@@ -71,15 +74,16 @@
 	{#if !allLoaded}
 		<LoadScreen />
 	{:else}
+		<!-- PROFILE DISPLAYED -->
 		<section id="profile">
 			<!-- Profile Card -->
 			<ProfileCard
 				email={session.user.email}
-				name={payload.account.name ?? "N/A"}
-				bio={payload.profile.bio ?? null}
-				handle={payload.account.handle ?? null}
-				avatar={payload.profile.avatar ?? null}
-				banner={payload.profile.banner ?? null}
+				name={user.account.name ?? "N/A"}
+				bio={user.profile.bio ?? null}
+				handle={user.account.handle ?? null}
+				avatar={user.profile.avatar ?? null}
+				banner={user.profile.banner ?? null}
 				accountProvider={session.user.app_metadata.provider ?? null}
 			/>
 
@@ -103,7 +107,7 @@
 					bind:posts={activeCommissionPosts}
 					bind:method={$profilePageState.artist.activeCommSorting}
 				>
-					<a href="/profile/new/post">
+					<a href="/dashboard/new/post">
 						<button id="new-comm" class="solid small exclude-phone">New Commission</button>
 					</a>
 				</ArtistCardList>
@@ -130,6 +134,18 @@
 	{/if}
 </main>
 
+<Modal>
+	<!-- The desktop settings -->
+	<div class="exclude-phone">
+		<AccountSettings />
+	</div>
+
+	<!-- The mobile settings -->
+	<div class="only-phone">
+		<MobileAccountSettings {session} {user} />
+	</div>
+</Modal>
+
 <style lang="scss">
 	@import "$static/stylesheets/guideline";
 
@@ -137,7 +153,7 @@
 		width: calc(100% - 260px); // full navbar width minus the 20 pixels margin on each side
 		max-width: 1400px;
 
-		padding: 0 20px 200px 20px;
+		padding: 0 15px 200px 15px;
 		box-sizing: border-box;
 
 		display: flex;

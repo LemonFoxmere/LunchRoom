@@ -1,7 +1,7 @@
 <script lang="ts">
 </script>
 
-<a class="only-phone" href="/profile/new/post">
+<a class="only-phone" href="/dashboard/new/post">
 	<button>
 		<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
 			<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">

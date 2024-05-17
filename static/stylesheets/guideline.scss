@@ -51,8 +51,8 @@ $out-quart: cubic-bezier(0.165, 0.84, 0.44, 1.0075);
 $out-quint: cubic-bezier(0.23, 1, 0.32, 1.002);
 $out-expo: cubic-bezier(0.19, 1, 0.22, 1.003);
 $out-circ: cubic-bezier(0.075, 0.82, 0.165, 1.0015);
-$out-generic: cubic-bezier(0.3, -0.01, 0.4, 1.004);
-$out-generic-expo: cubic-bezier(0.3, 1, 0.22, 1.003);
+$out-generic: cubic-bezier(0.37, 0.13, 0.33, 1);
+$out-generic-expo: cubic-bezier(0.3, 1, 0.22, 1);
 $in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
 $in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
 $in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
@@ -272,12 +272,12 @@ input {
     box-sizing: border-box;
     transition: none;
 
-    border: 2px solid $black;
+    border: 1px solid $quaternary;
     border-radius: 8px;
     background: none;
 
     font-family: "Figtree", system-ui, Helvetica, sans-serif;
-    font-size: 14px;
+    font-size: 16px;
 
     &::placeholder {
         color: $quaternary;

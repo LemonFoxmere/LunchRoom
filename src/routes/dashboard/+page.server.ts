@@ -7,7 +7,7 @@ export const load = async ({ url, locals: { supabase, safeGetSession } }) => {
 	// sign in if the user is not already signed in
 	if (!(session && user)) {
 		// set a bounce back link in
-		redirectLink.set("/profile");
+		redirectLink.set("/dashboard");
 		redirect(303, `/signin`);
 	}
 

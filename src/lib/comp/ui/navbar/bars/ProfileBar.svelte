@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { profilePageState } from "$route/profile/+page.svelte";
+	import { profilePageState } from "$route/dashboard/+page.svelte";
+	import { modalOpen } from "../../modals/Modal.svelte";
 	import MenuButton from "../MenuButton.svelte";
 	import MobileMenu from "../MobileMenu.svelte";
 	import BlankBar, { TopBarLayout } from "../TopBar.svelte";
@@ -21,6 +22,12 @@
 	let topBarLayout: `${TopBarLayout}`;
 	$: topBarLayout = !UrlLayouts[url] ? "normal" : UrlLayouts[url];
 
+	// desktop menu items
+	const openAccountModal = () => {
+		$modalOpen = true;
+		closeMobileMenu();
+	};
+
 	// mobile menu control
 	let mobileMenuOpened = false;
 	const toggleMobileMenu = () => {
@@ -30,6 +37,7 @@
 		mobileMenuOpened = false;
 	};
 
+	// mobile menu items
 	const toggleToClient = () => {
 		$profilePageState.type = "client";
 		// closeMobileMenu();
@@ -51,10 +59,13 @@
 		{closeMobileMenu}
 	>
 		<section
+			id="cta"
 			class="exclude-phone cta"
 			style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms"
 		>
 			<!-- Desktop / Tablet Content Here -->
+			<button class="text" on:click={openAccountModal}>Account Settings</button>
+
 			<section id="client-artist-sel">
 				<button
 					id="client"
@@ -69,7 +80,6 @@
 					on:click={toggleToArtist}>Artist</button
 				>
 			</section>
-			<a href="/account"> <button class="text">Account Settings</button></a>
 		</section>
 
 		<!-- Mobile menu opening and closing button -->
@@ -84,9 +94,9 @@
 		<section class={mobileMenuOpened ? "" : "disabled"} id="mobile-cta">
 			<!-- Mobile Menu Here -->
 			<section class="mobile menu-items" id="client-artist-sel">
-				<h1>Profile Type</h1>
+				<h1>Dashboard</h1>
 
-				<section id="cta">
+				<section id="dashboard-cta">
 					<button
 						id="client"
 						disabled={$profilePageState.type === "client"}
@@ -102,7 +112,7 @@
 				</section>
 			</section>
 
-			<a class="menu-items" target="_blank" on:click={closeMobileMenu}>
+			<a class="menu-items" on:click={openAccountModal}>
 				<button class="text">Account Settings</button>
 			</a>
 
@@ -152,6 +162,41 @@
 						opacity: 1;
 						transform: translateY(0);
 					}
+				}
+			}
+
+			#client-artist-sel {
+				margin: 5px 0px 20px 0px;
+				width: 100%;
+
+				display: flex;
+				flex-direction: column;
+
+				button {
+					&#client {
+						border-radius: 10px 0px 0px 10px;
+						border-right: none;
+					}
+					&#artist {
+						border-radius: 0px 10px 10px 0px;
+						border-left: none;
+					}
+				}
+
+				#dashboard-cta {
+					margin-top: 14px;
+					display: flex;
+
+					button {
+						width: 100%;
+						height: 50px;
+						font-size: 16px;
+					}
+				}
+
+				h1 {
+					font-size: 32px;
+					width: 100%;
 				}
 			}
 
@@ -205,80 +250,63 @@
 			}
 		}
 
-		#client-artist-sel {
-			// margin-right: 42px;
+		#cta {
 			display: flex;
+			justify-content: flex-end;
+			column-gap: 40px;
 
-			button {
-				&#client {
-					border-radius: 10px 0px 0px 10px;
-					border-right: none;
-				}
-				&#artist {
-					border-radius: 0px 10px 10px 0px;
-					border-left: none;
+			#client-artist-sel {
+				// margin-right: 42px;
+				display: flex;
+
+				button {
+					&#client {
+						border-radius: 10px 0px 0px 10px;
+						border-right: none;
+					}
+					&#artist {
+						border-radius: 0px 10px 10px 0px;
+						border-left: none;
+					}
 				}
 			}
 
-			&.mobile {
-				margin: 5px 0px 20px 0px;
-				width: 100%;
+			.cta {
 				display: flex;
-				flex-direction: column;
+				flex-direction: row-reverse;
 
-				#cta {
-					margin-top: 14px;
-					display: flex;
+				animation: cta-shrink forwards;
+				animation-play-state: paused;
+				animation-timing-function: $out-expo;
 
-					button {
-						width: 100%;
-						height: 50px;
-						font-size: 16px;
+				display: flex;
+				align-items: center;
+
+				@keyframes cta-shrink {
+					from {
+						transform: scale(100%);
+					}
+					to {
+						transform: scale(90%);
 					}
 				}
 
-				h1 {
-					font-size: 32px;
-					width: 100%;
-				}
-			}
-		}
+				a {
+					text-decoration: none;
+					margin-right: 42px;
 
-		.cta {
-			display: flex;
-			flex-direction: row-reverse;
+					&:first-child {
+						margin: 0;
+					}
 
-			animation: cta-shrink forwards;
-			animation-play-state: paused;
-			animation-timing-function: $out-expo;
+					button {
+						display: flex;
+						align-items: center;
 
-			display: flex;
-			align-items: center;
-
-			@keyframes cta-shrink {
-				from {
-					transform: scale(100%);
-				}
-				to {
-					transform: scale(90%);
-				}
-			}
-
-			a {
-				text-decoration: none;
-				margin-right: 42px;
-
-				&:first-child {
-					margin: 0;
-				}
-
-				button {
-					display: flex;
-					align-items: center;
-
-					svg {
-						margin-left: 8px;
-						height: 14px;
+						svg {
+							margin-left: 8px;
+							height: 14px;
+						}
 					}
 				}
 			}

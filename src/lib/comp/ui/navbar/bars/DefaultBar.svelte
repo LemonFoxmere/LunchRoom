@@ -100,13 +100,15 @@
 				</a>
 			{:else}
 				<div id="avatar">
+					<!-- Drop down menu for the avatar -->
 					<DesktopMenu
 						shown={profileMenuOpened}
 						menuItems={[
-							{ content: "View Profile", href: "/profile" },
+							{ content: "View Dashboard", href: "/dashboard" },
 							{ content: "Sign Out", formAction: "/api/auth?/signout" }
 						]}
 					>
+						<!-- The actual button itself -->
 						<button class="text" on:click={toggleProfileMenu}>
 							<img
 								src={avatarUrl ??
@@ -142,8 +144,8 @@
 					<button class="text">Sign in</button>
 				</a>
 			{:else}
-				<a class="menu-items" href="/profile" on:click={closeMobileMenu}>
-					<button class="text">View Profile</button>
+				<a class="menu-items" href="/dashboard" on:click={closeMobileMenu}>
+					<button class="text">View Dashboard</button>
 				</a>
 			{/if}
 

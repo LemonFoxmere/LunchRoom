@@ -21,8 +21,8 @@
 					<button>Sign Up</button>
 				</a>
 			{:else}
-				<a href="/profile">
-					<button class="solid">View Profile</button>
+				<a href="/dashboard">
+					<button class="solid">View Dashboard</button>
 				</a>
 			{/if}
 		</section>

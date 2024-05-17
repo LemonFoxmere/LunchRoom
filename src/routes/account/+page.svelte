@@ -1,21 +1,25 @@
 <script lang="ts">
-	import { getHighResURL } from "$lib/util/profile/avatar";
+	import ProfilePicture from "$lib/comp/ui/account/ProfilePicture.svelte";
+	import Dollar from "$lib/comp/ui/icons/Dollar.svelte";
+	import Lock from "$lib/comp/ui/icons/Lock.svelte";
+	import Logout from "$lib/comp/ui/icons/Logout.svelte";
+	import User from "$lib/comp/ui/icons/User.svelte";
 	import type { Session } from "@supabase/supabase-js";
-	import { Md5 } from "ts-md5";
 	import type { PageData } from "./$types";
 
 	export let data: PageData;
 
 	let session: Session;
-	let payload: AppUser;
-	$: ({ session, payload } = data);
+	let user: AppUser;
+	$: user = data.payload;
+	$: session = data.session;
 
 	let sectionIdx = 0;
 </script>
 
 <main>
 	<div id="sidebar">
-		<a id="back-to-profile" href="/profile">
+		<a id="back-to-profile" href="/dashboard">
 			<svg id="back" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
 			</svg>
@@ -24,67 +28,27 @@
 		</a>
 
 		<section id="greet">
-			<img
-				id="avatar"
-				src={payload.profile.avatar
-					? getHighResURL(payload.profile.avatar, 512, session.user.app_metadata.provider ?? null)
-					: `https://gravatar.com/avatar/${Md5.hashStr(
-							session.user.email ?? ""
-						)}?f=y&d=identicon&s=512`}
-				class="no-drag"
-				alt=""
-			/>
+			<ProfilePicture {user} {session} />
 
-			<h3 id="name">{payload.account.name}</h3>
+			<h3 id="name">{user.account.name}</h3>
 		</section>
 
 		<section id="settings-menu">
 			<a class={sectionIdx === 0 ? "active" : ""}>
-				<svg id="icon" viewBox="0 0 24 24" fill="currentColor">
-					<path
-						fill-rule="evenodd"
-						d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z"
-						clip-rule="evenodd"
-					/>
-				</svg>
-
+				<Lock />
 				<h6 id="text">Account</h6>
 			</a>
 			<a class={sectionIdx === 1 ? "active" : ""}>
-				<svg id="icon" viewBox="0 0 24 24" fill="currentColor">
-					<path
-						fill-rule="evenodd"
-						d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
-						clip-rule="evenodd"
-					/>
-				</svg>
-
+				<User />
 				<h6 id="text">Profile</h6>
 			</a>
 			<a class={sectionIdx === 2 ? "active" : ""}>
-				<svg id="icon" viewBox="0 0 24 24" fill="currentColor">
-					<path
-						d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 0 1-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.323.152-.691.546-1.004ZM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .305-.152.671-.579.991a2.534 2.534 0 0 1-.921.42Z"
-					/>
-					<path
-						fill-rule="evenodd"
-						d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v.816a3.836 3.836 0 0 0-1.72.756c-.712.566-1.112 1.35-1.112 2.178 0 .829.4 1.612 1.113 2.178.502.4 1.102.647 1.719.756v2.978a2.536 2.536 0 0 1-.921-.421l-.879-.66a.75.75 0 0 0-.9 1.2l.879.66c.533.4 1.169.645 1.821.75V18a.75.75 0 0 0 1.5 0v-.81a4.124 4.124 0 0 0 1.821-.749c.745-.559 1.179-1.344 1.179-2.191 0-.847-.434-1.632-1.179-2.191a4.122 4.122 0 0 0-1.821-.75V8.354c.29.082.559.213.786.393l.415.33a.75.75 0 0 0 .933-1.175l-.415-.33a3.836 3.836 0 0 0-1.719-.755V6Z"
-						clip-rule="evenodd"
-					/>
-				</svg>
-
+				<Dollar />
 				<h6 id="text">Payment</h6>
 			</a>
 
 			<a id="signout">
-				<svg id="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5px">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
-					/>
-				</svg>
-
+				<Logout />
 				<h6 id="text">Sign Out</h6>
 			</a>
 		</section>

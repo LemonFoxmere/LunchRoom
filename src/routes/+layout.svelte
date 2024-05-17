@@ -33,8 +33,8 @@
 		none = "none"
 	}
 	const urlSpecificBar: Record<string, `${barTypes}`> = {
-		"/profile": barTypes.profile,
-		"/profile/new/post": barTypes.none,
+		"/dashboard": barTypes.profile,
+		"/dashboard/new/post": barTypes.none,
 		"/auth/confirm/email": barTypes.none,
 		"/auth/confirm/oauth": barTypes.none
 	};
@@ -77,8 +77,7 @@
 
 		#main-content {
 			width: 100%;
-			min-height: calc(100vh - $navbar-height);
-			height: fit-content;
+			height: calc(100vh - $navbar-height);
 
 			display: flex;
 			justify-content: center;

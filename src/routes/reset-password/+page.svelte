@@ -12,9 +12,6 @@
 	let email: string = "";
 	let emailField: HTMLInputElement;
 
-	let password: string = "";
-	let passwordField: HTMLInputElement;
-
 	// email validation
 	$: emailIsValid = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email);
 
@@ -29,12 +26,6 @@
 
 	// check if the fields are filled out correctly.
 	const fieldsValid = (): boolean => {
-		if (email && emailIsValid && password) return true;
-
-		if (!password) {
-			errorMsg = "Please enter a password";
-			animateInputFailure(passwordField);
-		}
 		if (!emailIsValid) {
 			errorMsg = "Please a valid email address";
 			animateInputFailure(emailField);
@@ -55,7 +46,6 @@
 		return async ({ result }) => {
 			if (result.type === "failure") {
 				setTimeout(() => {
-					animateInputFailure(passwordField);
 					animateInputFailure(emailField);
 
 					switch (result.status) {
@@ -185,6 +175,7 @@
 			justify-content: center;
 			align-items: center;
 		}
+
 		#signup-box {
 			width: fit-content;
 			height: fit-content;

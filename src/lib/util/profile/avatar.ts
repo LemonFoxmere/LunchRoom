@@ -5,7 +5,19 @@
  * @param targetDim
  * @param provider
  */
-export const getHighResURL = (url: string, targetDim: number, provider: string | null) => {
+export const getHighResURL = (url: string, targetDim: number) => {
+	// determine the provider based on the url
+	let provider = "";
+	const domain = url.split("/")[2];
+
+	if (domain.includes("discord")) {
+		provider = "discord";
+	} else if (domain.includes("google")) {
+		provider = "google";
+	} else if (domain.includes("twimg")) {
+		provider = "twitter";
+	}
+
 	switch (provider) {
 		case "google":
 			return url.replace(/s[0-9]+-c/g, `s${targetDim}-c`);

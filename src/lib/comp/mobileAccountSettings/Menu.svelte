@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { createEventDispatcher } from "svelte";
 	import ChevLeft from "../ui/icons/ChevLeft.svelte";
+	const disp = createEventDispatcher();
 
 	export let id: string = "";
 	export let parentCtrlLevel: number; // The parent menu's level controller. Make sure this is binded in the parent
@@ -9,13 +11,38 @@
 	export let localCtrlLevel: number = -1; // The current menu's level
 
 	export let menuName: string = "";
+	export let menuDescription: string = "";
 	export let parentMenuName: string = "Cancel";
 	export let menuTitleSpacing: number = 25;
 
 	export let rootMenu: boolean = false;
+	export let locked: boolean = false;
+
+	const exitMenu = () => {
+		if (locked) return;
+
+		// dispatch event and reset parent control level
+		disp("exit");
+		parentCtrlLevel = -1;
+	};
+
+	$: if (parentCtrlLevel === menuLevel) disp("enter");
+
+	// detect if we should hide or show the menu
+	let mainContainer: HTMLElement;
+	$: if (mainContainer) {
+		if (parentCtrlLevel !== menuLevel) {
+			mainContainer.classList.add("hidden-as-child");
+		} else mainContainer.classList.remove("hidden-as-child");
+
+		if (localCtrlLevel !== -1 && parentCtrlLevel === menuLevel) {
+			mainContainer.classList.add("hidden-as-parent");
+		} else mainContainer.classList.remove("hidden-as-parent");
+	}
 </script>
 
 <main
+	bind:this={mainContainer}
 	{id}
 	class="
         {parentCtrlLevel !== menuLevel ? 'hidden-as-child' : ''}
@@ -23,13 +50,18 @@
 >
 	<!-- Back button -->
 	{#if !rootMenu}
-		<button id="back" class="text" on:click={() => (parentCtrlLevel = -1)}>
+		<button id="back" class="text {locked ? 'disabled' : ''}" on:click={exitMenu}>
 			<ChevLeft s={20} />
 			<p>{parentMenuName}</p>
 		</button>
 	{/if}
 
-	<h1 id="menu-title" style="--spacing:{menuTitleSpacing}px">{menuName}</h1>
+	<section id="menu-title-container" style="--spacing:{menuTitleSpacing}px">
+		<h1 id="title">{menuName}</h1>
+		{#if menuDescription}
+			<p id="description">{menuDescription}</p>
+		{/if}
+	</section>
 
 	<slot name="content" />
 </main>
@@ -47,9 +79,13 @@
 		transition-property: opacity, transform;
 		transition-delay: 150ms;
 
+		padding: 32px 28px 32px 28px;
+
 		&.hidden {
-			position: absolute;
+			position: fixed;
 			width: 100%;
+			height: fit-content;
+			max-height: 100%;
 			bottom: 0px;
 
 			opacity: 0;
@@ -71,11 +107,21 @@
 			display: flex;
 			align-items: center;
 			column-gap: 5px;
-
-			margin-bottom: 20px;
 			padding: 0px;
 
 			color: $quaternary;
+
+			width: fit-content;
+			border-radius: 12px;
+			padding: 10px;
+
+			transform: translate(-10px, -10px);
+			transition: opacity 500ms $out-generic-expo;
+
+			&.disabled {
+				opacity: 0.4;
+				pointer-events: none;
+			}
 
 			p {
 				font-size: 18px;
@@ -83,13 +129,18 @@
 			}
 		}
 
-		#menu-title {
+		#menu-title-container {
 			$spacing: var(--spacing);
-
-			font-size: 32px;
-			color: $black;
-
 			margin-bottom: $spacing;
+
+			display: flex;
+			flex-direction: column;
+			row-gap: 12px;
+
+			#title {
+				font-size: 32px;
+				color: $black;
+			}
 		}
 	}
 </style>

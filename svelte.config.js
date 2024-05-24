@@ -6,8 +6,9 @@ const config = {
 	// Consult https://kit.svelte.dev/docs/integrations#preprocessors
 	// for more information about preprocessors
 	preprocess: vitePreprocess(),
-	
+
 	onwarn: (warning, handler) => {
+		// if (warning.code.startsWith("a11y-")) {
 		if (warning.code === "css-unused-selector" || warning.code.startsWith("a11y-")) {
 			return;
 		}

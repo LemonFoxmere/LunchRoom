@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { user } from "$lib/objects/user";
 	import { Md5 } from "ts-md5";
 	import MenuButton from "../MenuButton.svelte";
 	import BlankBar, { TopBarLayout } from "../TopBar.svelte";
@@ -6,9 +7,6 @@
 	import MobileMenu from "./../MobileMenu.svelte";
 
 	// External UI variables
-	export let userId: string | null;
-	export let email: string;
-	export let avatarUrl: string | null;
 	export let url: string;
 
 	export let animResolution: number;
@@ -77,12 +75,15 @@
 		{closeMobileMenu}
 	>
 		<section id="mobile-cta-container" class="only-phone cta">
-			{#if !userId}
+			{#if !$user.account.uid}
 				<MenuButton opened={mobileMenuOpened} on:click={toggleMobileMenu} />
 			{:else}
 				<button id="avatar" class="cta-buttons text" on:click={toggleMobileMenu}>
 					<img
-						src={avatarUrl ?? `https://gravatar.com/avatar/${Md5.hashStr(email)}?f=y&d=identicon`}
+						src={$user.profile.avatar ??
+							`https://gravatar.com/avatar/${Md5.hashStr(
+								$user.account.email ?? ""
+							)}?f=y&d=identicon`}
 						alt="Profile Picture"
 					/>
 				</button>
@@ -94,7 +95,7 @@
 			class="exclude-phone cta"
 			style="animation-duration: {animResolution}ms; animation-delay: {navbarLogoDelay}ms"
 		>
-			{#if !userId}
+			{#if !$user.account.uid}
 				<a id="sign-in" class="cta-links" href="/signin">
 					<button class="text">Sign In</button>
 				</a>
@@ -111,8 +112,10 @@
 						<!-- The actual button itself -->
 						<button class="text" on:click={toggleProfileMenu}>
 							<img
-								src={avatarUrl ??
-									`https://gravatar.com/avatar/${Md5.hashStr(email)}?f=y&d=identicon`}
+								src={$user.profile.avatar ??
+									`https://gravatar.com/avatar/${Md5.hashStr(
+										$user.account.email
+									)}?f=y&d=identicon`}
 								alt="Profile Picture"
 							/>
 						</button>
@@ -139,7 +142,7 @@
 
 	<MobileMenu {mobileMenuOpened} {closeMobileMenu}>
 		<form class={mobileMenuOpened ? "" : "disabled"} id="mobile-cta" method="post">
-			{#if !userId}
+			{#if !$user.account.uid}
 				<a class="menu-items" href="/signin" on:click={closeMobileMenu}>
 					<button class="text">Sign in</button>
 				</a>
@@ -166,7 +169,7 @@
 				<button class="text">GitHub</button>
 			</a>
 
-			{#if userId}
+			{#if $user.account.uid}
 				<hr class="menu-items" />
 
 				<a class="menu-items">

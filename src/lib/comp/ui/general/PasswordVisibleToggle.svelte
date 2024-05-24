@@ -59,7 +59,6 @@
 	@import "$static/stylesheets/guideline";
 
 	a {
-		// border: 1px solid red;
 		width: 50px;
 		height: 42px;
 

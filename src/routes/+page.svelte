@@ -5,11 +5,8 @@
 	export let data: PageData;
 
 	onMount(() => {
-		(async () => {
-		})();
+		(async () => {})();
 	});
-
-	let a: number = "123";
 </script>
 
 <main>
@@ -33,119 +30,119 @@
 </main>
 
 <style lang="scss">
-  @import "$static/stylesheets/guideline";
+	@import "$static/stylesheets/guideline";
 
-  main {
-    width: 100%;
-    height: fit-content;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    box-sizing: border-box;
+	main {
+		width: 100%;
+		height: fit-content;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		box-sizing: border-box;
 
-    padding: 0px 20px;
+		padding: 0px 20px;
 
-    #frontpage {
-      width: 100%;
-      height: calc(100vh - 2 * $navbar-height);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
+		#frontpage {
+			width: 100%;
+			height: calc(100vh - 2 * $navbar-height);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
 
-      row-gap: 32px;
+			row-gap: 32px;
 
-      #title {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+			#title {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
 
-        h1 {
-          font-size: 64px;
-          font-weight: 800;
-          transform: translate(-10px, 0px);
+				h1 {
+					font-size: 64px;
+					font-weight: 800;
+					transform: translate(-10px, 0px);
 
-          text-align: center;
-        }
+					text-align: center;
+				}
 
-        h4 {
-          margin-top: 12px;
-          font-weight: 400;
-          color: $tertiary;
-        }
-      }
+				h4 {
+					margin-top: 12px;
+					font-weight: 400;
+					color: $tertiary;
+				}
+			}
 
-      #cta {
-        display: flex;
-        flex-direction: row;
-        box-sizing: border-box;
+			#cta {
+				display: flex;
+				flex-direction: row;
+				box-sizing: border-box;
 
-        button {
-          &.text {
-            text-decoration: underline;
-          }
+				button {
+					&.text {
+						text-decoration: underline;
+					}
 
-          &:first-child {
-            margin-right: 12px;
-          }
-        }
+					&:first-child {
+						margin-right: 12px;
+					}
+				}
 
-        @media screen and (max-width: $tablet-width) {
-          margin: 36px 0 0 0;
-        }
+				@media screen and (max-width: $tablet-width) {
+					margin: 36px 0 0 0;
+				}
 
-        @media screen and (max-width: $mobile-width) {
-          flex-direction: column;
-          align-items: center;
-          margin: 42px 0 0 0;
+				@media screen and (max-width: $mobile-width) {
+					flex-direction: column;
+					align-items: center;
+					margin: 42px 0 0 0;
 
-          width: 100%;
+					width: 100%;
 
-          a {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+					a {
+						width: 100%;
+						display: flex;
+						justify-content: center;
+						align-items: center;
 
-            text-decoration: none;
-          }
+						text-decoration: none;
+					}
 
-          button {
-            width: 100%;
-            margin-bottom: 12px;
-            margin-right: 0px;
+					button {
+						width: 100%;
+						margin-bottom: 12px;
+						margin-right: 0px;
 
-            &:last-child {
-              margin: 0;
-            }
+						&:last-child {
+							margin: 0;
+						}
 
-            &.text {
-              width: fit-content;
-            }
-          }
-        }
-      }
+						&.text {
+							width: fit-content;
+						}
+					}
+				}
+			}
 
-      @media screen and (max-width: $tablet-width) {
-        flex-direction: column;
+			@media screen and (max-width: $tablet-width) {
+				flex-direction: column;
 
-        #title {
-          h3 {
-            font-size: 26px;
-          }
-        }
-      }
+				#title {
+					h3 {
+						font-size: 26px;
+					}
+				}
+			}
 
-      @media screen and (max-width: $mobile-width) {
-        width: 100%;
-        height: calc(100vh - $urlbar-height - $navbar-height);
-        flex-direction: column;
-      }
-    }
+			@media screen and (max-width: $mobile-width) {
+				width: 100%;
+				height: calc(100vh - $urlbar-height - $navbar-height);
+				flex-direction: column;
+			}
+		}
 
-    @media screen and (max-width: $mobile-width) {
-      padding-bottom: 16px;
-    }
-  }
+		@media screen and (max-width: $mobile-width) {
+			padding-bottom: 16px;
+		}
+	}
 </style>

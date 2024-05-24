@@ -3,7 +3,7 @@ import { redirect, type Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from "$env/static/public";
-import type { Session } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
 
 const supabase: Handle = async ({ event, resolve }) => {
 	/**
@@ -34,7 +34,10 @@ const supabase: Handle = async ({ event, resolve }) => {
 	 * validating the JWT, this function also calls `getUser()` to validate the
 	 * JWT before returning the session.
 	 */
-	event.locals.safeGetSession = async () => {
+	event.locals.safeGetSession = async (): Promise<{
+		session: Session | null;
+		user: User | null;
+	}> => {
 		const {
 			data: { user },
 			error

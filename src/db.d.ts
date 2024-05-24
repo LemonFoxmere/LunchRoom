@@ -1,7 +1,10 @@
 declare global {
 	interface UserAccount {
+		uid: string;
+		email: string;
+		name: string;
+		provider: string | null;
 		handle?: string | null;
-		name?: string;
 	}
 	interface UserProfile {
 		avatar?: string | null;

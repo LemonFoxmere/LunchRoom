@@ -1,6 +1,5 @@
 <script lang="ts" context="module">
 	import Modal from "./../../lib/comp/ui/modals/Modal.svelte";
-	import AccountSettings from "./../../lib/comp/ui/modals/modalContent/AccountSettings.svelte";
 	export interface ProfilePageState {
 		type: "client" | "artist";
 		client: {
@@ -34,8 +33,8 @@
 	import { TABLET_VIEWPORT_WIDTH } from "$lib/@const/dynamic.env";
 	import CardMasonry from "$lib/comp/profile/sections/CardMasonry.svelte";
 	import ArtistCardList from "$lib/comp/profile/sections/artist/ArtistCardList.svelte";
+	import AccountSettings from "$lib/comp/ui/modals/modalContent/AccountSettings.svelte";
 	import MobileAccountSettings from "$lib/comp/ui/modals/modalContent/MobileAccountSettings.svelte";
-	import type { CommissionPost } from "$server/src/posts/commissions/commissions.repository";
 	import type { Session } from "@supabase/supabase-js";
 	import type { PageData } from "./$types";
 	import LoadScreen from "./../../lib/comp/ui/general/LoadScreen.svelte";
@@ -43,15 +42,14 @@
 	export let data: PageData;
 
 	let session: Session;
-	let user: AppUser;
-	$: ({ session, payload: user } = data);
+	$: ({ session } = data);
 
 	// initialize the min width for the masonry cards
 	let minMasonryColWidth = 450;
 
 	// the active commission posts all commission posts
-	let allCommissionPosts: CommissionPost[] = [];
-	let activeCommissionPosts: CommissionPost[] = [];
+	let allCommissionPosts: string[] = [];
+	let activeCommissionPosts: string[] = [];
 
 	let allLoaded: boolean = false;
 
@@ -77,24 +75,19 @@
 		<!-- PROFILE DISPLAYED -->
 		<section id="profile">
 			<!-- Profile Card -->
-			<ProfileCard
-				email={session.user.email}
-				name={user.account.name ?? "N/A"}
-				bio={user.profile.bio ?? null}
-				handle={user.account.handle ?? null}
-				avatar={user.profile.avatar ?? null}
-				banner={user.profile.banner ?? null}
-				accountProvider={session.user.app_metadata.provider ?? null}
-			/>
+			<ProfileCard />
 
 			<!-- CTA -->
 			<section id="account-setting-container">
 				<!-- desktop -->
 				<button class="text underlined only-desktop" id="edit">Edit Profile</button>
-				<button class="text underlined only-desktop" id="copy-link">Copy Link to Profile</button>
+				<button class="text underlined only-desktop" id="copy-link"
+					>Copy Link to Profile</button
+				>
 				<!-- tablet and mobile -->
 				<button class="underlined small exclude-desktop" id="edit">Edit Profile</button>
-				<button class="underlined small exclude-desktop" id="copy-link">Copy Link to Profile</button
+				<button class="underlined small exclude-desktop" id="copy-link"
+					>Copy Link to Profile</button
 				>
 			</section>
 		</section>
@@ -108,7 +101,9 @@
 					bind:method={$profilePageState.artist.activeCommSorting}
 				>
 					<a href="/dashboard/new/post">
-						<button id="new-comm" class="solid small exclude-phone">New Commission</button>
+						<button id="new-comm" class="solid small exclude-phone"
+							>New Commission</button
+						>
 					</a>
 				</ArtistCardList>
 
@@ -136,13 +131,13 @@
 
 <Modal>
 	<!-- The desktop settings -->
-	<div class="exclude-phone">
+	<div class="exclude-phone modal-content">
 		<AccountSettings />
 	</div>
 
 	<!-- The mobile settings -->
-	<div class="only-phone">
-		<MobileAccountSettings {session} {user} />
+	<div class="only-phone modal-content">
+		<MobileAccountSettings {session} />
 	</div>
 </Modal>
 
@@ -343,5 +338,14 @@
 				}
 			}
 		}
+	}
+
+	.modal-content {
+		display: flex;
+		flex-direction: column;
+
+		min-height: 0px;
+		height: fit-content;
+		max-height: 100%;
 	}
 </style>

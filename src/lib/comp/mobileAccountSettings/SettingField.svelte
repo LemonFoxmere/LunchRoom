@@ -19,7 +19,7 @@
 <main>
 	<section id="information">
 		<p class="label-text">{name}</p>
-		<p class="value-text">{currentValue ?? defaultValue}</p>
+		<pre class="value-text">{currentValue ?? defaultValue}</pre>
 	</section>
 
 	{#if editable}
@@ -38,6 +38,7 @@
 		column-gap: 25px;
 
 		#information {
+			max-width: calc(100% - 42px - 25px);
 			display: flex;
 			flex-direction: column;
 			row-gap: 3px;
@@ -49,8 +50,17 @@
 			}
 
 			.value-text {
+				max-width: 100%;
 				font-size: 16px;
 				color: $tertiary;
+				white-space: pre-wrap;
+
+				// only show 3 lines of text
+				overflow: hidden;
+				display: -webkit-box;
+				-webkit-line-clamp: 3;
+				line-clamp: 3;
+				-webkit-box-orient: vertical;
 			}
 		}
 

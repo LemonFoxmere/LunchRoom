@@ -1,11 +1,12 @@
 <script lang="ts">
 	import ProfileBar from "$lib/comp/ui/navbar/bars/ProfileBar.svelte";
+	import { anonUser, user } from "$lib/objects/user";
 	import { onMount } from "svelte";
-	import type { PageData } from "./$types";
+	import type { LayoutData } from "./$types";
 	import DefaultBar from "./../lib/comp/ui/navbar/bars/DefaultBar.svelte";
 
-	export let data: PageData;
-	$: ({ url } = data);
+	export let data: LayoutData;
+	$: ({ url, session, payload } = data);
 
 	// scroll animation
 	let scrollDist = 0;
@@ -14,9 +15,14 @@
 		requestAnimationFrame(trackScroll);
 	};
 
+	const initUserStore = () => {
+		$user = payload ?? anonUser;
+	};
+
 	const init = async () => {
 		// initialize the UI comps
 		trackScroll();
+		initUserStore();
 	};
 
 	onMount(() => {
@@ -44,15 +50,7 @@
 
 <main>
 	{#if navbarBarType === barTypes.default}
-		<DefaultBar
-			userId={data.payload.userId}
-			email={data.payload.email}
-			avatarUrl={data.payload.avatarUrl}
-			{url}
-			{animResolution}
-			{navbarAnimDelay}
-			{navbarLogoDelay}
-		/>
+		<DefaultBar {url} {animResolution} {navbarAnimDelay} {navbarLogoDelay} />
 	{:else if navbarBarType === barTypes.profile}
 		<ProfileBar {url} {animResolution} {navbarAnimDelay} {navbarLogoDelay} />
 	{/if}

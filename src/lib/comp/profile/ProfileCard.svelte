@@ -1,29 +1,20 @@
 <script lang="ts">
+	import { user } from "$lib/objects/user";
 	import { getHighResURL } from "$lib/util/profile/avatar";
 	import { Md5 } from "ts-md5";
-
-	export let email: string = "";
-	export let name: string = "";
-	export let handle: string | null = null;
-	export let bio: string | null = null;
-
-	export let avatar: string | null = null;
-	export let banner: string | null = null;
-
-	export let accountProvider: string | null = null;
 </script>
 
 <main>
 	<div id="banner">
-		{#if banner}
-			<img src={banner} class="no-drag" alt="" />
+		{#if $user.profile.banner}
+			<img src={$user.profile.banner} class="no-drag" alt="" />
 			<div id="gradient" class="no-drag" />
 		{:else}
 			<img
 				id="tmp"
-				src={avatar
-					? getHighResURL(avatar, 512, accountProvider)
-					: `https://gravatar.com/avatar/${Md5.hashStr(email)}?f=y&d=identicon&s=512`}
+				src={$user.profile.avatar
+					? getHighResURL($user.profile.avatar, 512)
+					: `https://gravatar.com/avatar/${Md5.hashStr($user.account.email)}?f=y&d=identicon&s=512`}
 				class="no-drag"
 				alt=""
 			/>
@@ -31,9 +22,9 @@
 	</div>
 	<div id="pfp">
 		<img
-			src={avatar
-				? getHighResURL(avatar, 512, accountProvider)
-				: `https://gravatar.com/avatar/${Md5.hashStr(email)}?f=y&d=identicon&s=512`}
+			src={$user.profile.avatar
+				? getHighResURL($user.profile.avatar, 512)
+				: `https://gravatar.com/avatar/${Md5.hashStr($user.account.email)}?f=y&d=identicon&s=512`}
 			class="no-drag"
 			alt=""
 		/>
@@ -43,18 +34,16 @@
 		<section id="descriptor-aligner">
 			<section id="name-bio-container">
 				<section id="name-container">
-					<h1 id="name">{name}</h1>
-					{#if handle}
-						<p class="exclude-phone" id="handle">@{handle}</p>
+					<h1 id="name">{$user.account.name}</h1>
+					{#if $user.account.handle}
+						<p class="exclude-phone" id="handle">@{$user.account.handle}</p>
 					{/if}
 				</section>
 
 				<div id="seperator"></div>
 
-				{#if bio}
-					<p id="bio">
-						{bio}
-					</p>
+				{#if $user.profile.bio}
+					<pre id="bio">{$user.profile.bio}</pre>
 				{:else}
 					<!-- if there is no bio, show the follower count where the bio would be -->
 					<section id="follower-container">
@@ -64,7 +53,7 @@
 			</section>
 
 			<!-- if there is a bio, show the follower count to the right -->
-			{#if bio}
+			{#if $user.profile.bio}
 				<section id="follower-container">
 					<!-- Add the follower feature later -->
 					<!-- <p><span>1,017</span> Followers &emsp; <span>21</span> Commissions</p> -->
@@ -244,7 +233,7 @@
 
 						// padding-top: 29px;
 						font-size: 18px;
-						line-height: 24px;
+						line-height: 28px;
 
 						-webkit-line-clamp: 3;
 						-webkit-box-orient: vertical;

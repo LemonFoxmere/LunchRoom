@@ -642,6 +642,11 @@ array-union@^2.1.0:
   resolved "https://registry.yarnpkg.com/array-union/-/array-union-2.1.0.tgz#b798420adbeb1de828d84acd8a2e23d3efe85e8d"
   integrity sha512-HGyxoOTYUyCM6stUe6EJgnd4EoewAI7zMdfqO+kGjnlZmBDz/cR5pf8r/cR4Wq60sL/p0IkcjUEEPwS3GFrIyw==
 
+autoresize@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/autoresize/-/autoresize-0.1.1.tgz#8ca42a654dd835a922ec58a965b9f70edba92584"
+  integrity sha512-TOf9eSyKZIbxzoOFqm/zFYFm11dpDXqmmZf59GgTaOvgjpeLSq56RmZliOFudMpqbWWc9GCk+qkiWAIXCa54vg==
+
 axobject-query@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/axobject-query/-/axobject-query-3.2.1.tgz#39c378a6e3b06ca679f29138151e45b2b32da62a"

@@ -4,10 +4,21 @@
 
 	export let parentCtrlLevel: number;
 	export let currentHandle: string | null | undefined;
+	export let menuLevel: number;
+
+	let newHandle: string | null | undefined;
+
+	const resetMenu = () => {};
 </script>
 
 <main>
-	<Menu id="edit-handle" menuName="Edit Handle" bind:parentCtrlLevel menuLevel={0}>
+	<Menu
+		id="edit-handle"
+		menuName="Edit Handle"
+		bind:parentCtrlLevel
+		{menuLevel}
+		on:enter={resetMenu}
+	>
 		<section id="content" slot="content">
 			<h6 id="caption">New handle:</h6>
 
@@ -39,8 +50,8 @@
 			</section>
 
 			<p id="note">
-				Note: You must have a registered handle for a valid artist profile. Removing your handle
-				will automatically disable any active artist profiles.
+				Note: You must have a registered handle for a valid artist profile. Removing your
+				handle will automatically disable any active artist profiles.
 			</p>
 		</section>
 	</Menu>
